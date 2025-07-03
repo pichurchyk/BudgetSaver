@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Budget Saver</string>
+    <string name="sign_in_with_google">Sign with Google</string>
+    <string name="manage_your_finances_with_ease">Manage your finances with ease</string>
+    <string name="dashboard">Dashboard</string>
+
+    <string name="all">All</string>
+    <string name="expenses">Expenses</string>
+    <string name="incomes">Incomes</string>
+    <string name="type">Type</string>
+    <string name="categories">Categories</string>
+    <string name="summary">Summary</string>
+    <string name="selected">Selected</string>
+    <string name="no_data_available">There are no data to show</string>
+    <string name="recent_transactions">Recent transactions</string>
+    <string name="expenses_by_category">Expenses by category</string>
+    <string name="add_transaction">Add transaction</string>
+
+    <string name="error_occurred">Error occurred</string>
+    <string name="error_while_loading_occurred">Error occurred while loading</string>
+    <string name="retry">Retry</string>
+    <string name="amount">Amount</string>
+    <string name="currency">Currency</string>
+    <string name="search">Search</string>
+    <string name="comments">Comments</string>
+    <string name="category">Category</string>
+    <string name="submit">Submit</string>
+    <string name="title">Title</string>
+    <string name="transaction_saved">Transaction saved!</string>
+    <string name="back">Back</string>
+    <string name="fill_require_fields">Fill all required fields</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="error_network_issue">Connection probles occured</string>
+    <string name="error_unauthorized">Unauthorized</string>
+    <string name="error_bad_request">Bad request</string>
+    <string name="error_server_issue">Server error occured</string>
+    <string name="error_data_format">Error parsing data</string>
+</resources>
