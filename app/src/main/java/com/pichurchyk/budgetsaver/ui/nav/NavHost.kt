@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
-import com.pichurchyk.budgetsaver.ui.screen.add.AddTransactionScreen
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
 

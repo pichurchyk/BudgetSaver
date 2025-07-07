@@ -1,8 +1,7 @@
-package com.pichurchyk.budgetsaver.ui.screen.add.viewmodel
+package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.util.Currency
 
 data class AddTransactionViewState(

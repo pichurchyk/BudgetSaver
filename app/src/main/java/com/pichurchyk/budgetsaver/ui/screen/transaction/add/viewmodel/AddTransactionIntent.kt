@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.add.viewmodel
+package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType

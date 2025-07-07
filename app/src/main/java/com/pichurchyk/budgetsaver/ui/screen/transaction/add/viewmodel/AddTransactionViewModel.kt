@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.add.viewmodel
+package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Currency
+import kotlin.text.iterator
 
 class AddTransactionViewModel(
     private val addTransactionUseCase: AddTransactionUseCase

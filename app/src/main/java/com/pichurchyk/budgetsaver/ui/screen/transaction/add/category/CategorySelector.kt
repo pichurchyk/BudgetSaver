@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.add.category
+package com.pichurchyk.budgetsaver.ui.screen.transaction.add.category
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -33,9 +33,9 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.ui.common.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
-import com.pichurchyk.budgetsaver.ui.screen.add.category.viewmodel.CategorySelectorIntent
-import com.pichurchyk.budgetsaver.ui.screen.add.category.viewmodel.CategorySelectorViewModel
-import com.pichurchyk.budgetsaver.ui.screen.add.category.viewmodel.CategorySelectorViewState
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel.CategorySelectorIntent
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel.CategorySelectorViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel.CategorySelectorViewState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 

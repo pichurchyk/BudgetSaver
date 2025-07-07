@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.add
+package com.pichurchyk.budgetsaver.ui.screen.transaction.add
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +40,6 @@ import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
-import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
@@ -48,15 +47,15 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
-import com.pichurchyk.budgetsaver.ui.screen.add.category.CategoryButton
-import com.pichurchyk.budgetsaver.ui.screen.add.category.CategorySelector
-import com.pichurchyk.budgetsaver.ui.screen.add.currency.CurrencyButton
-import com.pichurchyk.budgetsaver.ui.screen.add.currency.CurrencySelector
-import com.pichurchyk.budgetsaver.ui.screen.add.viewmodel.AddTransactionIntent
-import com.pichurchyk.budgetsaver.ui.screen.add.viewmodel.AddTransactionValidationError
-import com.pichurchyk.budgetsaver.ui.screen.add.viewmodel.AddTransactionViewModel
-import com.pichurchyk.budgetsaver.ui.screen.add.viewmodel.AddTransactionViewState
-import com.pichurchyk.budgetsaver.ui.screen.add.viewmodel.UIStatus
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.CategoryButton
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.CategorySelector
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.currency.CurrencyButton
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.currency.CurrencySelector
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionIntent
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionValidationError
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.UIStatus
 import org.koin.androidx.compose.koinViewModel
 
 private enum class BottomSheetState {

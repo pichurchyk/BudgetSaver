@@ -18,8 +18,8 @@ import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
-import com.pichurchyk.budgetsaver.ui.screen.add.category.viewmodel.CategorySelectorViewModel
-import com.pichurchyk.budgetsaver.ui.screen.add.viewmodel.AddTransactionViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel.CategorySelectorViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf

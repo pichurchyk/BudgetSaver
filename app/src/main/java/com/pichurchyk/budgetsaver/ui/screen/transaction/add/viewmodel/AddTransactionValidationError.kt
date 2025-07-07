@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.add.viewmodel
+package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 enum class AddTransactionValidationError {
     EMPTY_AMOUNT,
