@@ -1,7 +1,5 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
-import java.util.Currency
-
 sealed interface DashboardViewState {
     data object Init : DashboardViewState
 
@@ -9,16 +7,16 @@ sealed interface DashboardViewState {
 
     data class Loaded(
         val allTransactions: List<TransactionsWithFilters>,
-        val selectedCurrency: Currency? = allTransactions.firstOrNull()?.transactions?.currency
+        val selectedCurrency: String? = allTransactions.firstOrNull()?.transactions?.currencyCode
     ) : DashboardViewState {
-        val allCurrencies: List<Currency>
-            get() = allTransactions.map { it.transactions.currency }
+        val allCurrencies: List<String>
+            get() = allTransactions.map { it.transactions.currencyCode }
 
         val indexOfSelectedCurrency: Int
             get() = allCurrencies.indexOf(selectedCurrency)
 
         val sortedTransactionsBySelectedCurrency: TransactionsWithFilters?
-            get() = allTransactions.find { it.transactions.currency == selectedCurrency }
+            get() = allTransactions.find { it.transactions.currencyCode == selectedCurrency }
     }
 
     data class Error(val message: String?) : DashboardViewState

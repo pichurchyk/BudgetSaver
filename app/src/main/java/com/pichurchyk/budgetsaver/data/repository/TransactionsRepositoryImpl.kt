@@ -4,6 +4,7 @@ import com.pichurchyk.budgetsaver.data.datasource.TransactionsDataSource
 import com.pichurchyk.budgetsaver.data.ext.category.toDomain
 import com.pichurchyk.budgetsaver.data.ext.toDomain
 import com.pichurchyk.budgetsaver.data.ext.toPayload
+import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
@@ -26,10 +27,19 @@ internal class TransactionsRepositoryImpl(
                 .map { (currency, transactions) ->
                     TransactionsByCurrency(
                         transactions = transactions,
-                        currency = currency
+                        currencyCode = currency
                     )
                 }
         }
+
+    override suspend fun getTransaction(transactionId: String): Transaction =
+        transactionsDataSource.getTransaction(transactionId).toDomain()
+
+    override suspend fun getRelativeTransaction(
+        transactionId: String,
+        direction: RelativeTransactionType
+    ): Transaction =
+        transactionsDataSource.getRelativeTransaction(transactionId, direction).toDomain()
 
     override suspend fun getCategories(): Flow<List<TransactionCategory>> =
         transactionsDataSource.getCategories().map { categories ->

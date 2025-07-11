@@ -1,29 +1,26 @@
 package com.pichurchyk.budgetsaver.domain.model.transaction
 
+import com.pichurchyk.budgetsaver.domain.model.serializer.BigIntegerSerializer
+import kotlinx.serialization.Serializable
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.math.RoundingMode
 import java.util.Currency
-import kotlin.math.pow
-import kotlin.math.roundToLong
 
+@Serializable
 data class Money(
-    val amountMinor: Long,
-    val currency: Currency
+    @Serializable(with = BigIntegerSerializer::class)
+    val amountMinor: BigInteger,
+    val currency: String
 ) {
-    fun toMajorWithCurrency(): String {
-        val divisor = 10.0.pow(currency.defaultFractionDigits)
-        val majorAmount = amountMinor / divisor
-        return "%.${currency.defaultFractionDigits}f %s".format(majorAmount, currency.symbol)
-    }
-
-    fun toMajor(): Double {
-        val divisor = 10.0.pow(currency.defaultFractionDigits)
-        return amountMinor.toDouble() / divisor
-    }
-
     companion object {
-        fun fromMajor(amount: Double, currency: Currency): Money {
-            val factor = 10.0.pow(currency.defaultFractionDigits)
-            val minorAmount = (amount * factor).roundToLong()
-            return Money(minorAmount, currency)
+        fun fromMajor(amount: BigDecimal, currency: Currency): Money {
+            val factor = BigDecimal.TEN.pow(currency.defaultFractionDigits)
+
+            val minorAmountBigDecimal = amount.multiply(factor)
+                .setScale(0, RoundingMode.HALF_UP)
+
+            return Money(minorAmountBigDecimal.toBigInteger(), currency.currencyCode)
         }
     }
 }

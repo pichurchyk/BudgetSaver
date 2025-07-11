@@ -9,7 +9,7 @@ data class TransactionResponse(
     val uuid: String,
 
     val title: String,
-    val value: Long,
+    val value: String,
     val currency: String,
     val notes: String,
 

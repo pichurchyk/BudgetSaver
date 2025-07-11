@@ -4,6 +4,7 @@ import com.pichurchyk.budgetsaver.data.ext.toPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
+import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -21,12 +22,32 @@ internal class TransactionsDataSource(
 ) {
     fun getTransactions(): Flow<List<TransactionResponse>> = flow {
         httpClient
-            .get(GetTransaction()) {
+            .get(GetTransactions()) {
                 parameter("sort", "dateMillis")
                 parameter("order", "desc")
             }
             .body<List<TransactionResponse>>()
             .also { emit(it) }
+    }
+
+    suspend fun getTransaction(transactionId: String): TransactionResponse {
+        return httpClient
+            .get(GetTransaction()) {
+                parameter("id", transactionId)
+            }
+            .body<TransactionResponse>()
+    }
+
+    suspend fun getRelativeTransaction(
+        transactionId: String,
+        direction: RelativeTransactionType
+    ): TransactionResponse {
+        return httpClient
+            .get(GetTransaction()) {
+                parameter("id", transactionId)
+                parameter("direction", direction.name.lowercase())
+            }
+            .body<TransactionResponse>()
     }
 
     fun getCategories(): Flow<List<MainCategoryResponse>> = flow {
@@ -51,6 +72,10 @@ internal class TransactionsDataSource(
 
 @Serializable
 @Resource("/functions/v1/all_transactions")
+private class GetTransactions()
+
+@Serializable
+@Resource("/functions/v1/single-transaction")
 private class GetTransaction()
 
 @Serializable

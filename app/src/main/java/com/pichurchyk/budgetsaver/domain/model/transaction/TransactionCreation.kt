@@ -13,7 +13,7 @@ data class TransactionCreation(
     val notes: String = "",
     val date: TransactionDate = TransactionDate(
         dateInstant = Clock.System.now(),
-        zoneId = TimeZone.currentSystemDefault()
+        timeZone = TimeZone.currentSystemDefault()
     ),
 
     val type: TransactionType = TransactionType.EXPENSES,

@@ -49,7 +49,7 @@ class DashboardViewModel(
         }
     }
 
-    private fun selectCurrency(currency: Currency) {
+    private fun selectCurrency(currency: String) {
         _state.update { currentState ->
             if (currentState !is DashboardViewState.Loaded) return@update currentState
 
@@ -62,7 +62,7 @@ class DashboardViewModel(
             if (currentState !is DashboardViewState.Loaded) return@update currentState
 
             val updatedAllTransactions = currentState.allTransactions.map {
-                if (it.transactions.currency == currentState.selectedCurrency) {
+                if (it.transactions.currencyCode == currentState.selectedCurrency) {
                     it.copy(selectedTransactionType = TransactionType.entries)
                 } else it
             }
@@ -76,7 +76,7 @@ class DashboardViewModel(
             if (currentState !is DashboardViewState.Loaded) return@update currentState
 
             val updatedAllTransactions = currentState.allTransactions.map {
-                if (it.transactions.currency == currentState.selectedCurrency) {
+                if (it.transactions.currencyCode == currentState.selectedCurrency) {
                     val currentFilters = it.selectedTransactionType.toSet()
 
                     val newFilters = when {
@@ -105,7 +105,7 @@ class DashboardViewModel(
             if (currentState !is DashboardViewState.Loaded) return@update currentState
 
             val updatedAllTransactions = currentState.allTransactions.map {
-                if (it.transactions.currency == currentState.selectedCurrency) {
+                if (it.transactions.currencyCode == currentState.selectedCurrency) {
                     val currentFilters = it.selectedCategories.toSet()
 
                     val newFilters = when {
@@ -134,7 +134,7 @@ class DashboardViewModel(
             if (currentState !is DashboardViewState.Loaded) return@update currentState
 
             val updatedAllTransactions = currentState.allTransactions.map {
-                if (it.transactions.currency == currentState.selectedCurrency) {
+                if (it.transactions.currencyCode == currentState.selectedCurrency) {
                     it.copy(selectedCategories = it.transactions.allCategories)
                 } else it
             }

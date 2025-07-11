@@ -1,5 +1,8 @@
 package com.pichurchyk.budgetsaver.domain.model.transaction
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TransactionCategory(
     val uuid: String,
     val title: String,

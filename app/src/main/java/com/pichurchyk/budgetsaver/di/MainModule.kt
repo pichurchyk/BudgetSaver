@@ -12,6 +12,8 @@ import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.GetSingleTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.GetSingleTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
@@ -22,6 +24,7 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel.C
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.details.viewmodel.TransactionDetailsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -44,10 +47,13 @@ val mainModule = module {
     viewModelOf(::DashboardViewModel)
     viewModelOf(::AddTransactionViewModel)
     viewModelOf(::CategorySelectorViewModel)
+    viewModelOf(::TransactionDetailsViewModel)
 
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
 
     single<AddTransactionUseCase> { AddTransactionUseCaseImpl(get()) }
+
+    single<GetSingleTransactionUseCase> { GetSingleTransactionUseCaseImpl(get()) }
 }

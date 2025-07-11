@@ -35,4 +35,8 @@
     <string name="error_bad_request">Bad request</string>
     <string name="error_server_issue">Server error occured</string>
     <string name="error_data_format">Error parsing data</string>
+    <string name="billion_symbol">B</string>
+    <string name="million_symbol">M</string>
+    <string name="hundred_symbol">K</string>
+    <string name="trillion_symbol">T</string>
 </resources>

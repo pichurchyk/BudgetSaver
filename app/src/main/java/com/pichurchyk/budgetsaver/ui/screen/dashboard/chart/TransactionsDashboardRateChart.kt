@@ -38,8 +38,10 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Corner.Relative
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.ui.ext.toMajor
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import com.pichurchyk.budgetsaver.ui.theme.green
+import java.math.BigInteger
 
 @Composable
 fun TransactionsDashboardRateChart(
@@ -68,7 +70,7 @@ fun TransactionsDashboardRateChart(
 
     LaunchedEffect(transactions) {
         categoriesPercentage = transactions
-            .filter { it.value.amountMinor < 0 }
+            .filter { it.value.amountMinor < BigInteger("0") }
             .groupBy { it.mainCategory }
             .mapValues { entry ->
                 entry.value.sumOf { it.value.toMajor() }

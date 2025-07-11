@@ -12,4 +12,7 @@ sealed class Screen {
 
     @Serializable
     data object AddTransaction: Screen()
+
+    @Serializable
+    data class TransactionDetails(val transactionIdToOpen: String): Screen()
 }

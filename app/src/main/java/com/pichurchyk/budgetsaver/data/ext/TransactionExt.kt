@@ -1,6 +1,5 @@
 package com.pichurchyk.budgetsaver.data.ext
 
-import java.util.Currency
 import com.pichurchyk.budgetsaver.data.ext.category.toDomain
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
@@ -19,8 +18,8 @@ fun TransactionResponse.toDomain(): Transaction {
         title = this.title,
         notes = this.notes,
         value = Money(
-            amountMinor = this.value,
-            currency = Currency.getInstance(this.currency)
+            amountMinor = this.value.toBigInteger(),
+            currency = this.currency
         ),
         date = TransactionDate(Instant.fromEpochMilliseconds(this.dateMillis), TimeZone.of(this.dateTimeZone)),
         mainCategory = this.mainCategory.toDomain(),
@@ -35,7 +34,7 @@ fun TransactionCreation.toPayload(): TransactionPayload {
     val offset = java.time.ZonedDateTime.now(zoneId).offset
     val utcOffset = "UTC" + offset.id
 
-    val value = if (this.type == TransactionType.EXPENSES) -this.value.toDouble() else this.value.toDouble()
+    val value = if (this.type == TransactionType.EXPENSES) -this.value.toBigDecimal() else this.value.toBigDecimal()
 
     return TransactionPayload(
         title = this.title,

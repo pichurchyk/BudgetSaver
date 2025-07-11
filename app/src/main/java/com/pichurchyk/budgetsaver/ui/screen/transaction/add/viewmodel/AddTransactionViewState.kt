@@ -14,7 +14,7 @@ data class AddTransactionViewState(
 
     val validationError: List<AddTransactionValidationError> = emptyList<AddTransactionValidationError>(),
 
-    val status: UIStatus = UIStatus.Idle
+    val status: AddTransactionUiStatus = AddTransactionUiStatus.Idle
 ) {
     val filteredCurrencies: List<Currency>
         get() =
@@ -25,18 +25,18 @@ data class AddTransactionViewState(
                 .sortedByDescending { it == transaction.currency }
 }
 
-sealed interface UIStatus {
+sealed interface AddTransactionUiStatus {
 
-    object Idle : UIStatus
+    object Idle : AddTransactionUiStatus
 
-    object Loading : UIStatus
+    object Loading : AddTransactionUiStatus
 
-    object Success : UIStatus
+    object Success : AddTransactionUiStatus
 
-    object ValidationError: UIStatus
+    object ValidationError: AddTransactionUiStatus
 
     data class Error(
         val error: DomainException,
         val lastAction: () -> Unit
-    ) : UIStatus
+    ) : AddTransactionUiStatus
 }

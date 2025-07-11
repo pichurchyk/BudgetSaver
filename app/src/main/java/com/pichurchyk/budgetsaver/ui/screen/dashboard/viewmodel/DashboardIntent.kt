@@ -13,5 +13,5 @@ sealed class DashboardIntent {
     data class ToggleCategoriesFilter(val category: TransactionCategory): DashboardIntent()
     data object ToggleAllCategoriesFilter: DashboardIntent()
 
-    data class SelectCurrency(val currency: Currency): DashboardIntent()
+    data class SelectCurrency(val currency: String): DashboardIntent()
 }

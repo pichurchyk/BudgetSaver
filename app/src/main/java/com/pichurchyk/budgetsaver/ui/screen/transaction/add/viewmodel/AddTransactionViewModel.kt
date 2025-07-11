@@ -44,7 +44,7 @@ class AddTransactionViewModel(
     private fun dismissNotification() {
         _viewState.update {
             it.copy(
-                status = UIStatus.Idle
+                status = AddTransactionUiStatus.Idle
             )
         }
     }
@@ -123,7 +123,7 @@ class AddTransactionViewModel(
     }
 
     private fun submit() {
-        _viewState.update { it.copy(status = UIStatus.Idle, validationError = emptyList()) }
+        _viewState.update { it.copy(status = AddTransactionUiStatus.Idle, validationError = emptyList()) }
 
         val currentData = _viewState.value
         val validationErrors = performValidation(currentData.transaction, currentData.transaction.type)
@@ -132,7 +132,7 @@ class AddTransactionViewModel(
             _viewState.update {
                 it.copy(
                     validationError = validationErrors,
-                    status = UIStatus.ValidationError
+                    status = AddTransactionUiStatus.ValidationError
                 )
             }
 
@@ -143,12 +143,12 @@ class AddTransactionViewModel(
             _viewState.value.transaction.let { transactionToSubmit ->
                 addTransactionUseCase.invoke(transactionToSubmit)
                     .onStart {
-                        _viewState.update { it.copy(status = UIStatus.Loading) }
+                        _viewState.update { it.copy(status = AddTransactionUiStatus.Loading) }
                     }
                     .catch { e ->
                         _viewState.update {
                             it.copy(
-                                status = UIStatus.Error(
+                                status = AddTransactionUiStatus.Error(
                                     error = e as DomainException,
                                     lastAction = { submit() }
                                 )
@@ -159,7 +159,7 @@ class AddTransactionViewModel(
                         clearData()
                     }
                     .collect {
-                        _viewState.update { it.copy(status = UIStatus.Success) }
+                        _viewState.update { it.copy(status = AddTransactionUiStatus.Success) }
                     }
             }
         }

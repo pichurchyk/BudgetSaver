@@ -3,6 +3,7 @@ package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import java.math.BigInteger
 
 data class TransactionsWithFilters(
     val transactions: TransactionsByCurrency,
@@ -16,14 +17,14 @@ data class TransactionsWithFilters(
                 .filter { tx ->
                     when {
                         selectedTransactionType.containsAll(TransactionType.entries) -> true
-                        tx.value.amountMinor >= 0 -> TransactionType.INCOMES in selectedTransactionType
+                        tx.value.amountMinor >= BigInteger("0") -> TransactionType.INCOMES in selectedTransactionType
                         else -> TransactionType.EXPENSES in selectedTransactionType
                     }
                 }
 
             return TransactionsByCurrency(
                 transactions = filtered,
-                currency = transactions.currency
+                currencyCode = transactions.currencyCode
             )
         }
 }

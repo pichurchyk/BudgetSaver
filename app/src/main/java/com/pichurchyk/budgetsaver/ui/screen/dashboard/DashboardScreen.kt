@@ -46,28 +46,31 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategor
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
+import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.chart.TransactionsDashboardLineChart
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.chart.TransactionsDashboardRateChart
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.ExpenseIncomeFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.total.DashboardTotal
-import com.pichurchyk.budgetsaver.ui.screen.dashboard.transaction.TransactionItem
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardIntent
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewState
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.TransactionsWithFilters
+import com.pichurchyk.budgetsaver.ui.screen.transaction.details.TransactionCard
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import org.koin.androidx.compose.koinViewModel
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.Currency
-import kotlin.uuid.Uuid
 
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = koinViewModel(),
+    openTransactionDetails: (allTransactions: List<Transaction>, transactionId: String) -> Unit,
     openAddTransactionScreen: () -> Unit
 ) {
     val viewState by viewModel.state.collectAsState()
@@ -75,7 +78,8 @@ fun DashboardScreen(
     Content(
         viewState = viewState,
         callViewModel = { viewModel.handleIntent(it) },
-        onAddTransactionClick = openAddTransactionScreen
+        onAddTransactionClick = openAddTransactionScreen,
+        onTransactionClick = openTransactionDetails
     )
 
 }
@@ -85,7 +89,8 @@ fun DashboardScreen(
 private fun Content(
     viewState: DashboardViewState,
     callViewModel: (DashboardIntent) -> Unit,
-    onAddTransactionClick: () -> Unit
+    onAddTransactionClick: () -> Unit,
+    onTransactionClick: (transactions: List<Transaction>, transactionId: String) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val scrollState = rememberLazyListState()
@@ -153,7 +158,7 @@ private fun Content(
                                     },
                                     text = {
                                         Text(
-                                            text = currency.currencyCode,
+                                            text = currency,
                                             overflow = TextOverflow.Ellipsis
                                         )
                                     },
@@ -169,9 +174,11 @@ private fun Content(
                                     .fillMaxSize()
                                     .padding(top = 16.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Top,
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
                                 state = scrollState,
-                                contentPadding = PaddingValues(bottom = paddingValues.calculateBottomPadding())
+                                contentPadding = PaddingValues(
+                                    bottom = paddingValues.calculateBottomPadding()
+                                ),
                             ) {
                                 item {
                                     ExpenseIncomeFilter(
@@ -189,8 +196,7 @@ private fun Content(
                                 item {
                                     CategoriesFilter(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 12.dp),
+                                            .fillMaxWidth(),
                                         allCategories = activeData.transactions.allCategories,
                                         selectedItems = activeData.selectedCategories,
                                         onItemClick = {
@@ -209,8 +215,7 @@ private fun Content(
                                 item {
                                     DashboardTotal(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 32.dp),
+                                            .fillMaxWidth(),
                                         totalIncomes = activeData.filteredTransactionsWithCurrency.totalIncomes,
                                         totalExpenses = activeData.filteredTransactionsWithCurrency.totalExpenses
                                     )
@@ -231,7 +236,7 @@ private fun Content(
                                 item {
                                     Text(
                                         modifier = Modifier
-                                            .padding(start = 16.dp, top = 44.dp, bottom = 4.dp)
+                                            .padding(start = 16.dp)
                                             .fillMaxWidth(),
                                         text = stringResource(R.string.recent_transactions),
                                         textAlign = TextAlign.Start,
@@ -243,7 +248,11 @@ private fun Content(
                                 items(
                                     items = activeData.filteredTransactionsWithCurrency.transactions,
                                     key = { it.uuid }) { transactionData ->
-                                    TransactionItem(transactionData)
+                                    TransactionCard(
+                                        modifier = Modifier
+                                            .padding(horizontal = 16.dp),
+                                        transaction = transactionData
+                                    )
                                 }
                             }
                         }
@@ -252,7 +261,9 @@ private fun Content(
 
                 is DashboardViewState.Error -> {
                     ErrorBlock(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                         message = stringResource(R.string.error_while_loading_occurred)
                     ) {
                         callViewModel.invoke(DashboardIntent.LoadData)
@@ -304,15 +315,15 @@ private fun Preview() {
                                             uuid = "",
                                             title = "Bus ticket",
                                             value = Money(
-                                                amountMinor = 1000000000,
-                                                currency = Currency.getInstance("USD")
+                                                amountMinor = BigInteger("0"),
+                                                currency = "USD"
                                             ),
                                             notes = "Grocery shopping at local market",
                                             date = TransactionDate(
                                                 dateInstant = Instant.fromEpochMilliseconds(
                                                     1748198228000
                                                 ),
-                                                zoneId = TimeZone.UTC
+                                                timeZone = TimeZone.UTC
                                             ),
                                             mainCategory = TransactionCategory(
                                                 title = "Food",
@@ -328,7 +339,7 @@ private fun Preview() {
                                             )
                                         )
                                     ),
-                                    currency = Currency.getInstance("USD")
+                                    currencyCode = "USD"
                                 ),
                             listOf(),
                             listOf()
@@ -341,15 +352,15 @@ private fun Preview() {
                                             uuid = "",
                                             title = "Bus ticket",
                                             value = Money(
-                                                amountMinor = 1000000000,
-                                                currency = Currency.getInstance("BYN")
+                                                amountMinor = BigInteger("0"),
+                                                currency = "BYN"
                                             ),
                                             notes = "Grocery shopping at local market",
                                             date = TransactionDate(
                                                 dateInstant = Instant.fromEpochMilliseconds(
                                                     1748198228000
                                                 ),
-                                                zoneId = TimeZone.UTC
+                                                timeZone = TimeZone.UTC
                                             ),
                                             mainCategory = TransactionCategory(
                                                 title = "Food",
@@ -365,16 +376,17 @@ private fun Preview() {
                                             )
                                         )
                                     ),
-                                    currency = Currency.getInstance("BYN")
+                                    currencyCode = "BYN"
                                 ),
                             listOf(),
                             listOf()
                         )
                     ),
-                    selectedCurrency = Currency.getInstance("USD"),
+                    selectedCurrency = "USD",
                 ),
                 callViewModel = {},
-                onAddTransactionClick = {}
+                onAddTransactionClick = {},
+                onTransactionClick = { _, _ -> }
             )
         }
     }

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
+import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
@@ -55,7 +56,7 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransac
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionValidationError
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.UIStatus
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionUiStatus
 import org.koin.androidx.compose.koinViewModel
 
 private enum class BottomSheetState {
@@ -72,7 +73,7 @@ fun AddTransactionScreen(
 
     LaunchedEffect(viewState.status) {
         when (val uiStatus = viewState.status) {
-            UIStatus.Success -> {
+            AddTransactionUiStatus.Success -> {
                 NotificationController.sendEvent(
                     NotificationEvent(
                         message = context.getString(R.string.transaction_saved),
@@ -81,7 +82,7 @@ fun AddTransactionScreen(
                 )
             }
 
-            is UIStatus.Error -> {
+            is AddTransactionUiStatus.Error -> {
                 NotificationController.sendEvent(
                     NotificationEvent(
                         message = context.getString(uiStatus.error.asErrorMessage()),
@@ -98,7 +99,7 @@ fun AddTransactionScreen(
                 )
             }
 
-            is UIStatus.ValidationError -> {
+            is AddTransactionUiStatus.ValidationError -> {
                 NotificationController.sendEvent(
                     NotificationEvent(
                         message = context.getString(R.string.fill_require_fields),
@@ -113,7 +114,7 @@ fun AddTransactionScreen(
                 )
             }
 
-            UIStatus.Idle, UIStatus.Loading -> {}
+            AddTransactionUiStatus.Idle, AddTransactionUiStatus.Loading -> {}
         }
     }
 
@@ -135,7 +136,7 @@ private fun Content(
     var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
 
     val transactionData = viewState.transaction
-    val isLoading = viewState.status is UIStatus.Loading
+    val isLoading = viewState.status is AddTransactionUiStatus.Loading
 
     Scaffold(
         topBar = {
