@@ -46,7 +46,6 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategor
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
-import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.chart.TransactionsDashboardLineChart
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.chart.TransactionsDashboardRateChart
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
@@ -63,9 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import org.koin.androidx.compose.koinViewModel
-import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.Currency
 
 @Composable
 fun DashboardScreen(
@@ -213,6 +210,24 @@ private fun Content(
                                 }
 
                                 item {
+                                    val totalIncomes =
+                                        activeData.filteredTransactionsWithCurrency.totalIncomes
+                                    val totalExpenses =
+                                        activeData.filteredTransactionsWithCurrency.totalExpenses
+
+                                    if (totalExpenses.amountMinor == BigInteger("0") &&
+                                        totalIncomes.amountMinor == BigInteger("0")
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.padding(top = 10.dp),
+                                            text = stringResource(R.string.no_data_available),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+
+                                item {
                                     DashboardTotal(
                                         modifier = Modifier
                                             .fillMaxWidth(),
@@ -222,7 +237,10 @@ private fun Content(
 
                                     TransactionsDashboardLineChart(
                                         modifier = Modifier.padding(4.dp),
-                                        transactions = activeData.filteredTransactionsWithCurrency.transactions,
+                                        transactions = activeData
+                                            .filteredTransactionsWithCurrency
+                                            .transactions
+                                            .reversed(),
                                     )
                                 }
 
@@ -233,26 +251,28 @@ private fun Content(
                                     )
                                 }
 
-                                item {
-                                    Text(
-                                        modifier = Modifier
-                                            .padding(start = 16.dp)
-                                            .fillMaxWidth(),
-                                        text = stringResource(R.string.recent_transactions),
-                                        textAlign = TextAlign.Start,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onBackground
-                                    )
-                                }
+                                if (activeData.filteredTransactionsWithCurrency.transactions.isNotEmpty()) {
+                                    item {
+                                        Text(
+                                            modifier = Modifier
+                                                .padding(start = 16.dp)
+                                                .fillMaxWidth(),
+                                            text = stringResource(R.string.recent_transactions),
+                                            textAlign = TextAlign.Start,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
 
-                                items(
-                                    items = activeData.filteredTransactionsWithCurrency.transactions,
-                                    key = { it.uuid }) { transactionData ->
-                                    TransactionCard(
-                                        modifier = Modifier
-                                            .padding(horizontal = 16.dp),
-                                        transaction = transactionData
-                                    )
+                                    items(
+                                        items = activeData.filteredTransactionsWithCurrency.transactions,
+                                        key = { it.uuid }) { transactionData ->
+                                        TransactionCard(
+                                            modifier = Modifier
+                                                .padding(horizontal = 16.dp),
+                                            transaction = transactionData
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -328,7 +348,7 @@ private fun Preview() {
                                             mainCategory = TransactionCategory(
                                                 title = "Food",
                                                 emoji = "🍎",
-                                                color = "#FF00DS",
+                                                color = "#FF00FF",
                                                 uuid = "123"
                                             ),
                                             subCategory = listOf(
