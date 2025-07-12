@@ -9,7 +9,7 @@ import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
-import com.pichurchyk.budgetsaver.ui.screen.transaction.details.TransactionDetailsScreen
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.EditTransactionScreen
 
 @Composable
 fun NavHost(
@@ -30,8 +30,8 @@ fun NavHost(
                 openAddTransactionScreen = {
                     navController.navigate(Screen.AddTransaction)
                 },
-                openTransactionDetails = { transactions, transactionId ->
-                    navController.navigate(Screen.TransactionDetails(transactionIdToOpen = transactionId))
+                openEditTransactionScreen = { transactionId ->
+                    navController.navigate(Screen.EditTransaction(transactionId = transactionId))
                 }
             )
         }
@@ -42,11 +42,12 @@ fun NavHost(
             )
         }
 
-        composable<Screen.TransactionDetails> { backStackEntry ->
-            val args = backStackEntry.toRoute<Screen.TransactionDetails>()
-            TransactionDetailsScreen(
-                initialTransactionId = args.transactionIdToOpen,
-                closeScreen = { navController.popBackStack() }
+        composable<Screen.EditTransaction> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.EditTransaction>()
+
+            EditTransactionScreen(
+                transactionId = args.transactionId,
+                closeScreen = { navController.popBackStack() },
             )
         }
     }

@@ -1,11 +1,9 @@
 package com.pichurchyk.budgetsaver.data.datasource
 
-import com.pichurchyk.budgetsaver.data.ext.toPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
 import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
-import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
@@ -61,6 +59,14 @@ internal class TransactionsDataSource(
 
     suspend fun addTransaction(transactionPayload: TransactionPayload) {
         httpClient.post(Transaction()) {
+            setBody(transactionPayload)
+        }.body<Unit>()
+    }
+
+    suspend fun editTransaction(transactionId: String, transactionPayload: TransactionPayload) {
+        httpClient.post(Transaction()) {
+            parameter("id", "eq.$transactionId")
+
             setBody(transactionPayload)
         }.body<Unit>()
     }

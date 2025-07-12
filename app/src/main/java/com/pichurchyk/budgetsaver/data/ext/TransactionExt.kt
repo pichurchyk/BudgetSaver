@@ -8,8 +8,14 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import com.pichurchyk.budgetsaver.ui.ext.toMajor
+import com.pichurchyk.budgetsaver.ui.ext.toMajorString
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.util.Currency
+import kotlin.text.toBigDecimal
 
 fun TransactionResponse.toDomain(): Transaction {
 
@@ -21,7 +27,10 @@ fun TransactionResponse.toDomain(): Transaction {
             amountMinor = this.value.toBigInteger(),
             currency = this.currency
         ),
-        date = TransactionDate(Instant.fromEpochMilliseconds(this.dateMillis), TimeZone.of(this.dateTimeZone)),
+        date = TransactionDate(
+            Instant.fromEpochMilliseconds(this.dateMillis),
+            TimeZone.of(this.dateTimeZone)
+        ),
         mainCategory = this.mainCategory.toDomain(),
         subCategory = emptyList(),
     )
@@ -34,7 +43,8 @@ fun TransactionCreation.toPayload(): TransactionPayload {
     val offset = java.time.ZonedDateTime.now(zoneId).offset
     val utcOffset = "UTC" + offset.id
 
-    val value = if (this.type == TransactionType.EXPENSES) -this.value.toBigDecimal() else this.value.toBigDecimal()
+    val value =
+        if (this.type == TransactionType.EXPENSES) -this.value.toBigDecimal() else this.value.toBigDecimal()
 
     return TransactionPayload(
         title = this.title,
@@ -46,5 +56,26 @@ fun TransactionCreation.toPayload(): TransactionPayload {
         mainCategory = checkNotNull(this.mainCategory?.uuid) {
             "Category must not be null"
         }
+    )
+}
+
+fun Transaction.toTransactionCreation(): TransactionCreation {
+    val type =
+        if (value.amountMinor >= BigInteger("0")) TransactionType.INCOMES else TransactionType.EXPENSES
+
+    val currency = Currency.getInstance(value.currency)
+
+    return TransactionCreation(
+        title = title,
+        value = Money(value.amountMinor.abs(), value.currency).toMajorString(),
+        currency = currency,
+        notes = notes,
+        date = TransactionDate(
+            Instant.fromEpochMilliseconds(date.dateInstant.toEpochMilliseconds()),
+            date.timeZone
+        ),
+        type = type,
+        mainCategory = mainCategory,
+        subCategory = emptyList()
     )
 }

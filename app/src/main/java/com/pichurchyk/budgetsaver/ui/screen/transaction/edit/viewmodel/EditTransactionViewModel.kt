@@ -1,12 +1,14 @@
-package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
+package com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pichurchyk.budgetsaver.data.ext.toTransactionCreation
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
-import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -17,47 +19,76 @@ import kotlinx.coroutines.launch
 import java.util.Currency
 import kotlin.text.iterator
 
-class AddTransactionViewModel(
-    private val addTransactionUseCase: AddTransactionUseCase
+class EditTransactionViewModel(
+    private val transactionId: String,
+    private val loadTransactionUseCase: LoadTransactionUseCase,
+    private val editTransactionUseCase: EditTransactionUseCase
 ) : ViewModel() {
 
-    private val _viewState: MutableStateFlow<AddTransactionViewState> = MutableStateFlow(
-        AddTransactionViewState()
+    private val _viewState: MutableStateFlow<EditTransactionViewState> = MutableStateFlow(
+        EditTransactionViewState()
     )
     val viewState = _viewState.asStateFlow()
 
-    fun handleIntent(intent: AddTransactionIntent) {
+    init {
+        loadTransaction()
+    }
+
+    private fun loadTransaction() {
+        viewModelScope.launch {
+            loadTransactionUseCase
+                .invoke(transactionId)
+                .onStart {
+                    _viewState.update { currentState ->
+                        currentState.copy(status = EditTransactionUiStatus.Loading)
+                    }
+                }
+                .catch { }
+                .collect { transaction ->
+                    _viewState.update { currentState ->
+                        currentState.copy(
+                            status = EditTransactionUiStatus.Idle,
+                            transaction = transaction.toTransactionCreation()
+                        )
+                    }
+                }
+        }
+    }
+
+    fun handleIntent(intent: EditTransactionIntent) {
         when (intent) {
-            is AddTransactionIntent.Submit -> submit()
-            is AddTransactionIntent.ChangeCurrency -> changeCurrency(intent.currency)
-            is AddTransactionIntent.ChangeValue -> changeValue(intent.value)
-            is AddTransactionIntent.ChangeType -> changeType(intent.value)
-            is AddTransactionIntent.ChangeNotes -> changeNotes(intent.value)
-            is AddTransactionIntent.ChangeTitle -> changeTitle(intent.value)
-            is AddTransactionIntent.SearchCurrency -> changeSearchCurrencyValue(intent.value)
-            is AddTransactionIntent.ChangeCategory -> changeCategory(intent.value)
-            is AddTransactionIntent.ClearData -> clearData()
-            is AddTransactionIntent.DismissNotification -> dismissNotification()
+            is EditTransactionIntent.Submit -> submit()
+            is EditTransactionIntent.Delete -> delete()
+            is EditTransactionIntent.SubmitDelete -> submitDelete()
+            is EditTransactionIntent.ChangeCurrency -> changeCurrency(intent.currency)
+            is EditTransactionIntent.ChangeValue -> changeValue(intent.value)
+            is EditTransactionIntent.ChangeType -> changeType(intent.value)
+            is EditTransactionIntent.ChangeNotes -> changeNotes(intent.value)
+            is EditTransactionIntent.ChangeTitle -> changeTitle(intent.value)
+            is EditTransactionIntent.SearchCurrency -> changeSearchCurrencyValue(intent.value)
+            is EditTransactionIntent.ChangeCategory -> changeCategory(intent.value)
+            is EditTransactionIntent.ClearData -> clearData()
+            is EditTransactionIntent.DismissNotification -> dismissNotification()
         }
     }
 
     private fun dismissNotification() {
         _viewState.update {
             it.copy(
-                status = AddTransactionUiStatus.Idle
+                status = EditTransactionUiStatus.Idle
             )
         }
     }
 
     private fun clearData() {
-        _viewState.update { AddTransactionViewState() }
+        _viewState.update { EditTransactionViewState() }
     }
 
     private fun changeCategory(category: TransactionCategory?) {
         _viewState.update { currentViewState ->
             currentViewState.copy(
                 transaction = currentViewState.transaction.copy(mainCategory = category),
-                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_CATEGORY }
+                validationError = currentViewState.validationError.filterNot { it == EditTransactionValidationError.EMPTY_CATEGORY }
             )
         }
     }
@@ -79,7 +110,7 @@ class AddTransactionViewModel(
             val filteredValue = filterAmountInput(value)
             currentViewState.copy(
                 transaction = currentViewState.transaction.copy(value = filteredValue),
-                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_AMOUNT }
+                validationError = currentViewState.validationError.filterNot { it == EditTransactionValidationError.EMPTY_AMOUNT }
             )
         }
     }
@@ -94,7 +125,7 @@ class AddTransactionViewModel(
         _viewState.update { currentViewState ->
             currentViewState.copy(
                 transaction = currentViewState.transaction.copy(title = value),
-                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_TITLE }
+                validationError = currentViewState.validationError.filterNot { it == EditTransactionValidationError.EMPTY_TITLE }
             )
         }
     }
@@ -132,17 +163,33 @@ class AddTransactionViewModel(
         }
     }
 
+    private fun delete() {
+        _viewState.update { currentViewState ->
+            currentViewState.copy(status = EditTransactionUiStatus.Deleting)
+        }
+    }
+
+    private fun submitDelete() {
+
+    }
+
     private fun submit() {
-        _viewState.update { it.copy(status = AddTransactionUiStatus.Idle, validationError = emptyList()) }
+        _viewState.update {
+            it.copy(
+                status = EditTransactionUiStatus.Idle,
+                validationError = emptyList()
+            )
+        }
 
         val currentData = _viewState.value
-        val validationErrors = performValidation(currentData.transaction, currentData.transaction.type)
+        val validationErrors =
+            performValidation(currentData.transaction, currentData.transaction.type)
 
         if (validationErrors.isNotEmpty()) {
             _viewState.update {
                 it.copy(
                     validationError = validationErrors,
-                    status = AddTransactionUiStatus.ValidationError
+                    status = EditTransactionUiStatus.ValidationError
                 )
             }
 
@@ -151,14 +198,14 @@ class AddTransactionViewModel(
 
         viewModelScope.launch {
             _viewState.value.transaction.let { transactionToSubmit ->
-                addTransactionUseCase.invoke(transactionToSubmit)
+                editTransactionUseCase.invoke(transactionId, transactionToSubmit)
                     .onStart {
-                        _viewState.update { it.copy(status = AddTransactionUiStatus.Loading) }
+                        _viewState.update { it.copy(status = EditTransactionUiStatus.Loading) }
                     }
                     .catch { e ->
                         _viewState.update {
                             it.copy(
-                                status = AddTransactionUiStatus.Error(
+                                status = EditTransactionUiStatus.Error(
                                     error = e as DomainException,
                                     lastAction = { submit() }
                                 )
@@ -169,7 +216,7 @@ class AddTransactionViewModel(
                         clearData()
                     }
                     .collect {
-                        _viewState.update { it.copy(status = AddTransactionUiStatus.Success) }
+                        _viewState.update { it.copy(status = EditTransactionUiStatus.Success) }
                     }
             }
         }
@@ -178,20 +225,20 @@ class AddTransactionViewModel(
     private fun performValidation(
         transaction: TransactionCreation,
         type: TransactionType
-    ): List<AddTransactionValidationError> {
-        val errors = mutableListOf<AddTransactionValidationError>()
+    ): List<EditTransactionValidationError> {
+        val errors = mutableListOf<EditTransactionValidationError>()
 
         val parsedValue = transaction.value.toDoubleOrNull()
         if (parsedValue == null || parsedValue <= 0.0) {
-            errors.add(AddTransactionValidationError.EMPTY_AMOUNT)
+            errors.add(EditTransactionValidationError.EMPTY_AMOUNT)
         }
 
         if (transaction.title.isBlank()) {
-            errors.add(AddTransactionValidationError.EMPTY_TITLE)
+            errors.add(EditTransactionValidationError.EMPTY_TITLE)
         }
 
         if (transaction.mainCategory == null) {
-            errors.add(AddTransactionValidationError.EMPTY_CATEGORY)
+            errors.add(EditTransactionValidationError.EMPTY_CATEGORY)
         }
 
         return errors

@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.transaction.add.currency
+package com.pichurchyk.budgetsaver.ui.screen.currency
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

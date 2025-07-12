@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.transaction.add
+package com.pichurchyk.budgetsaver.ui.screen.transaction.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,28 +52,32 @@ import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionIntent
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionValidationError
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionUiStatus
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionIntent
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionUiStatus
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionValidationError
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionViewState
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 private enum class BottomSheetState {
     NONE, CATEGORY, CURRENCY
 }
 
 @Composable
-fun AddTransactionScreen(
+fun EditTransactionScreen(
+    transactionId: String,
     closeScreen: () -> Unit,
-    viewModel: AddTransactionViewModel = koinViewModel(),
+    viewModel: EditTransactionViewModel = koinViewModel(
+        parameters = { parametersOf(transactionId) }
+    ),
 ) {
     val viewState by viewModel.viewState.collectAsState()
     val context = LocalContext.current
 
     LaunchedEffect(viewState.status) {
         when (val uiStatus = viewState.status) {
-            AddTransactionUiStatus.Success -> {
+            EditTransactionUiStatus.Success -> {
                 NotificationController.sendEvent(
                     NotificationEvent(
                         message = context.getString(R.string.transaction_saved),
@@ -81,7 +86,7 @@ fun AddTransactionScreen(
                 )
             }
 
-            is AddTransactionUiStatus.Error -> {
+            is EditTransactionUiStatus.Error -> {
                 NotificationController.sendEvent(
                     NotificationEvent(
                         message = context.getString(uiStatus.error.asErrorMessage()),
@@ -91,14 +96,14 @@ fun AddTransactionScreen(
                             action = {
                                 uiStatus.lastAction.invoke()
 
-                                viewModel.handleIntent(AddTransactionIntent.DismissNotification)
+                                viewModel.handleIntent(EditTransactionIntent.DismissNotification)
                             }
                         )
                     )
                 )
             }
 
-            is AddTransactionUiStatus.ValidationError -> {
+            is EditTransactionUiStatus.ValidationError -> {
                 NotificationController.sendEvent(
                     NotificationEvent(
                         message = context.getString(R.string.fill_require_fields),
@@ -106,14 +111,14 @@ fun AddTransactionScreen(
                         action = NotificationAction(
                             name = context.getString(R.string.dismiss),
                             action = {
-                                viewModel.handleIntent(AddTransactionIntent.DismissNotification)
+                                viewModel.handleIntent(EditTransactionIntent.DismissNotification)
                             }
                         )
                     )
                 )
             }
 
-            AddTransactionUiStatus.Idle, AddTransactionUiStatus.Loading -> {}
+            else -> {}
         }
     }
 
@@ -127,15 +132,15 @@ fun AddTransactionScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    viewState: AddTransactionViewState,
-    callViewModel: (AddTransactionIntent) -> Unit,
+    viewState: EditTransactionViewState,
+    callViewModel: (EditTransactionIntent) -> Unit,
     closeScreen: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
 
     val transactionData = viewState.transaction
-    val isLoading = viewState.status is AddTransactionUiStatus.Loading
+    val isLoading = viewState.status is EditTransactionUiStatus.Loading
 
     Scaffold(
         topBar = {
@@ -164,6 +169,17 @@ private fun Content(
                         },
                         onClick = closeScreen,
                     )
+                },
+                actions = {
+                    IconButton(
+                        content = {
+                            Icon(
+                                Icons.Rounded.Delete,
+                                stringResource(R.string.delete)
+                            )
+                        },
+                        onClick = closeScreen,
+                    )
                 }
             )
         },
@@ -184,7 +200,7 @@ private fun Content(
                                     .wrapContentHeight(),
                                 selectedValues = selectedValues,
                                 onValuesSelected = {
-                                    callViewModel.invoke(AddTransactionIntent.ChangeCategory(it.firstOrNull())) // Use firstOrNull for safety
+                                    callViewModel.invoke(EditTransactionIntent.ChangeCategory(it.firstOrNull())) // Use firstOrNull for safety
                                     modalBottomSheetState = BottomSheetState.NONE
                                 },
                                 isMultiSelect = false,
@@ -208,10 +224,10 @@ private fun Content(
                                 searchValue = viewState.currenciesSearch,
                                 currencies = viewState.filteredCurrencies,
                                 onSearchValueChanged = {
-                                    callViewModel.invoke(AddTransactionIntent.SearchCurrency(it))
+                                    callViewModel.invoke(EditTransactionIntent.SearchCurrency(it))
                                 },
                                 onValueSelected = {
-                                    callViewModel.invoke(AddTransactionIntent.ChangeCurrency(it))
+                                    callViewModel.invoke(EditTransactionIntent.ChangeCurrency(it))
                                     modalBottomSheetState = BottomSheetState.NONE
                                 }
                             )
@@ -248,7 +264,7 @@ private fun Content(
                                 .height(40.dp)
                                 .doOnClick {
                                     if (!isLoading) {
-                                        callViewModel.invoke(AddTransactionIntent.ChangeType(type))
+                                        callViewModel.invoke(EditTransactionIntent.ChangeType(type))
                                     }
                                 },
                             isSelected = isSelected,
@@ -261,9 +277,9 @@ private fun Content(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     headline = stringResource(R.string.title),
                     value = transactionData.title,
-                    error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_TITLE),
+                    error = viewState.validationError.contains(EditTransactionValidationError.EMPTY_TITLE),
                 ) {
-                    callViewModel.invoke(AddTransactionIntent.ChangeTitle(it))
+                    callViewModel.invoke(EditTransactionIntent.ChangeTitle(it))
                 }
 
                 Row(
@@ -276,9 +292,9 @@ private fun Content(
                         headline = stringResource(R.string.amount),
                         keyboardType = KeyboardType.Decimal,
                         value = if (transactionData.value.toDoubleOrNull() == 0.0 && transactionData.value.isNotEmpty()) "" else transactionData.value,
-                        error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_AMOUNT),
+                        error = viewState.validationError.contains(EditTransactionValidationError.EMPTY_AMOUNT),
                     ) {
-                        callViewModel.invoke(AddTransactionIntent.ChangeValue(it))
+                        callViewModel.invoke(EditTransactionIntent.ChangeValue(it))
                     }
 
                     CurrencyButton(
@@ -300,7 +316,7 @@ private fun Content(
                             .clickable(enabled = !isLoading) {
                                 modalBottomSheetState = BottomSheetState.CATEGORY
                             },
-                        error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_CATEGORY),
+                        error = viewState.validationError.contains(EditTransactionValidationError.EMPTY_CATEGORY),
                         value = transactionData.mainCategory
                     )
                 }
@@ -311,7 +327,7 @@ private fun Content(
                     headline = stringResource(R.string.comments),
                     value = transactionData.notes,
                 ) {
-                    callViewModel.invoke(AddTransactionIntent.ChangeNotes(it))
+                    callViewModel.invoke(EditTransactionIntent.ChangeNotes(it))
                 }
             }
         },
@@ -324,10 +340,20 @@ private fun Content(
                 value = stringResource(R.string.submit),
                 onClick = {
                     if (!isLoading) {
-                        callViewModel.invoke(AddTransactionIntent.Submit)
+                        callViewModel.invoke(EditTransactionIntent.Submit)
                     }
                 }
             )
         }
     )
+}
+
+fun formatAmountRoundedIfPossible(value: String): String {
+    val number = value.toDoubleOrNull() ?: return value
+
+    return if (number % 1.0 == 0.0) {
+        number.toInt().toString()
+    } else {
+        number.toString()
+    }
 }

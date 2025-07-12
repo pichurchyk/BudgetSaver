@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.transaction.add.category
+package com.pichurchyk.budgetsaver.ui.screen.category
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

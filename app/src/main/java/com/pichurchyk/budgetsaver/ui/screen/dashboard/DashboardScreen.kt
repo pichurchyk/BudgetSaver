@@ -55,7 +55,6 @@ import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardIntent
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewState
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.TransactionsWithFilters
-import com.pichurchyk.budgetsaver.ui.screen.transaction.details.TransactionCard
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import kotlinx.coroutines.launch
@@ -67,7 +66,7 @@ import java.math.BigInteger
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = koinViewModel(),
-    openTransactionDetails: (allTransactions: List<Transaction>, transactionId: String) -> Unit,
+    openEditTransactionScreen: (transactionId: String) -> Unit,
     openAddTransactionScreen: () -> Unit
 ) {
     val viewState by viewModel.state.collectAsState()
@@ -76,7 +75,7 @@ fun DashboardScreen(
         viewState = viewState,
         callViewModel = { viewModel.handleIntent(it) },
         onAddTransactionClick = openAddTransactionScreen,
-        onTransactionClick = openTransactionDetails
+        onEditTransactionClick = openEditTransactionScreen
     )
 
 }
@@ -87,7 +86,7 @@ private fun Content(
     viewState: DashboardViewState,
     callViewModel: (DashboardIntent) -> Unit,
     onAddTransactionClick: () -> Unit,
-    onTransactionClick: (transactions: List<Transaction>, transactionId: String) -> Unit
+    onEditTransactionClick: (transactionId: String) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val scrollState = rememberLazyListState()
@@ -270,7 +269,8 @@ private fun Content(
                                         TransactionCard(
                                             modifier = Modifier
                                                 .padding(horizontal = 16.dp),
-                                            transaction = transactionData
+                                            transaction = transactionData,
+                                            onEditClick = { onEditTransactionClick(it) }
                                         )
                                     }
                                 }
@@ -406,7 +406,7 @@ private fun Preview() {
                 ),
                 callViewModel = {},
                 onAddTransactionClick = {},
-                onTransactionClick = { _, _ -> }
+                onEditTransactionClick = { _ -> }
             )
         }
     }

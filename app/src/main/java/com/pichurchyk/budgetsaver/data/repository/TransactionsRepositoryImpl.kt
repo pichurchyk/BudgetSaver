@@ -52,4 +52,7 @@ internal class TransactionsRepositoryImpl(
     override suspend fun addTransaction(transaction: TransactionCreation): Unit =
         transactionsDataSource.addTransaction(transaction.toPayload())
 
+    override suspend fun editTransaction(transactionId: String, transaction: TransactionCreation): Unit =
+        transactionsDataSource.editTransaction(transactionId = transactionId, transaction.toPayload())
+
 }

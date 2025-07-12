@@ -19,4 +19,6 @@ internal interface TransactionsRepository {
 
     suspend fun addTransaction(transaction: TransactionCreation)
 
+    suspend fun editTransaction(transactionId: String, transaction: TransactionCreation)
+
 }

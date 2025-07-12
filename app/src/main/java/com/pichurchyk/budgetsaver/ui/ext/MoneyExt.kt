@@ -32,7 +32,14 @@ fun Money.toMajorWithCurrency(): String {
         RoundingMode.HALF_EVEN
     )
 
-    return "%.${currencyHelper.defaultFractionDigits}f %s".format(majorAmount, currencyHelper.symbol)
+    val stripped = majorAmount.stripTrailingZeros()
+    val formattedAmount = if (stripped.scale() <= 0) {
+        stripped.toPlainString()
+    } else {
+        "%.${currencyHelper.defaultFractionDigits}f".format(majorAmount)
+    }
+
+    return "$formattedAmount ${currencyHelper.symbol}"
 }
 
 fun Money.toMajor(): Double {
@@ -40,6 +47,22 @@ fun Money.toMajor(): Double {
 
     val divisor = 10.0.pow(currencyHelper.defaultFractionDigits)
     return amountMinor.toDouble() / divisor
+}
+
+fun Money.toMajorString(): String {
+    val currencyHelper = Currency.getInstance(this.currency)
+
+    val divisor = 10.0.pow(currencyHelper.defaultFractionDigits)
+
+    val value = amountMinor.toDouble() / divisor
+
+    val formatedValue = if (value % 1.0 == 0.0) {
+        value.toInt().toString()
+    } else {
+        value.toString()
+    }
+
+    return formatedValue
 }
 
 @Composable

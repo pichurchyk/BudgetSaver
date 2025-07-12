@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel
+package com.pichurchyk.budgetsaver.ui.screen.category.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

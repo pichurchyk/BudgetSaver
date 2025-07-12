@@ -39,4 +39,6 @@
     <string name="million_symbol">M</string>
     <string name="hundred_symbol">K</string>
     <string name="trillion_symbol">T</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 </resources>

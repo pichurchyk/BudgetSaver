@@ -10,21 +10,23 @@ import com.pichurchyk.budgetsaver.domain.repository.AuthRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.GetSingleTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.GetSingleTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
-import com.pichurchyk.budgetsaver.ui.screen.transaction.add.category.viewmodel.CategorySelectorViewModel
+import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
-import com.pichurchyk.budgetsaver.ui.screen.transaction.details.viewmodel.TransactionDetailsViewModel
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -47,13 +49,14 @@ val mainModule = module {
     viewModelOf(::DashboardViewModel)
     viewModelOf(::AddTransactionViewModel)
     viewModelOf(::CategorySelectorViewModel)
-    viewModelOf(::TransactionDetailsViewModel)
+    viewModelOf(::EditTransactionViewModel)
 
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
 
     single<AddTransactionUseCase> { AddTransactionUseCaseImpl(get()) }
+    single<EditTransactionUseCase> { EditTransactionUseCaseImpl(get()) }
 
-    single<GetSingleTransactionUseCase> { GetSingleTransactionUseCaseImpl(get()) }
+    single<LoadTransactionUseCase> { LoadTransactionUseCaseImpl(get()) }
 }
