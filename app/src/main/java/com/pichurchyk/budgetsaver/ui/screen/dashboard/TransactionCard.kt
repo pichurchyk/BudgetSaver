@@ -70,7 +70,7 @@ fun TransactionCard(
     val transactionColor = transaction.mainCategory.color?.let { Color.fromHex(it) } ?: disableGrey
 
     var isExpanded by remember {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     val titleTextSize =

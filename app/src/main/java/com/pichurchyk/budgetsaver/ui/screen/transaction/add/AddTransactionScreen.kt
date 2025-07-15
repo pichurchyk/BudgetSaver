@@ -40,6 +40,7 @@ import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
+import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
@@ -316,18 +317,26 @@ private fun Content(
             }
         },
         bottomBar = {
-            CommonButton(
-                modifier = Modifier
-                    .imePadding()
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                value = stringResource(R.string.submit),
-                onClick = {
-                    if (!isLoading) {
-                        callViewModel.invoke(AddTransactionIntent.Submit)
-                    }
+            when (viewState.status) {
+                is AddTransactionUiStatus.Loading -> {
+                    Loader(modifier = Modifier)
                 }
-            )
+
+                else -> {
+                    CommonButton(
+                        modifier = Modifier
+                            .imePadding()
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        value = stringResource(R.string.submit),
+                        onClick = {
+                            if (!isLoading) {
+                                callViewModel.invoke(AddTransactionIntent.Submit)
+                            }
+                        }
+                    )
+                }
+            }
         }
     )
 }

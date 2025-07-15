@@ -10,8 +10,6 @@ data class EditTransactionViewState(
     val allCurrencies: List<Currency> = Currency.getAvailableCurrencies().toList(),
     val currenciesSearch: String = "",
 
-    val isLoading: Boolean = false,
-
     val validationError: List<EditTransactionValidationError> = emptyList<EditTransactionValidationError>(),
 
     val status: EditTransactionUiStatus = EditTransactionUiStatus.Idle

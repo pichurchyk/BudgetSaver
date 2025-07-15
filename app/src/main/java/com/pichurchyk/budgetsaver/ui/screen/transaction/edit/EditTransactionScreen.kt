@@ -2,17 +2,24 @@ package com.pichurchyk.budgetsaver.ui.screen.transaction.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,6 +48,7 @@ import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
+import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
@@ -164,7 +172,8 @@ private fun Content(
                         content = {
                             Icon(
                                 Icons.AutoMirrored.Rounded.ArrowBack,
-                                stringResource(R.string.back)
+                                stringResource(R.string.back),
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         },
                         onClick = closeScreen,
@@ -174,8 +183,10 @@ private fun Content(
                     IconButton(
                         content = {
                             Icon(
-                                Icons.Rounded.Delete,
-                                stringResource(R.string.delete)
+                                modifier = Modifier.size(18.dp),
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                tint = MaterialTheme.colorScheme.onBackground,
                             )
                         },
                         onClick = closeScreen,
@@ -235,19 +246,17 @@ private fun Content(
                     )
                 }
 
-                BottomSheetState.NONE -> { /* No sheet visible */
-                }
+                BottomSheetState.NONE -> {}
             }
 
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize() // Use fillMaxSize for the main content column
-                    .imePadding(), // Ensure it handles keyboard
+                    .fillMaxSize()
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Transaction Type Chips
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(
@@ -332,28 +341,36 @@ private fun Content(
             }
         },
         bottomBar = {
-            CommonButton(
+            Box(
                 modifier = Modifier
-                    .imePadding()
                     .fillMaxWidth()
-                    .padding(16.dp),
-                value = stringResource(R.string.submit),
-                onClick = {
-                    if (!isLoading) {
-                        callViewModel.invoke(EditTransactionIntent.Submit)
+                    .padding(
+                        WindowInsets.navigationBars
+                            .only(WindowInsetsSides.Bottom)
+                            .asPaddingValues()
+                    )
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                when (viewState.status) {
+                    is EditTransactionUiStatus.Loading -> {
+                        Loader(modifier = Modifier)
+                    }
+
+                    else -> {
+                        CommonButton(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            value = stringResource(R.string.submit),
+                            onClick = {
+                                if (!isLoading) {
+                                    callViewModel.invoke(EditTransactionIntent.Submit)
+                                }
+                            }
+                        )
                     }
                 }
-            )
+            }
         }
     )
-}
-
-fun formatAmountRoundedIfPossible(value: String): String {
-    val number = value.toDoubleOrNull() ?: return value
-
-    return if (number % 1.0 == 0.0) {
-        number.toInt().toString()
-    } else {
-        number.toString()
-    }
 }

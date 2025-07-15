@@ -165,10 +165,9 @@ class AddTransactionViewModel(
                             )
                         }
                     }
-                    .onCompletion { cause ->
-                        clearData()
-                    }
                     .collect {
+                        clearData()
+
                         _viewState.update { it.copy(status = AddTransactionUiStatus.Success) }
                     }
             }
