@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -20,10 +22,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +63,8 @@ import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewSta
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.TransactionsWithFilters
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
+import com.pichurchyk.budgetsaver.ui.theme.notificationRedDark
+import com.pichurchyk.budgetsaver.ui.theme.notificationRedLight
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -75,7 +83,7 @@ fun DashboardScreen(
         viewState = viewState,
         callViewModel = { viewModel.handleIntent(it) },
         onAddTransactionClick = openAddTransactionScreen,
-        onEditTransactionClick = openEditTransactionScreen
+        onEditTransactionClick = openEditTransactionScreen,
     )
 
 }
@@ -235,7 +243,7 @@ private fun Content(
                                     )
 
                                     TransactionsDashboardLineChart(
-                                        modifier = Modifier.padding(4.dp),
+                                        modifier = Modifier.padding( vertical = 4.dp),
                                         transactions = activeData
                                             .filteredTransactionsWithCurrency
                                             .transactions
@@ -266,11 +274,15 @@ private fun Content(
                                     items(
                                         items = activeData.filteredTransactionsWithCurrency.transactions,
                                         key = { it.uuid }) { transactionData ->
-                                        TransactionCard(
-                                            modifier = Modifier
-                                                .padding(horizontal = 16.dp),
+                                        ListTransactionItem(
+                                            modifier = Modifier,
                                             transaction = transactionData,
-                                            onEditClick = { onEditTransactionClick(it) }
+                                            onEditTransactionClick = onEditTransactionClick,
+                                            onDeleteTransactionClick = {
+                                                callViewModel.invoke(
+                                                    DashboardIntent.DeleteTransaction(it)
+                                                )
+                                            }
                                         )
                                     }
                                 }
@@ -311,6 +323,56 @@ private fun Content(
                     )
                 }
             }
+        }
+    )
+}
+
+@Composable
+private fun ListTransactionItem(
+    modifier: Modifier,
+    transaction: Transaction,
+    onEditTransactionClick: (transactionId: String) -> Unit,
+    onDeleteTransactionClick: (transaction: Transaction) -> Unit
+) {
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+             if (it == SwipeToDismissBoxValue.StartToEnd) {}
+            else if (it == SwipeToDismissBoxValue.EndToStart) onDeleteTransactionClick(transaction)
+
+            false
+        }
+    )
+
+    SwipeToDismissBox(
+        modifier = modifier,
+        state = swipeToDismissBoxState,
+        backgroundContent = {
+            when (swipeToDismissBoxState.dismissDirection) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Remove item",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(notificationRedLight)
+                            .wrapContentSize(Alignment.CenterEnd)
+                            .padding(12.dp),
+                        tint = notificationRedDark
+                    )
+                }
+
+                else -> {}
+            }
+        },
+        content = {
+            TransactionCard(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp),
+                transaction = transaction,
+                onEditClick = { onEditTransactionClick(it) }
+            )
         }
     )
 }

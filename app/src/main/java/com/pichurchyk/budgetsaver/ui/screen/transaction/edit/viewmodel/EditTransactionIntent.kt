@@ -11,6 +11,8 @@ sealed class EditTransactionIntent {
 
     data object SubmitDelete: EditTransactionIntent()
 
+    data object CancelDelete: EditTransactionIntent()
+
     data class ChangeValue(val value: String): EditTransactionIntent()
 
     data class ChangeTitle(val value: String): EditTransactionIntent()
@@ -24,8 +26,6 @@ sealed class EditTransactionIntent {
     data class ChangeType(val value: TransactionType): EditTransactionIntent()
 
     data class ChangeCategory(val value: TransactionCategory?): EditTransactionIntent()
-
-    data object ClearData: EditTransactionIntent()
 
     data object DismissNotification: EditTransactionIntent()
 }

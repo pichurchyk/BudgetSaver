@@ -52,11 +52,9 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import com.pichurchyk.budgetsaver.ui.common.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
-import com.pichurchyk.budgetsaver.ui.ext.fromHex
 import com.pichurchyk.budgetsaver.ui.ext.getColorBasedOnValue
 import com.pichurchyk.budgetsaver.ui.ext.toMajorWithCurrency
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
-import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigInteger
@@ -67,8 +65,6 @@ fun TransactionCard(
     transaction: Transaction,
     onEditClick: (transactionId: String) -> Unit
 ) {
-    val transactionColor = transaction.mainCategory.color?.let { Color.fromHex(it) } ?: disableGrey
-
     var isExpanded by remember {
         mutableStateOf(false)
     }
@@ -96,7 +92,7 @@ fun TransactionCard(
                 isExpanded = !isExpanded
             },
         colors = CardDefaults.cardColors(
-            containerColor = transactionColor.copy(0.05f)
+            containerColor = MaterialTheme.colorScheme.background
         ),
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(0.5.dp, transaction.value.getColorBasedOnValue().copy(0.3f)),

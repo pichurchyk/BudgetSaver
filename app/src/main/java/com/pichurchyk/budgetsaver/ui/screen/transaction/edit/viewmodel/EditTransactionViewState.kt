@@ -31,7 +31,7 @@ sealed interface EditTransactionUiStatus {
 
     object Loading : EditTransactionUiStatus
 
-    object Success : EditTransactionUiStatus
+    data class Success(val action: EditTransactionAction): EditTransactionUiStatus
 
     object ValidationError: EditTransactionUiStatus
 

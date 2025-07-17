@@ -40,5 +40,10 @@
     <string name="hundred_symbol">K</string>
     <string name="trillion_symbol">T</string>
     <string name="edit">Edit</string>
+    <string name="delete_question">Are you sure you want to delete?</string>
     <string name="delete">Delete</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancel</string>
+    <string name="transaction_deleted">Transaction deleted</string>
 </resources>

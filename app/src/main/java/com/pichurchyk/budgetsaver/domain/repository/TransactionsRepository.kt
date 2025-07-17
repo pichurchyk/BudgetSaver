@@ -21,4 +21,6 @@ internal interface TransactionsRepository {
 
     suspend fun editTransaction(transactionId: String, transaction: TransactionCreation)
 
+    suspend fun deleteTransaction(transactionId: String)
+
 }

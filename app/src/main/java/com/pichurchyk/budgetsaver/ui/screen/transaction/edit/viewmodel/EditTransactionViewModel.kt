@@ -7,6 +7,7 @@ import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,8 @@ import kotlin.text.iterator
 class EditTransactionViewModel(
     private val transactionId: String,
     private val loadTransactionUseCase: LoadTransactionUseCase,
-    private val editTransactionUseCase: EditTransactionUseCase
+    private val editTransactionUseCase: EditTransactionUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
 ) : ViewModel() {
 
     private val _viewState: MutableStateFlow<EditTransactionViewState> = MutableStateFlow(
@@ -59,6 +61,7 @@ class EditTransactionViewModel(
             is EditTransactionIntent.Submit -> submit()
             is EditTransactionIntent.Delete -> delete()
             is EditTransactionIntent.SubmitDelete -> submitDelete()
+            is EditTransactionIntent.CancelDelete -> cancelDelete()
             is EditTransactionIntent.ChangeCurrency -> changeCurrency(intent.currency)
             is EditTransactionIntent.ChangeValue -> changeValue(intent.value)
             is EditTransactionIntent.ChangeType -> changeType(intent.value)
@@ -66,7 +69,6 @@ class EditTransactionViewModel(
             is EditTransactionIntent.ChangeTitle -> changeTitle(intent.value)
             is EditTransactionIntent.SearchCurrency -> changeSearchCurrencyValue(intent.value)
             is EditTransactionIntent.ChangeCategory -> changeCategory(intent.value)
-            is EditTransactionIntent.ClearData -> clearData()
             is EditTransactionIntent.DismissNotification -> dismissNotification()
         }
     }
@@ -77,10 +79,6 @@ class EditTransactionViewModel(
                 status = EditTransactionUiStatus.Idle
             )
         }
-    }
-
-    private fun clearData() {
-        _viewState.update { EditTransactionViewState() }
     }
 
     private fun changeCategory(category: TransactionCategory?) {
@@ -169,7 +167,33 @@ class EditTransactionViewModel(
     }
 
     private fun submitDelete() {
+        viewModelScope.launch {
+            deleteTransactionUseCase.invoke(transactionId)
+                .onStart {
+                    _viewState.update { currentState ->
+                        currentState.copy(status = EditTransactionUiStatus.Loading)
+                    }
+                }
+                .catch { e->
+                    _viewState.update {
+                        it.copy(
+                            status = EditTransactionUiStatus.Error(
+                                error = e as DomainException,
+                                lastAction = { submit() }
+                            )
+                        )
+                    }
+                }
+                .collect {
+                    _viewState.update { it.copy(status = EditTransactionUiStatus.Success(action = EditTransactionAction.DELETE)) }
+                }
+        }
+    }
 
+    private fun cancelDelete() {
+        _viewState.update { currentViewState ->
+            currentViewState.copy(status = EditTransactionUiStatus.Idle)
+        }
     }
 
     private fun submit() {
@@ -212,9 +236,7 @@ class EditTransactionViewModel(
                         }
                     }
                     .collect {
-                        clearData()
-
-                        _viewState.update { it.copy(status = EditTransactionUiStatus.Success) }
+                        _viewState.update { it.copy(status = EditTransactionUiStatus.Success(action = EditTransactionAction.EDIT)) }
                     }
             }
         }

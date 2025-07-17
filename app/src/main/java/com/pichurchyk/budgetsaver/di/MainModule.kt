@@ -10,6 +10,8 @@ import com.pichurchyk.budgetsaver.domain.repository.AuthRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
@@ -57,6 +59,7 @@ val mainModule = module {
 
     single<AddTransactionUseCase> { AddTransactionUseCaseImpl(get()) }
     single<EditTransactionUseCase> { EditTransactionUseCaseImpl(get()) }
+    single<DeleteTransactionUseCase> { DeleteTransactionUseCaseImpl(get()) }
 
     single<LoadTransactionUseCase> { LoadTransactionUseCaseImpl(get()) }
 }

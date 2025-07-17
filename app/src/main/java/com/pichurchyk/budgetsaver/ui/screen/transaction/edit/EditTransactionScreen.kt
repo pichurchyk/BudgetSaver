@@ -50,6 +50,7 @@ import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
+import com.pichurchyk.budgetsaver.ui.common.TwoOptionsSelector
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
@@ -60,6 +61,7 @@ import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionAction
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionIntent
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionUiStatus
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionValidationError
@@ -69,7 +71,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
 private enum class BottomSheetState {
-    NONE, CATEGORY, CURRENCY
+    NONE, CATEGORY, CURRENCY, DELETE_TRANSACTION
 }
 
 @Composable
@@ -81,54 +83,6 @@ fun EditTransactionScreen(
     ),
 ) {
     val viewState by viewModel.viewState.collectAsState()
-    val context = LocalContext.current
-
-    LaunchedEffect(viewState.status) {
-        when (val uiStatus = viewState.status) {
-            EditTransactionUiStatus.Success -> {
-                NotificationController.sendEvent(
-                    NotificationEvent(
-                        message = context.getString(R.string.transaction_saved),
-                        type = NotificationType.SUCCESS,
-                    )
-                )
-            }
-
-            is EditTransactionUiStatus.Error -> {
-                NotificationController.sendEvent(
-                    NotificationEvent(
-                        message = context.getString(uiStatus.error.asErrorMessage()),
-                        type = NotificationType.ERROR,
-                        action = NotificationAction(
-                            name = context.getString(R.string.retry),
-                            action = {
-                                uiStatus.lastAction.invoke()
-
-                                viewModel.handleIntent(EditTransactionIntent.DismissNotification)
-                            }
-                        )
-                    )
-                )
-            }
-
-            is EditTransactionUiStatus.ValidationError -> {
-                NotificationController.sendEvent(
-                    NotificationEvent(
-                        message = context.getString(R.string.fill_require_fields),
-                        type = NotificationType.ERROR,
-                        action = NotificationAction(
-                            name = context.getString(R.string.dismiss),
-                            action = {
-                                viewModel.handleIntent(EditTransactionIntent.DismissNotification)
-                            }
-                        )
-                    )
-                )
-            }
-
-            else -> {}
-        }
-    }
 
     Content(
         viewState = viewState,
@@ -149,6 +103,68 @@ private fun Content(
 
     val transactionData = viewState.transaction
     val isLoading = viewState.status is EditTransactionUiStatus.Loading
+
+    val context = LocalContext.current
+
+    LaunchedEffect(viewState.status) {
+        when (val uiStatus = viewState.status) {
+            is EditTransactionUiStatus.Success -> {
+                val message = when (uiStatus.action) {
+                    EditTransactionAction.EDIT -> context.getString(R.string.transaction_saved)
+                    EditTransactionAction.DELETE -> context.getString(R.string.transaction_deleted)
+                }
+
+                NotificationController.sendEvent(
+                    NotificationEvent(
+                        message = message,
+                        type = NotificationType.SUCCESS,
+                    )
+                )
+
+                if (uiStatus.action == EditTransactionAction.DELETE) {
+                    closeScreen()
+                }
+            }
+
+            is EditTransactionUiStatus.Error -> {
+                NotificationController.sendEvent(
+                    NotificationEvent(
+                        message = context.getString(uiStatus.error.asErrorMessage()),
+                        type = NotificationType.ERROR,
+                        action = NotificationAction(
+                            name = context.getString(R.string.retry),
+                            action = {
+                                uiStatus.lastAction.invoke()
+
+                                callViewModel.invoke(EditTransactionIntent.DismissNotification)
+                            }
+                        )
+                    )
+                )
+            }
+
+            is EditTransactionUiStatus.ValidationError -> {
+                NotificationController.sendEvent(
+                    NotificationEvent(
+                        message = context.getString(R.string.fill_require_fields),
+                        type = NotificationType.ERROR,
+                        action = NotificationAction(
+                            name = context.getString(R.string.dismiss),
+                            action = {
+                                callViewModel.invoke(EditTransactionIntent.DismissNotification)
+                            }
+                        )
+                    )
+                )
+            }
+
+            is EditTransactionUiStatus.Deleting -> {
+                modalBottomSheetState = BottomSheetState.DELETE_TRANSACTION
+            }
+
+            else -> {}
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -189,64 +205,82 @@ private fun Content(
                                 tint = MaterialTheme.colorScheme.onBackground,
                             )
                         },
-                        onClick = closeScreen,
+                        onClick = {
+                            callViewModel.invoke(EditTransactionIntent.Delete)
+                        },
                     )
                 }
             )
         },
         content = { paddingValues ->
-            when (modalBottomSheetState) {
-                BottomSheetState.CATEGORY -> {
-                    val selectedValues =
-                        transactionData.mainCategory?.let { listOf(it) } ?: emptyList()
-                    ModalBottomSheet(
-                        modifier = Modifier,
-                        sheetState = sheetState,
-                        onDismissRequest = { modalBottomSheetState = BottomSheetState.NONE },
-                        content = {
-                            CategorySelector(
-                                modifier = Modifier
-                                    .padding(bottom = 6.dp)
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(),
-                                selectedValues = selectedValues,
-                                onValuesSelected = {
-                                    callViewModel.invoke(EditTransactionIntent.ChangeCategory(it.firstOrNull())) // Use firstOrNull for safety
-                                    modalBottomSheetState = BottomSheetState.NONE
-                                },
-                                isMultiSelect = false,
-                                isNullable = true
-                            )
+            if (modalBottomSheetState != BottomSheetState.NONE) {
+                ModalBottomSheet(
+                    modifier = Modifier,
+                    sheetState = sheetState,
+                    onDismissRequest = {
+                        modalBottomSheetState = BottomSheetState.NONE
+                        if (viewState.status == EditTransactionUiStatus.Deleting) {
+                            callViewModel.invoke(EditTransactionIntent.CancelDelete)
                         }
-                    )
-                }
+                    },
+                    content = {
+                        when (modalBottomSheetState) {
+                            BottomSheetState.CATEGORY -> {
+                                val selectedValues =
+                                    transactionData.mainCategory?.let { listOf(it) } ?: emptyList()
 
-                BottomSheetState.CURRENCY -> {
-                    ModalBottomSheet(
-                        modifier = Modifier,
-                        sheetState = sheetState,
-                        onDismissRequest = { modalBottomSheetState = BottomSheetState.NONE },
-                        content = {
-                            CurrencySelector(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(),
-                                selectedCurrency = transactionData.currency,
-                                searchValue = viewState.currenciesSearch,
-                                currencies = viewState.filteredCurrencies,
-                                onSearchValueChanged = {
-                                    callViewModel.invoke(EditTransactionIntent.SearchCurrency(it))
-                                },
-                                onValueSelected = {
-                                    callViewModel.invoke(EditTransactionIntent.ChangeCurrency(it))
-                                    modalBottomSheetState = BottomSheetState.NONE
-                                }
-                            )
+                                CategorySelector(
+                                    modifier = Modifier
+                                        .padding(bottom = 6.dp)
+                                        .fillMaxWidth()
+                                        .wrapContentHeight(),
+                                    selectedValues = selectedValues,
+                                    onValuesSelected = {
+                                        callViewModel.invoke(EditTransactionIntent.ChangeCategory(it.firstOrNull())) // Use firstOrNull for safety
+                                        modalBottomSheetState = BottomSheetState.NONE
+                                    },
+                                    isMultiSelect = false,
+                                    isNullable = true
+                                )
+                            }
+
+                            BottomSheetState.CURRENCY -> {
+                                CurrencySelector(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .wrapContentHeight(),
+                                    selectedCurrency = transactionData.currency,
+                                    searchValue = viewState.currenciesSearch,
+                                    currencies = viewState.filteredCurrencies,
+                                    onSearchValueChanged = {
+                                        callViewModel.invoke(EditTransactionIntent.SearchCurrency(it))
+                                    },
+                                    onValueSelected = {
+                                        callViewModel.invoke(EditTransactionIntent.ChangeCurrency(it))
+                                        modalBottomSheetState = BottomSheetState.NONE
+                                    }
+                                )
+                            }
+
+                            BottomSheetState.DELETE_TRANSACTION -> {
+                                TwoOptionsSelector(
+                                    modifier = Modifier,
+                                    positiveText = stringResource(R.string.delete),
+                                    negativeText = stringResource(R.string.cancel),
+                                    title = stringResource(R.string.delete_question),
+                                    onNegativeClick = {
+                                        callViewModel.invoke(EditTransactionIntent.CancelDelete)
+                                    },
+                                    onPositiveClick = {
+                                        callViewModel.invoke(EditTransactionIntent.SubmitDelete)
+                                    }
+                                )
+                            }
+
+                            else -> {}
                         }
-                    )
-                }
-
-                BottomSheetState.NONE -> {}
+                    }
+                )
             }
 
             Column(

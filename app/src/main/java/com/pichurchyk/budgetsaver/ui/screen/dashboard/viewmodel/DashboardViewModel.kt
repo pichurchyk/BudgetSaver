@@ -2,8 +2,10 @@ package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,10 +13,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Currency
 
 class DashboardViewModel(
-    private val getTransactionsUseCase: GetTransactionsUseCase
+    private val getTransactionsUseCase: GetTransactionsUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<DashboardViewState> =
@@ -46,6 +48,37 @@ class DashboardViewModel(
             is DashboardIntent.SelectCurrency -> {
                 selectCurrency(intent.currency)
             }
+
+            is DashboardIntent.DeleteTransaction -> {
+                deleteTransaction(intent.transaction)
+            }
+        }
+    }
+
+    private fun deleteTransaction(transaction: Transaction) {
+        viewModelScope.launch {
+            deleteTransactionUseCase.invoke(transaction.uuid)
+                .onStart {}
+                .catch { error ->
+                    _state.update { DashboardViewState.Error(error.message) }
+                }
+                .collect {
+                    _state.update { currentState ->
+                        if (currentState !is DashboardViewState.Loaded) return@update currentState
+
+                        val transactions =
+                            currentState.allTransactions.map { transactionsWithFilters ->
+                                transactionsWithFilters.copy(
+                                    transactions = transactionsWithFilters.transactions.copy(
+                                        transactions = transactionsWithFilters.transactions.transactions.filter { it != transaction })
+                                )
+                            }
+
+                        currentState.copy(
+                            allTransactions = transactions,
+                        )
+                    }
+                }
         }
     }
 
@@ -154,13 +187,13 @@ class DashboardViewModel(
                 }
                 .collect { data ->
                     val items = data.map {
-                        val selectedCategories = it.transactions.map { it.mainCategory }.distinct()
-                        val selectedTransactionType = TransactionType.entries
+                        val allCategories = it.transactions.map { it.mainCategory }.distinct()
+                        val allTransactionTypes = TransactionType.entries
 
                         TransactionsWithFilters(
-                            it,
-                            selectedCategories,
-                            selectedTransactionType
+                            transactions = it,
+                            selectedCategories = allCategories,
+                            selectedTransactionType = allTransactionTypes
                         )
                     }
 

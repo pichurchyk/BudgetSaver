@@ -55,4 +55,7 @@ internal class TransactionsRepositoryImpl(
     override suspend fun editTransaction(transactionId: String, transaction: TransactionCreation): Unit =
         transactionsDataSource.editTransaction(transactionId = transactionId, transaction.toPayload())
 
+    override suspend fun deleteTransaction(transactionId: String): Unit =
+        transactionsDataSource.deleteTransaction(transactionId = transactionId)
+
 }

@@ -6,6 +6,7 @@ import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
 import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.resources.delete
 import io.ktor.client.plugins.resources.get
 import io.ktor.client.plugins.resources.post
 import io.ktor.client.request.parameter
@@ -68,6 +69,12 @@ internal class TransactionsDataSource(
             parameter("id", "eq.$transactionId")
 
             setBody(transactionPayload)
+        }.body<Unit>()
+    }
+
+    suspend fun deleteTransaction(transactionId: String) {
+        httpClient.delete(Transaction()) {
+            parameter("id", "eq.$transactionId")
         }.body<Unit>()
     }
 
