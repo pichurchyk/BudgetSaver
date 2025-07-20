@@ -44,7 +44,15 @@ class EditTransactionViewModel(
                         currentState.copy(status = EditTransactionUiStatus.Loading)
                     }
                 }
-                .catch { }
+                .catch { e ->
+                    _viewState.update { currentState ->
+                        currentState.copy(
+                            status = EditTransactionUiStatus.Error(
+                                error = e as DomainException,
+                                lastAction = { loadTransaction() })
+                        )
+                    }
+                }
                 .collect { transaction ->
                     _viewState.update { currentState ->
                         currentState.copy(
@@ -173,7 +181,7 @@ class EditTransactionViewModel(
                         currentState.copy(status = EditTransactionUiStatus.Loading)
                     }
                 }
-                .catch { e->
+                .catch { e ->
                     _viewState.update {
                         it.copy(
                             status = EditTransactionUiStatus.Error(
