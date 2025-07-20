@@ -93,8 +93,7 @@ class AddTransactionViewModel(
     private fun changeTitle(value: String) {
         _viewState.update { currentViewState ->
             currentViewState.copy(
-                transaction = currentViewState.transaction.copy(title = value),
-                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_TITLE }
+                transaction = currentViewState.transaction.copy(title = value)
             )
         }
     }
@@ -183,10 +182,6 @@ class AddTransactionViewModel(
         val parsedValue = transaction.value.toDoubleOrNull()
         if (parsedValue == null || parsedValue <= 0.0) {
             errors.add(AddTransactionValidationError.EMPTY_AMOUNT)
-        }
-
-        if (transaction.title.isBlank()) {
-            errors.add(AddTransactionValidationError.EMPTY_TITLE)
         }
 
         if (transaction.mainCategory == null) {

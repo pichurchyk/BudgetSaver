@@ -59,13 +59,9 @@ fun TransactionsDashboardLineChart(
             isDataEmpty = false
 
             modelProducer.runTransaction {
-                lineSeries { series(chartData) }
+                lineSeries { series(listOf(0.0) + chartData) }
             }
         }
-    }
-
-    val typeface by remember {
-        mutableStateOf(ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_regular))
     }
 
     val chartStroke = if (isDataEmpty) disableGrey.copy(0.2f) else green

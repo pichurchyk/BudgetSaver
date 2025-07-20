@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class Transaction(
     val uuid: String,
 
-    val title: String,
+    val title: String?,
 
     val value: Money,
     val notes: String,

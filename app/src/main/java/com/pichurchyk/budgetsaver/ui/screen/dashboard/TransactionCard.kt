@@ -53,6 +53,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategor
 import com.pichurchyk.budgetsaver.ui.common.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getColorBasedOnValue
+import com.pichurchyk.budgetsaver.ui.ext.getTransactionDefaultTitle
 import com.pichurchyk.budgetsaver.ui.ext.toMajorWithCurrency
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import kotlinx.datetime.Instant
@@ -146,7 +147,7 @@ private fun ExpandedCard(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = transaction.title,
+                text = transaction.title ?: transaction.getTransactionDefaultTitle(),
                 style = MaterialTheme.typography.headlineMedium,
                 fontSize = titleTextSize.sp
             )
@@ -226,7 +227,7 @@ private fun CollapsedCard(
 
         Text(
             modifier = Modifier.weight(1f),
-            text = transaction.title,
+            text = transaction.title ?: transaction.getTransactionDefaultTitle(),
             style = MaterialTheme.typography.headlineMedium,
             fontSize = titleTextSize.sp,
             maxLines = 1,

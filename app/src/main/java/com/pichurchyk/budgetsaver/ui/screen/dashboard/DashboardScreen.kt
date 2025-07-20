@@ -5,16 +5,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -33,11 +38,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -173,93 +183,82 @@ private fun Content(
                         }
 
                         viewState.sortedTransactionsBySelectedCurrency?.let { activeData ->
-                            LazyColumn(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(top = 16.dp),
+                                    .padding(top = 16.dp)
+                                    .verticalScroll(rememberScrollState()),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                                state = scrollState,
-                                contentPadding = PaddingValues(
-                                    bottom = paddingValues.calculateBottomPadding()
-                                ),
                             ) {
-                                item {
-                                    ExpenseIncomeFilter(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        selectedItems = activeData.selectedTransactionType,
-                                        onItemClick = {
-                                            callViewModel.invoke(DashboardIntent.ToggleTypeFilter(it))
-                                        },
-                                        onSelectAllClick = {
-                                            callViewModel.invoke(DashboardIntent.ToggleAllTypesFilter)
-                                        }
-                                    )
-                                }
-
-                                item {
-                                    CategoriesFilter(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        allCategories = activeData.transactions.allCategories,
-                                        selectedItems = activeData.selectedCategories,
-                                        onItemClick = {
-                                            callViewModel.invoke(
-                                                DashboardIntent.ToggleCategoriesFilter(
-                                                    it
-                                                )
+                                ExpenseIncomeFilter(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    selectedItems = activeData.selectedTransactionType,
+                                    onItemClick = {
+                                        callViewModel.invoke(
+                                            DashboardIntent.ToggleTypeFilter(
+                                                it
                                             )
-                                        },
-                                        onSelectAllClick = {
-                                            callViewModel.invoke(DashboardIntent.ToggleAllCategoriesFilter)
-                                        }
-                                    )
-                                }
-
-                                item {
-                                    val totalIncomes =
-                                        activeData.filteredTransactionsWithCurrency.totalIncomes
-                                    val totalExpenses =
-                                        activeData.filteredTransactionsWithCurrency.totalExpenses
-
-                                    if (totalExpenses.amountMinor == BigInteger("0") &&
-                                        totalIncomes.amountMinor == BigInteger("0")
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.padding(top = 10.dp),
-                                            text = stringResource(R.string.no_data_available),
-                                            style = MaterialTheme.typography.titleSmall,
-                                            color = MaterialTheme.colorScheme.error
                                         )
+                                    },
+                                    onSelectAllClick = {
+                                        callViewModel.invoke(DashboardIntent.ToggleAllTypesFilter)
                                     }
+                                )
+
+                                CategoriesFilter(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    allCategories = activeData.transactions.allCategories,
+                                    selectedItems = activeData.selectedCategories,
+                                    onItemClick = {
+                                        callViewModel.invoke(
+                                            DashboardIntent.ToggleCategoriesFilter(
+                                                it
+                                            )
+                                        )
+                                    },
+                                    onSelectAllClick = {
+                                        callViewModel.invoke(DashboardIntent.ToggleAllCategoriesFilter)
+                                    }
+                                )
+
+                                val totalIncomes =
+                                    activeData.filteredTransactionsWithCurrency.totalIncomes
+                                val totalExpenses =
+                                    activeData.filteredTransactionsWithCurrency.totalExpenses
+
+                                if (totalExpenses.amountMinor == BigInteger("0") &&
+                                    totalIncomes.amountMinor == BigInteger("0")
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(top = 10.dp),
+                                        text = stringResource(R.string.no_data_available),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
                                 }
 
-                                item {
-                                    DashboardTotal(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                        totalIncomes = activeData.filteredTransactionsWithCurrency.totalIncomes,
-                                        totalExpenses = activeData.filteredTransactionsWithCurrency.totalExpenses
-                                    )
+                                DashboardTotal(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    totalIncomes = activeData.filteredTransactionsWithCurrency.totalIncomes,
+                                    totalExpenses = activeData.filteredTransactionsWithCurrency.totalExpenses
+                                )
 
-                                    TransactionsDashboardLineChart(
-                                        modifier = Modifier.padding( vertical = 4.dp),
-                                        transactions = activeData
-                                            .filteredTransactionsWithCurrency
-                                            .transactions
-                                            .reversed(),
-                                    )
-                                }
-
-                                item {
-                                    TransactionsDashboardRateChart(
-                                        transactions = activeData.filteredTransactionsWithCurrency.transactions,
-                                        modifier = Modifier,
-                                    )
-                                }
+                                TransactionsDashboardLineChart(
+                                    modifier = Modifier,
+                                    transactions = activeData
+                                        .filteredTransactionsWithCurrency
+                                        .transactions
+                                        .reversed(),
+                                )
 
                                 if (activeData.filteredTransactionsWithCurrency.transactions.isNotEmpty()) {
-                                    item {
+                                    Column(
+                                        modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding(), top = 40.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
                                         Text(
                                             modifier = Modifier
                                                 .padding(start = 16.dp)
@@ -269,21 +268,19 @@ private fun Content(
                                             style = MaterialTheme.typography.titleMedium,
                                             color = MaterialTheme.colorScheme.onBackground
                                         )
-                                    }
 
-                                    items(
-                                        items = activeData.filteredTransactionsWithCurrency.transactions,
-                                        key = { it.uuid }) { transactionData ->
-                                        ListTransactionItem(
-                                            modifier = Modifier,
-                                            transaction = transactionData,
-                                            onEditTransactionClick = onEditTransactionClick,
-                                            onDeleteTransactionClick = {
-                                                callViewModel.invoke(
-                                                    DashboardIntent.DeleteTransaction(it)
-                                                )
-                                            }
-                                        )
+                                        activeData.filteredTransactionsWithCurrency.transactions.forEach { transaction ->
+                                            ListTransactionItem(
+                                                modifier = Modifier,
+                                                transaction = transaction,
+                                                onEditTransactionClick = onEditTransactionClick,
+                                                onDeleteTransactionClick = {
+                                                    callViewModel.invoke(
+                                                        DashboardIntent.DeleteTransaction(it)
+                                                    )
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -336,7 +333,7 @@ private fun ListTransactionItem(
 ) {
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
-             if (it == SwipeToDismissBoxValue.StartToEnd) {}
+            if (it == SwipeToDismissBoxValue.StartToEnd) onEditTransactionClick(transaction.uuid)
             else if (it == SwipeToDismissBoxValue.EndToStart) onDeleteTransactionClick(transaction)
 
             false
@@ -360,6 +357,21 @@ private fun ListTransactionItem(
                             .wrapContentSize(Alignment.CenterEnd)
                             .padding(12.dp),
                         tint = notificationRedDark
+                    )
+                }
+
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = "Edit item",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.background)
+                            .wrapContentSize(Alignment.CenterStart)
+                            .padding(12.dp),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
 

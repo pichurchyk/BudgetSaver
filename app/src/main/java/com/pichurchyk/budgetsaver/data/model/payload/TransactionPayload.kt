@@ -7,7 +7,7 @@ import java.math.BigInteger
 
 @Serializable
 data class TransactionPayload(
-    val title: String,
+    val title: String?,
 
     @Serializable(with = BigIntegerSerializer::class)
     val value: BigInteger,

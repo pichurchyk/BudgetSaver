@@ -5,7 +5,7 @@ import kotlinx.datetime.TimeZone
 import java.util.Currency
 
 data class TransactionCreation(
-    val title: String = "",
+    val title: String? = null,
 
     val value: String = "",
     val currency: Currency = Currency.getInstance("USD"),

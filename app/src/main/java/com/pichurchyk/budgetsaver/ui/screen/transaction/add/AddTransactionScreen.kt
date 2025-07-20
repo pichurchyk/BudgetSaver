@@ -1,13 +1,20 @@
 package com.pichurchyk.budgetsaver.ui.screen.transaction.add
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
@@ -31,7 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +59,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
+import com.pichurchyk.budgetsaver.ui.ext.getTitle
 import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencyButton
@@ -57,6 +69,8 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransac
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionUiStatus
+import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionUiStatus
+import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
 private enum class BottomSheetState {
@@ -68,6 +82,8 @@ fun AddTransactionScreen(
     closeScreen: () -> Unit,
     viewModel: AddTransactionViewModel = koinViewModel(),
 ) {
+    val focusManager = LocalFocusManager.current
+
     val viewState by viewModel.viewState.collectAsState()
     val context = LocalContext.current
 
@@ -118,11 +134,21 @@ fun AddTransactionScreen(
         }
     }
 
-    Content(
-        viewState = viewState,
-        callViewModel = { viewModel.handleIntent(it) },
-        closeScreen = closeScreen,
-    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
+    ) {
+        Content(
+            viewState = viewState,
+            callViewModel = { viewModel.handleIntent(it) },
+            closeScreen = closeScreen,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,6 +163,18 @@ private fun Content(
 
     val transactionData = viewState.transaction
     val isLoading = viewState.status is AddTransactionUiStatus.Loading
+
+    val focusRequester = remember { FocusRequester() }
+
+    var isInitialFocusTriggered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewState.status) {
+        if (viewState.status == AddTransactionUiStatus.Idle && !isInitialFocusTriggered) {
+            focusRequester.requestFocus()
+
+            isInitialFocusTriggered = true
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -262,7 +300,7 @@ private fun Content(
                     modifier = Modifier.padding(horizontal = 16.dp),
                     headline = stringResource(R.string.title),
                     value = transactionData.title,
-                    error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_TITLE),
+                    placeholder = transactionData.mainCategory?.let { "${transactionData.type.getTitle()} (${transactionData.mainCategory.title})" },
                 ) {
                     callViewModel.invoke(AddTransactionIntent.ChangeTitle(it))
                 }
@@ -273,7 +311,9 @@ private fun Content(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     CommonInput(
-                        modifier = Modifier.weight(3f),
+                        modifier = Modifier
+                            .weight(3f)
+                            .focusRequester(focusRequester),
                         headline = stringResource(R.string.amount),
                         keyboardType = KeyboardType.Decimal,
                         value = if (transactionData.value.toDoubleOrNull() == 0.0 && transactionData.value.isNotEmpty()) "" else transactionData.value,
@@ -325,9 +365,13 @@ private fun Content(
                 else -> {
                     CommonButton(
                         modifier = Modifier
-                            .imePadding()
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(
+                                (WindowInsets.navigationBars)
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues()
+                            )
+                            .padding(horizontal = 16.dp),
                         value = stringResource(R.string.submit),
                         onClick = {
                             if (!isLoading) {

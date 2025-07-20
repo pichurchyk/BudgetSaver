@@ -8,7 +8,7 @@ data class TransactionResponse(
     @SerialName("id")
     val uuid: String,
 
-    val title: String,
+    val title: String? = null,
     val value: String,
     val currency: String,
     val notes: String,
