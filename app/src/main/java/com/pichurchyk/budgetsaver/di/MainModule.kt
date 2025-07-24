@@ -4,9 +4,12 @@ import com.pichurchyk.budgetsaver.data.datasource.AuthDataSource
 import com.pichurchyk.budgetsaver.data.datasource.TransactionsDataSource
 import com.pichurchyk.budgetsaver.data.preferences.AuthPreferences
 import com.pichurchyk.budgetsaver.data.preferences.AuthPreferencesActions
+import com.pichurchyk.budgetsaver.data.preferences.SystemPreferences
 import com.pichurchyk.budgetsaver.data.repository.AuthRepositoryImpl
+import com.pichurchyk.budgetsaver.data.repository.SystemRepositoryImpl
 import com.pichurchyk.budgetsaver.data.repository.TransactionsRepositoryImpl
 import com.pichurchyk.budgetsaver.domain.repository.AuthRepository
+import com.pichurchyk.budgetsaver.domain.repository.SystemRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCaseImpl
@@ -28,16 +31,18 @@ import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorV
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
+import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileViewModel
+import com.pichurchyk.budgetsaver.ui.screen.themeselector.viewmodel.AppThemeSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 
 val mainModule = module {
 
+    single<SystemRepository> { SystemRepositoryImpl(get()) }
+
     single<TransactionsRepository> { TransactionsRepositoryImpl(get()) }
     single<TransactionsDataSource> { TransactionsDataSource(get()) }
-
-    viewModelOf(::AuthViewModel)
 
     single<GetSignedInUserUseCase> { GetSignedInUserUseCaseImpl(get()) }
     single<SignInUseCase> { SignInUseCaseImpl(get()) }
@@ -45,14 +50,15 @@ val mainModule = module {
     single { AuthDataSource(get(), get()) }
 
     single<AuthPreferencesActions> { AuthPreferences(get()) }
+    single<SystemPreferences> { SystemPreferences(get()) }
 
-
-
+    viewModelOf(::AuthViewModel)
     viewModelOf(::DashboardViewModel)
     viewModelOf(::AddTransactionViewModel)
     viewModelOf(::CategorySelectorViewModel)
     viewModelOf(::EditTransactionViewModel)
-
+    viewModelOf(::ProfileViewModel)
+    viewModelOf(::AppThemeSelectorViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }

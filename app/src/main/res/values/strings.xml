@@ -46,4 +46,12 @@
     <string name="no">No</string>
     <string name="cancel">Cancel</string>
     <string name="transaction_deleted">Transaction deleted</string>
+    <string name="profile">Profile</string>
+    <string name="you">You</string>
+    <string name="auth">Auth</string>
+    <string name="edit_transaction">Edit transaction</string>
+    <string name="dark">🌚 Dark</string>
+    <string name="light">🌞 Light</string>
+    <string name="system">🌓 System</string>
+    <string name="theme">Theme</string>
 </resources>

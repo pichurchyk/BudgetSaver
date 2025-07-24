@@ -9,6 +9,7 @@ import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
+import com.pichurchyk.budgetsaver.ui.screen.profile.ProfileScreen
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.EditTransactionScreen
 
 @Composable
@@ -34,6 +35,10 @@ fun NavHost(
                     navController.navigate(Screen.EditTransaction(transactionId = transactionId))
                 }
             )
+        }
+
+        composable<Screen.Profile> {
+            ProfileScreen()
         }
 
         composable<Screen.AddTransaction> {

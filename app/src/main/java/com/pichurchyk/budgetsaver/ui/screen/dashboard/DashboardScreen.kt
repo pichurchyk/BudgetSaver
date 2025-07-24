@@ -116,26 +116,6 @@ private fun Content(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                windowInsets = TopAppBarDefaults.windowInsets,
-                title = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        text = stringResource(R.string.dashboard),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors()
-                    .copy(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        scrolledContainerColor = MaterialTheme.colorScheme.background.copy(0f)
-                    ),
-                scrollBehavior = scrollBehavior
-            )
-        },
         content = { paddingValues ->
             when (viewState) {
                 is DashboardViewState.Init -> {
@@ -145,8 +125,7 @@ private fun Content(
                 is DashboardViewState.Loading -> {
                     Box(
                         Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Loader(Modifier.align(Alignment.Center))
@@ -159,7 +138,6 @@ private fun Content(
                             divider = {},
                             containerColor = MaterialTheme.colorScheme.background,
                             selectedTabIndex = viewState.indexOfSelectedCurrency,
-                            modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
                         ) {
                             viewState.allCurrencies.forEachIndexed { index, currency ->
                                 Tab(
@@ -291,8 +269,7 @@ private fun Content(
                 is DashboardViewState.Error -> {
                     ErrorBlock(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                            .fillMaxSize(),
                         message = stringResource(R.string.error_while_loading_occurred)
                     ) {
                         callViewModel.invoke(DashboardIntent.LoadData)

@@ -179,10 +179,10 @@ private fun Content(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                windowInsets = TopAppBarDefaults.windowInsets,
+                windowInsets = WindowInsets(top = 0.dp),
                 title = {
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier,
                         textAlign = TextAlign.Center,
                         text = stringResource(R.string.add_transaction),
                         color = MaterialTheme.colorScheme.onBackground,
@@ -265,8 +265,8 @@ private fun Content(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize() // Use fillMaxSize for the main content column
-                    .imePadding(), // Ensure it handles keyboard
+                    .fillMaxSize()
+                    .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
