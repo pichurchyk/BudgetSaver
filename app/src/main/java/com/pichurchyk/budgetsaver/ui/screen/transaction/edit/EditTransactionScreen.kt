@@ -193,9 +193,9 @@ private fun Content(
                 windowInsets = TopAppBarDefaults.windowInsets,
                 title = {
                     Text(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier,
                         textAlign = TextAlign.Center,
-                        text = stringResource(R.string.add_transaction),
+                        text = stringResource(R.string.edit_transaction),
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.headlineSmall
                     )

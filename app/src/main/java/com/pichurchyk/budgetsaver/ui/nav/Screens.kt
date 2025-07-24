@@ -11,9 +11,22 @@ sealed class Screen {
     data object Dashboard: Screen()
 
     @Serializable
+    data object Profile: Screen()
+
+    @Serializable
     data object AddTransaction: Screen()
 
     @Serializable
     data class EditTransaction(val transactionId: String): Screen()
 
+    companion object {
+        val menuScreens = listOf<Screen>(Dashboard, Profile)
+
+        val screensWithMenu = listOf(
+            Dashboard,
+            Profile,
+            AddTransaction,
+            EditTransaction("dummy") // you only need the class reference
+        )
+    }
 }
