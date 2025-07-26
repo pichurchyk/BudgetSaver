@@ -27,6 +27,7 @@ import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
+import com.pichurchyk.budgetsaver.ui.MainViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
@@ -59,6 +60,7 @@ val mainModule = module {
     viewModelOf(::EditTransactionViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::AppThemeSelectorViewModel)
+    viewModelOf(::MainViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }

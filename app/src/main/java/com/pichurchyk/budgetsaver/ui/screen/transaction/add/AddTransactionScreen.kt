@@ -315,6 +315,7 @@ private fun Content(
                             .weight(3f)
                             .focusRequester(focusRequester),
                         headline = stringResource(R.string.amount),
+                        isOptional = false,
                         keyboardType = KeyboardType.Decimal,
                         value = if (transactionData.value.toDoubleOrNull() == 0.0 && transactionData.value.isNotEmpty()) "" else transactionData.value,
                         error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_AMOUNT),
