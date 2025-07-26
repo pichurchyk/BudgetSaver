@@ -1,6 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.common
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,8 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
-import com.pichurchyk.budgetsaver.ui.theme.errorContainerLight
-import com.pichurchyk.budgetsaver.ui.theme.errorLight
 
 @Composable
 fun CommonInput(
@@ -30,18 +29,30 @@ fun CommonInput(
     keyboardType: KeyboardType = KeyboardType.Text,
     enabled: Boolean = true,
     isReadOnly: Boolean = false,
+    isOptional: Boolean = true,
     height: Dp = 50.dp,
     error: Boolean = false,
     onValueChanged: (String) -> Unit
 ) {
     Column(modifier) {
         headline?.let {
-            Text(
-                modifier = Modifier.padding(start = 18.dp),
-                text = it,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.labelSmall,
-            )
+            Row {
+                Text(
+                    modifier = Modifier.padding(start = 18.dp),
+                    text = it,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+
+                if (!isOptional) {
+                    Text(
+                        modifier = Modifier,
+                        text = "*",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
         }
 
         OutlinedTextField(
