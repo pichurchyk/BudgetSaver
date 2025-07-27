@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
-import com.pichurchyk.budgetsaver.ui.common.TransactionCategoryChip
+import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorIntent

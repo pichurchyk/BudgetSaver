@@ -133,7 +133,7 @@ class DashboardViewModel(
         }
     }
 
-    private fun toggleCategoriesFilter(clickedCategory: TransactionCategory) {
+    private fun toggleCategoriesFilter(clickedCategory: TransactionCategory?) {
         _state.update { currentState ->
             if (currentState !is DashboardViewState.Loaded) return@update currentState
 

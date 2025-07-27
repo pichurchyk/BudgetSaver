@@ -58,6 +58,13 @@ internal class TransactionsDataSource(
             .also { emit(it) }
     }
 
+    suspend fun deleteCategory(categoryId: String) {
+        httpClient.delete(DeleteTransaction()) {
+            parameter("categoryId", categoryId)
+        }
+            .body<Unit>()
+    }
+
     suspend fun addTransaction(transactionPayload: TransactionPayload) {
         httpClient.post(Transaction()) {
             setBody(transactionPayload)
@@ -90,6 +97,10 @@ private class GetTransactions()
 @Serializable
 @Resource("/functions/v1/single-transaction")
 private class GetTransaction()
+
+@Serializable
+@Resource("/functions/v1/delete-transaction-category")
+private class DeleteTransaction()
 
 @Serializable
 @Resource("/rest/v1/Category")

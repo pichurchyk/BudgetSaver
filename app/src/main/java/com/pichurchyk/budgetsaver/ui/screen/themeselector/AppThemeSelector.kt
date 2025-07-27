@@ -34,11 +34,10 @@ fun AppThemeSelector(
 
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
     ) {
         Text(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+            modifier = Modifier,
             text = stringResource(R.string.theme),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
@@ -51,13 +50,13 @@ fun AppThemeSelector(
 
             is AppThemeSelectorViewState.Idle -> {
                 Row(
-                    modifier = Modifier,
+                    modifier = Modifier.padding(top = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     AppThemeOption.entries.forEach { option ->
                         AppThemeSelectorChip(
-                            modifier = Modifier,
+                            modifier = Modifier.weight(1f),
                             option = option,
                             isSelected = option == state.selectedOption
                         ) {

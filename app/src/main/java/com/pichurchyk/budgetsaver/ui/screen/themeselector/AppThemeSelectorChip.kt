@@ -2,6 +2,7 @@ package com.pichurchyk.budgetsaver.ui.screen.themeselector
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +33,8 @@ fun AppThemeSelectorChip(
             .clip(RoundedCornerShape(12.dp))
             .background(textColor.copy(0.1f))
             .border(1.dp, textColor.copy(0.6f), RoundedCornerShape(12.dp))
-            .doOnClick { onItemClick(option) }
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .clickable { onItemClick(option) }
+            .padding(horizontal = 12.dp, vertical = 14.dp),
         text = option.getTitle(),
         style = MaterialTheme.typography.labelMedium,
         color = textColor

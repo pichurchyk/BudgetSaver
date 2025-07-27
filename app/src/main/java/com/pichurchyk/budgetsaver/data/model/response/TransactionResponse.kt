@@ -18,7 +18,7 @@ data class TransactionResponse(
     val dateTimeZone: String,
 
     @SerialName("main_category")
-    val mainCategory: MainCategoryResponse,
+    val mainCategory: MainCategoryResponse?,
 
     @SerialName("sub_category")
     val subCategory: List<String>? = null

@@ -12,6 +12,6 @@ data class Transaction(
     val notes: String,
     val date: TransactionDate,
 
-    val mainCategory: TransactionCategory,
+    val mainCategory: TransactionCategory?,
     val subCategory: List<TransactionSubCategory> = emptyList()
 )

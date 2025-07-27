@@ -7,7 +7,7 @@ import java.math.BigInteger
 
 data class TransactionsWithFilters(
     val transactions: TransactionsByCurrency,
-    val selectedCategories: List<TransactionCategory>,
+    val selectedCategories: List<TransactionCategory?>,
     val selectedTransactionType: List<TransactionType>
 ) {
     val filteredTransactionsWithCurrency: TransactionsByCurrency

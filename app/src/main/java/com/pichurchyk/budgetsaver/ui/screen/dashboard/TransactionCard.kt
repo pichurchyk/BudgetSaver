@@ -50,7 +50,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
-import com.pichurchyk.budgetsaver.ui.common.TransactionCategoryChip
+import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getColorBasedOnValue
 import com.pichurchyk.budgetsaver.ui.ext.getTransactionDefaultTitle
@@ -177,12 +177,14 @@ private fun ExpandedCard(
                 style = MaterialTheme.typography.titleMedium
             )
 
-            TransactionCategoryChip(
-                modifier = Modifier.padding(top = 10.dp),
-                category = transaction.mainCategory,
-                isSelected = false,
-                onItemClick = {}
-            )
+            transaction.mainCategory?.let {
+                TransactionCategoryChip(
+                    modifier = Modifier.padding(top = 10.dp),
+                    category = it,
+                    isSelected = false,
+                    onItemClick = {}
+                )
+            }
 
             if (transaction.notes.isNotEmpty()) {
                 Column {
@@ -220,7 +222,7 @@ private fun CollapsedCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = transaction.mainCategory.emoji,
+            text = transaction.mainCategory?.emoji ?: "❓",
             style = MaterialTheme.typography.headlineMedium,
             fontSize = titleTextSize.sp
         )

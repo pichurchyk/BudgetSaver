@@ -28,7 +28,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
-import com.pichurchyk.budgetsaver.ui.common.TransactionCategoryChip
+import com.pichurchyk.budgetsaver.ui.common.category.EmptyTransactionCategoryChip
+import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
@@ -37,9 +38,9 @@ import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 @Composable
 fun CategoriesFilter(
     modifier: Modifier = Modifier,
-    allCategories: List<TransactionCategory>,
-    selectedItems: List<TransactionCategory>,
-    onItemClick: (TransactionCategory) -> Unit,
+    allCategories: List<TransactionCategory?>,
+    selectedItems: List<TransactionCategory?>,
+    onItemClick: (TransactionCategory?) -> Unit,
     onSelectAllClick: () -> Unit
 ) {
     val (selectedCategories, unselectedCategories) = remember(allCategories, selectedItems) {
@@ -55,7 +56,9 @@ fun CategoriesFilter(
         )
 
         LazyRow(
-            modifier = Modifier.padding(top = 4.dp).height(66.dp),
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .height(66.dp),
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
 
@@ -73,7 +76,8 @@ fun CategoriesFilter(
             if (selectedCategories.isNotEmpty()) {
                 item(key = "selected_block") {
                     Column(
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier
+                            .padding(end = 8.dp)
                             .animateItem()
                     ) {
                         Text(
@@ -87,8 +91,15 @@ fun CategoriesFilter(
                         Box(
                             modifier = Modifier
                                 .animateContentSize(animationSpec = tween(durationMillis = 300))
-                                .background(MaterialTheme.colorScheme.primary.copy(0.05f), RoundedCornerShape(16.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(0.4f), RoundedCornerShape(16.dp))
+                                .background(
+                                    MaterialTheme.colorScheme.primary.copy(0.05f),
+                                    RoundedCornerShape(16.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary.copy(0.4f),
+                                    RoundedCornerShape(16.dp)
+                                )
                                 .padding(8.dp)
                         ) {
                             FlowRow(
@@ -96,12 +107,20 @@ fun CategoriesFilter(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 selectedCategories.forEach { category ->
-                                    TransactionCategoryChip(
-                                        modifier = Modifier,
-                                        category = category,
-                                        isSelected = true,
-                                        onItemClick = onItemClick
-                                    )
+                                    if (category != null) {
+                                        TransactionCategoryChip(
+                                            modifier = Modifier,
+                                            category = category,
+                                            isSelected = true,
+                                            onItemClick = onItemClick
+                                        )
+                                    } else {
+                                        EmptyTransactionCategoryChip(
+                                            modifier = Modifier,
+                                            isSelected = true,
+                                            onItemClick = { onItemClick(null) }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -111,22 +130,27 @@ fun CategoriesFilter(
 
             items(
                 unselectedCategories,
-                key = { it.title } // Stable key is crucial for animations
+                key = { it?.title ?: "" }
             ) { category ->
-                // By applying padding to each item, the space animates with the item itself.
                 Box(
                     modifier = Modifier
-                        .padding(end = 8.dp) // Use padding instead of arrangement
-                        // animateItem() is the modern API, called on the item's scope.
-                        // Compose handles the placement animation by default.
+                        .padding(end = 8.dp)
                         .animateItem()
                 ) {
-                    TransactionCategoryChip(
-                        modifier = Modifier.padding(top = 26.dp),
-                        category = category,
-                        isSelected = false,
-                        onItemClick = onItemClick
-                    )
+                    if (category != null) {
+                        TransactionCategoryChip(
+                            modifier = Modifier.padding(top = 26.dp),
+                            category = category,
+                            isSelected = false,
+                            onItemClick = onItemClick
+                        )
+                    } else {
+                        EmptyTransactionCategoryChip(
+                            modifier = Modifier.padding(top = 26.dp),
+                            isSelected = false,
+                            onItemClick = { onItemClick(null) }
+                        )
+                    }
                 }
             }
         }
@@ -177,7 +201,9 @@ private fun PreviewCategoriesFilter() {
     )
 
     AppTheme {
-        Box(Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
+        Box(Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .padding(vertical = 16.dp)) {
             CategoriesFilter(
                 allCategories = categories,
                 selectedItems = categories.take(2), // Preview with 2 items selected

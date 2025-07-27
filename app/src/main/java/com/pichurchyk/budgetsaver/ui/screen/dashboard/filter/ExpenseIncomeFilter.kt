@@ -2,6 +2,7 @@ package com.pichurchyk.budgetsaver.ui.screen.dashboard.filter
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -70,25 +72,23 @@ fun ExpenseIncomeFilter(
                         .padding(2.dp)
                         .background(bgColor, RoundedCornerShape(100))
                         .border(1.dp, textColor.copy(0.6f), RoundedCornerShape(100))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                        .doOnClick(onSelectAllClick),
+                        .clip(RoundedCornerShape(100))
+                        .clickable { onSelectAllClick() }
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                     text = stringResource(R.string.all),
                     style = MaterialTheme.typography.labelSmall,
                     color = textColor
                 )
             }
 
-            // Individual items
             items(allItems) { filterItem ->
                 val isSelected = selectedItems.contains(filterItem)
 
                 TransactionTypeChip(
-                    modifier = Modifier
-                        .doOnClick {
-                            onItemClick(filterItem)
-                        },
+                    modifier = Modifier,
                     isSelected = isSelected,
-                    value = filterItem
+                    value = filterItem,
+                    onClick = { onItemClick(filterItem) }
                 )
             }
         }
