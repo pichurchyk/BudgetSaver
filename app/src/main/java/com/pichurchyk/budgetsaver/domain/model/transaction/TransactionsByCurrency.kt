@@ -6,7 +6,7 @@ data class TransactionsByCurrency(
     val transactions: List<Transaction>,
     val currencyCode: String
 ) {
-    val allCategories: List<TransactionCategory>
+    val allCategories: List<TransactionCategory?>
         get() = transactions.map { it.mainCategory }.distinct()
 
     val totalIncomes: Money

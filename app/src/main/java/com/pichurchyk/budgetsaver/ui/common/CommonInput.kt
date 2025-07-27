@@ -19,6 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
+import com.pichurchyk.budgetsaver.ui.theme.disableGrey
+import com.pichurchyk.budgetsaver.ui.theme.red
 
 @Composable
 fun CommonInput(
@@ -62,6 +64,7 @@ fun CommonInput(
                 .clip(RoundedCornerShape(12.dp))
                 .padding(2.dp),
             value = value ?: "",
+            shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.primary.copy(0.05f),
                 focusedContainerColor = MaterialTheme.colorScheme.primary.copy(0.05f),
@@ -71,7 +74,9 @@ fun CommonInput(
                 unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(0.4f),
                 errorTextColor = MaterialTheme.colorScheme.onErrorContainer,
                 errorContainerColor = MaterialTheme.colorScheme.errorContainer,
-                errorIndicatorColor = MaterialTheme.colorScheme.errorContainer
+                errorIndicatorColor = MaterialTheme.colorScheme.errorContainer,
+                disabledContainerColor = disableGrey.copy(0.1f),
+                disabledPlaceholderColor = disableGrey,
             ),
             enabled = enabled,
             isError = error,
@@ -80,7 +85,6 @@ fun CommonInput(
             placeholder = {
                 placeholder?.let {
                     Text(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f),
                         text = it,
                         style = MaterialTheme.typography.labelSmall
                     )
@@ -93,14 +97,14 @@ fun CommonInput(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 private fun Preview() {
     AppTheme {
         CommonInput(
             modifier = Modifier,
             value = null,
             enabled = false,
-            error = true,
+            error = false,
             placeholder = "Placeholder",
             headline = "Headline"
         ) { }

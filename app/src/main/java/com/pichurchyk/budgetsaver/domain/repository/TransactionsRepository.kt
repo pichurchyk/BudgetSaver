@@ -13,6 +13,8 @@ internal interface TransactionsRepository {
 
     suspend fun getTransaction(transactionId: String): Transaction
 
+    suspend fun deleteCategory(categoryId: String)
+
     suspend fun getRelativeTransaction(transactionId: String, direction: RelativeTransactionType): Transaction
 
     suspend fun getCategories(): Flow<List<TransactionCategory>>

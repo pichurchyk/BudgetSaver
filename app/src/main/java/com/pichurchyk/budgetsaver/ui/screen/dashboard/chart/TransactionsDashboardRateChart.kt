@@ -41,7 +41,7 @@ fun TransactionsDashboardRateChart(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     var categoriesPercentage by remember {
-        mutableStateOf<List<Pair<TransactionCategory, Double>>>(emptyList())
+        mutableStateOf<List<Pair<TransactionCategory?, Double>>>(emptyList())
     }
 
     var isDataEmpty by remember { mutableStateOf(false) }

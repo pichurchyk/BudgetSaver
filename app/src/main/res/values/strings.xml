@@ -30,10 +30,10 @@
     <string name="back">Back</string>
     <string name="fill_require_fields">Fill all required fields</string>
     <string name="dismiss">Dismiss</string>
-    <string name="error_network_issue">Connection probles occured</string>
+    <string name="error_network_issue">Connection problems occurred</string>
     <string name="error_unauthorized">Unauthorized</string>
     <string name="error_bad_request">Bad request</string>
-    <string name="error_server_issue">Server error occured</string>
+    <string name="error_server_issue">Server error occurred</string>
     <string name="error_data_format">Error parsing data</string>
     <string name="billion_symbol">B</string>
     <string name="million_symbol">M</string>
@@ -54,4 +54,6 @@
     <string name="light">🌞 Light</string>
     <string name="system">🌓 System</string>
     <string name="theme">Theme</string>
+    <string name="long_click_on_items_to_delete">Tap and hold on items you want to delete</string>
+    <string name="no_category">No Category</string>
 </resources>

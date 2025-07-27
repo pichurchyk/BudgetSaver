@@ -93,7 +93,6 @@ class EditTransactionViewModel(
         _viewState.update { currentViewState ->
             currentViewState.copy(
                 transaction = currentViewState.transaction.copy(mainCategory = category),
-                validationError = currentViewState.validationError.filterNot { it == EditTransactionValidationError.EMPTY_CATEGORY }
             )
         }
     }
@@ -258,10 +257,6 @@ class EditTransactionViewModel(
         val parsedValue = transaction.value.toDoubleOrNull()
         if (parsedValue == null || parsedValue <= 0.0) {
             errors.add(EditTransactionValidationError.EMPTY_AMOUNT)
-        }
-
-        if (transaction.mainCategory == null) {
-            errors.add(EditTransactionValidationError.EMPTY_CATEGORY)
         }
 
         return errors

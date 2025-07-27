@@ -31,7 +31,7 @@ fun TransactionResponse.toDomain(): Transaction {
             Instant.fromEpochMilliseconds(this.dateMillis),
             TimeZone.of(this.dateTimeZone)
         ),
-        mainCategory = this.mainCategory.toDomain(),
+        mainCategory = this.mainCategory?.toDomain(),
         subCategory = emptyList(),
     )
 }

@@ -69,6 +69,7 @@ import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
+import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionIntent
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionAction
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionIntent
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionUiStatus
@@ -325,14 +326,14 @@ private fun Content(
                         TransactionTypeChip(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(40.dp)
-                                .doOnClick {
-                                    if (!isLoading) {
-                                        callViewModel.invoke(EditTransactionIntent.ChangeType(type))
-                                    }
-                                },
+                                .height(40.dp),
                             isSelected = isSelected,
-                            value = type
+                            value = type,
+                            onClick = {
+                                if (!isLoading) {
+                                    callViewModel.invoke(EditTransactionIntent.ChangeType(type))
+                                }
+                            }
                         )
                     }
                 }
@@ -381,7 +382,6 @@ private fun Content(
                             .clickable(enabled = !isLoading) {
                                 modalBottomSheetState = BottomSheetState.CATEGORY
                             },
-                        error = viewState.validationError.contains(EditTransactionValidationError.EMPTY_CATEGORY),
                         value = transactionData.mainCategory
                     )
                 }

@@ -147,7 +147,17 @@ val supabaseModule = module {
                         }
 
                         is ServerResponseException -> {
-                            throw DomainException.ServerErrorException(cause = exception)
+                            val response = exception.response
+                            val errorBody = try {
+                                response.body<ApiErrorResponse>()
+                            } catch (e: Exception) {
+                                null
+                            }
+
+                            throw DomainException.ServerErrorException(
+                                cause = exception,
+                                apiErrorMessage = errorBody?.message
+                            )
                         }
 
                         is RedirectResponseException -> {

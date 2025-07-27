@@ -9,5 +9,9 @@ import java.math.BigInteger
 fun Transaction.getTransactionDefaultTitle(): String {
     val transactionType = if (this.value.amountMinor > BigInteger("0")) TransactionType.INCOMES else TransactionType.EXPENSES
 
-    return "${transactionType.getTitle()} (${this.mainCategory.title})"
+    val categoryTitle = mainCategory?.title
+
+    return categoryTitle?.let {
+        "${transactionType.getTitle()} ($it)"
+    } ?: transactionType.getTitle()
 }

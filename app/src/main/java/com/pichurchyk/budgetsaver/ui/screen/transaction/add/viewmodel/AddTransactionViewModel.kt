@@ -57,7 +57,6 @@ class AddTransactionViewModel(
         _viewState.update { currentViewState ->
             currentViewState.copy(
                 transaction = currentViewState.transaction.copy(mainCategory = category),
-                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_CATEGORY }
             )
         }
     }
@@ -182,10 +181,6 @@ class AddTransactionViewModel(
         val parsedValue = transaction.value.toDoubleOrNull()
         if (parsedValue == null || parsedValue <= 0.0) {
             errors.add(AddTransactionValidationError.EMPTY_AMOUNT)
-        }
-
-        if (transaction.mainCategory == null) {
-            errors.add(AddTransactionValidationError.EMPTY_CATEGORY)
         }
 
         return errors

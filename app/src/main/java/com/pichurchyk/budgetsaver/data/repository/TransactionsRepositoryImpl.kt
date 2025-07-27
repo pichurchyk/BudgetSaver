@@ -35,6 +35,8 @@ internal class TransactionsRepositoryImpl(
     override suspend fun getTransaction(transactionId: String): Transaction =
         transactionsDataSource.getTransaction(transactionId).toDomain()
 
+    override suspend fun deleteCategory(categoryId: String) = transactionsDataSource.deleteCategory(categoryId)
+
     override suspend fun getRelativeTransaction(
         transactionId: String,
         direction: RelativeTransactionType
