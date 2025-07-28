@@ -86,7 +86,8 @@ private fun Content(
             },
             onDeleteChipClick = {
                 callViewModel.invoke(ProfileIntent.DeleteCategory(it.uuid))
-            }
+            },
+            onAddCategoryClick = {}
         )
     }
 }

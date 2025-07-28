@@ -26,7 +26,8 @@ fun CommonButton(
     onClick: () -> Unit,
 ) {
     Button(
-        modifier = modifier.clip(RoundedCornerShape(100.dp)),
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier.clip(RoundedCornerShape(12.dp)),
         onClick = onClick,
         colors = colors
     ) {

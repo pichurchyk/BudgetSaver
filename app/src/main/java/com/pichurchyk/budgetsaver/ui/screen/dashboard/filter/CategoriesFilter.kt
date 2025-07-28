@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.category.EmptyTransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
@@ -192,21 +193,13 @@ private fun SelectAllChip(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewCategoriesFilter() {
-    val categories = listOf(
-        TransactionCategory("Food", "🍔", "#FF7043"),
-        TransactionCategory("Transport", "🚌", "#42A5F5"),
-        TransactionCategory("Health", "❤️", "#EC407A"),
-        TransactionCategory("Gifts", "🎁", "#66BB6A"),
-        TransactionCategory("Entertainment", "🎮", "#AB47BC"),
-    )
-
     AppTheme {
         Box(Modifier
             .background(MaterialTheme.colorScheme.background)
             .padding(vertical = 16.dp)) {
             CategoriesFilter(
-                allCategories = categories,
-                selectedItems = categories.take(2), // Preview with 2 items selected
+                allCategories = PreviewMocks.categories,
+                selectedItems = PreviewMocks.categories.take(2),
                 onItemClick = {},
                 onSelectAllClick = {}
             )
