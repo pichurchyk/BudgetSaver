@@ -51,6 +51,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategor
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.chart.TransactionsDashboardLineChart
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.ExpenseIncomeFilter
@@ -355,98 +356,20 @@ private fun ListTransactionItem(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 private fun Preview() {
     AppTheme {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Content(
-                viewState = DashboardViewState.Loaded(
-                    listOf(
-                        TransactionsWithFilters(
-                            transactions =
-                                TransactionsByCurrency(
-                                    transactions = listOf(
-                                        Transaction(
-                                            uuid = "",
-                                            title = "Bus ticket",
-                                            value = Money(
-                                                amountMinor = BigInteger("0"),
-                                                currency = "USD"
-                                            ),
-                                            notes = "Grocery shopping at local market",
-                                            date = TransactionDate(
-                                                dateInstant = Instant.fromEpochMilliseconds(
-                                                    1748198228000
-                                                ),
-                                                timeZone = TimeZone.UTC
-                                            ),
-                                            mainCategory = TransactionCategory(
-                                                title = "Food",
-                                                emoji = "🍎",
-                                                color = "#FF00FF",
-                                                uuid = "123"
-                                            ),
-                                            subCategory = listOf(
-                                                TransactionSubCategory(
-                                                    title = "Groceries",
-                                                    color = "#FF00F0"
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    currencyCode = "USD"
-                                ),
-                            listOf(),
-                            listOf()
-                        ),
-                        TransactionsWithFilters(
-                            transactions =
-                                TransactionsByCurrency(
-                                    transactions = listOf(
-                                        Transaction(
-                                            uuid = "",
-                                            title = "Bus ticket",
-                                            value = Money(
-                                                amountMinor = BigInteger("0"),
-                                                currency = "BYN"
-                                            ),
-                                            notes = "Grocery shopping at local market",
-                                            date = TransactionDate(
-                                                dateInstant = Instant.fromEpochMilliseconds(
-                                                    1748198228000
-                                                ),
-                                                timeZone = TimeZone.UTC
-                                            ),
-                                            mainCategory = TransactionCategory(
-                                                title = "Food",
-                                                emoji = "🍎",
-                                                color = "#FF00DS",
-                                                uuid = "123"
-                                            ),
-                                            subCategory = listOf(
-                                                TransactionSubCategory(
-                                                    title = "Groceries",
-                                                    color = "#FF00F0"
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    currencyCode = "BYN"
-                                ),
-                            listOf(),
-                            listOf()
-                        )
-                    ),
-                    selectedCurrency = "USD",
+        Content(
+            viewState = DashboardViewState.Loaded(
+                listOf(
+                    PreviewMocks.transactionWithFilters,
+                    PreviewMocks.transactionWithFilters
                 ),
-                callViewModel = {},
-                onAddTransactionClick = {},
-                onEditTransactionClick = { _ -> }
-            )
-        }
+                selectedCurrency = "USD",
+            ),
+            callViewModel = {},
+            onAddTransactionClick = {},
+            onEditTransactionClick = { _ -> }
+        )
     }
 }

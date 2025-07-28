@@ -50,6 +50,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getColorBasedOnValue
@@ -287,33 +288,7 @@ private fun Preview() {
         TransactionCard(
             modifier = Modifier,
             onEditClick = {},
-            transaction = Transaction(
-                uuid = "",
-                title = "Bus ticket",
-                value = Money(
-                    amountMinor = BigInteger("0"),
-                    currency = "USD"
-                ),
-                notes = "Grocery shopping at local market",
-                date = TransactionDate(
-                    dateInstant = Instant.fromEpochMilliseconds(
-                        1748198228000
-                    ),
-                    timeZone = TimeZone.UTC
-                ),
-                mainCategory = TransactionCategory(
-                    title = "Food",
-                    emoji = "🍎",
-                    color = "#C5C22B",
-                    uuid = "123"
-                ),
-                subCategory = listOf(
-                    TransactionSubCategory(
-                        title = "Groceries",
-                        color = "#F5C26B"
-                    )
-                )
-            )
+            transaction = PreviewMocks.transaction
         )
     }
 }

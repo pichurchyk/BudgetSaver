@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.ext.toMajorWithCurrency
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.green
@@ -82,25 +83,13 @@ fun DashboardTotal(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 private fun Preview() {
     AppTheme {
-        Box(
-            Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .width(800.dp)
-        ) {
-            DashboardTotal(
-                modifier = Modifier.fillMaxWidth(),
-                totalExpenses = Money(
-                    BigInteger("132123123"),
-                    "USD"
-                ),
-                totalIncomes = Money(
-                    BigInteger("32132131"),
-                    "USD"
-                ),
-            )
-        }
+        DashboardTotal(
+            modifier = Modifier.fillMaxWidth(),
+            totalExpenses = PreviewMocks.money,
+            totalIncomes = PreviewMocks.money,
+        )
     }
 }

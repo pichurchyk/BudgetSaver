@@ -15,6 +15,7 @@
     <string name="recent_transactions">Recent transactions</string>
     <string name="expenses_by_category">Expenses by category</string>
     <string name="add_transaction">Add transaction</string>
+    <string name="add_category">Add category</string>
 
     <string name="error_occurred">Error occurred</string>
     <string name="error_while_loading_occurred">Error occurred while loading</string>

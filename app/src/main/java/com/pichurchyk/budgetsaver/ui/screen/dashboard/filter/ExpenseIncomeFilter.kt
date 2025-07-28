@@ -95,12 +95,10 @@ fun ExpenseIncomeFilter(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun Preview() {
     AppTheme {
-        Box(Modifier.background(MaterialTheme.colorScheme.background)) {
-            ExpenseIncomeFilter(modifier = Modifier, listOf(TransactionType.EXPENSES), {}, {})
-        }
+        ExpenseIncomeFilter(modifier = Modifier, listOf(TransactionType.EXPENSES), {}, {})
     }
 }
