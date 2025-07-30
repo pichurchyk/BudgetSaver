@@ -1,6 +1,7 @@
 package com.pichurchyk.budgetsaver.data.datasource
 
 import android.util.Log
+import com.pichurchyk.budgetsaver.data.model.response.user.UserResponse
 import com.pichurchyk.budgetsaver.data.preferences.AuthPreferencesActions
 import com.pichurchyk.budgetsaver.domain.model.SignInResult
 import io.github.jan.supabase.SupabaseClient
@@ -8,26 +9,25 @@ import io.github.jan.supabase.gotrue.SessionStatus
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Google
 import io.github.jan.supabase.gotrue.providers.builtin.IDToken
-import io.github.jan.supabase.gotrue.user.UserInfo
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.resources.get
+import io.ktor.resources.Resource
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.Serializable
 
 internal class AuthDataSource(
     private val supabaseClient: SupabaseClient,
-    private val preferences: AuthPreferencesActions
+    private val preferences: AuthPreferencesActions,
+    private val httpClient: HttpClient,
 ) {
-    fun getSignedInUser(): Flow<UserInfo?> = callbackFlow {
-        try {
-            trySend(supabaseClient.auth.currentUserOrNull())
-
-            close()
-
-            awaitClose()
-        } catch (e: Exception) {
-            Log.e(TAG, e.message ?: "Error occurred")
-        }
+    suspend fun getUser(): UserResponse? {
+        return httpClient
+            .get(User())
+            .body<UserResponse>()
     }
 
     fun signIn(googleIdToken: String): Flow<SignInResult> = callbackFlow {
@@ -91,3 +91,7 @@ internal class AuthDataSource(
         private const val TAG = "AuthDataSource"
     }
 }
+
+@Serializable
+@Resource("/functions/v1/user")
+private class User()

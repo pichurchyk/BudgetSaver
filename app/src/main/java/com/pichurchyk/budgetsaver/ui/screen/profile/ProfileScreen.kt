@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import com.pichurchyk.budgetsaver.ui.screen.currency.FavoriteCurrenciesSelector
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileCategoriesViewState
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileIntent
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileUserViewState
@@ -88,6 +89,10 @@ private fun Content(
                 callViewModel.invoke(ProfileIntent.DeleteCategory(it.uuid))
             },
             onAddCategoryClick = {}
+        )
+
+        FavoriteCurrenciesSelector(
+            modifier = Modifier
         )
     }
 }

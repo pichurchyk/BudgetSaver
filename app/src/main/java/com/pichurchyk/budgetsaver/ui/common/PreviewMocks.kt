@@ -6,10 +6,13 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
+import com.pichurchyk.budgetsaver.domain.model.user.User
+import com.pichurchyk.budgetsaver.domain.model.user.UserPreferences
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.TransactionsWithFilters
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigInteger
+import java.util.Currency
 
 object PreviewMocks {
 
@@ -43,26 +46,38 @@ object PreviewMocks {
             currency = "BYN"
         ),
         notes = "Grocery shopping at local market",
-        date = PreviewMocks.transactionDate,
-        mainCategory = PreviewMocks.category,
+        date = transactionDate,
+        mainCategory = category,
         subCategory = listOf(
-            PreviewMocks.transactionSuCategory
+            transactionSuCategory
         )
     )
 
     val transactionByCurrency = TransactionsByCurrency(
-        transactions = listOf(PreviewMocks.transaction),
+        transactions = listOf(transaction),
         currencyCode = "BYN"
     )
 
     val transactionWithFilters = TransactionsWithFilters(
-        transactions = PreviewMocks.transactionByCurrency,
+        transactions = transactionByCurrency,
         selectedCategories = listOf(),
         selectedTransactionType = listOf()
     )
 
     val money = Money(
-        BigInteger("132123123"),
-        "USD"
+        amountMinor = BigInteger("132123123"),
+         currency = "USD"
+    )
+
+    val userPreferences = UserPreferences(
+        favoriteCurrencies = listOf(Currency.getInstance("USD"))
+    )
+
+    val user = User(
+        id = "0",
+        name = "Uladzislau Pichurchyk",
+        avatarUrl = "",
+        email = "pichurchyk@gmail.com",
+        preferences = userPreferences
     )
 }

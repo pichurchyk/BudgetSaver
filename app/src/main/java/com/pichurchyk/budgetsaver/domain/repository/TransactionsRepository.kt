@@ -6,6 +6,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import kotlinx.coroutines.flow.Flow
+import java.util.Currency
 
 internal interface TransactionsRepository {
 
@@ -24,5 +25,9 @@ internal interface TransactionsRepository {
     suspend fun editTransaction(transactionId: String, transaction: TransactionCreation)
 
     suspend fun deleteTransaction(transactionId: String)
+
+    suspend fun addFavoriteCurrency(currency: Currency)
+
+    suspend fun deleteFavoriteCurrency(currency: Currency)
 
 }

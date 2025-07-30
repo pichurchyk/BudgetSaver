@@ -57,4 +57,10 @@
     <string name="theme">Theme</string>
     <string name="long_click_on_items_to_delete">Tap and hold on items you want to delete</string>
     <string name="no_category">No Category</string>
+    <string name="primary_currency">Favorite currencies</string>
+    <string name="info">Info</string>
+    <string name="primary_currency_description">Favorite currencies will appear in all lists first. Transactions with favorite currencies will be shown before the others</string>
+    <string name="currencies">Currencies</string>
+    <string name="you_have_no_categories">You have no categories</string>
+    <string name="nothing_found">Nothing found</string>
 </resources>
