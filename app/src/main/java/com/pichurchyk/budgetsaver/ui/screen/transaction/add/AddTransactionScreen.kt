@@ -61,7 +61,7 @@ import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
 import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.CategorySelector
-import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencyButton
+import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionIntent
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionUiStatus
@@ -323,6 +323,7 @@ private fun Content(
                     CurrencyButton(
                         modifier = Modifier
                             .weight(1f)
+                            .height(46.dp)
                             .padding(bottom = 2.dp)
                             .clickable {
                                 if (!isLoading) {

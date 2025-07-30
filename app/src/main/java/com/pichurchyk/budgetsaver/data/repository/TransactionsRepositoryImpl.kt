@@ -12,6 +12,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrenc
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.Currency
 
 internal class TransactionsRepositoryImpl(
     private val transactionsDataSource: TransactionsDataSource
@@ -59,5 +60,9 @@ internal class TransactionsRepositoryImpl(
 
     override suspend fun deleteTransaction(transactionId: String): Unit =
         transactionsDataSource.deleteTransaction(transactionId = transactionId)
+
+    override suspend fun addFavoriteCurrency(currency: Currency) = transactionsDataSource.addFavoriteCurrency(currency)
+
+    override suspend fun deleteFavoriteCurrency(currency: Currency) = transactionsDataSource.removeFavoriteCurrency(currency)
 
 }

@@ -1,7 +1,6 @@
 package com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
-import com.pichurchyk.budgetsaver.domain.model.User
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
 
 sealed class ProfileCategoriesUiStatus {

@@ -45,8 +45,7 @@ fun ProfileCategories(
         modifier = modifier
     ) {
         Text(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
             text = stringResource(R.string.categories),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
@@ -55,15 +54,17 @@ fun ProfileCategories(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CommonInput(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                placeholder = stringResource(R.string.search),
-                enabled = viewState.status !is ProfileCategoriesUiStatus.Error,
-                value = viewState.search
-            ) {
-                onSearchValueChanged(it)
+            if (viewState.categories.isNotEmpty()) {
+                CommonInput(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    placeholder = stringResource(R.string.search),
+                    enabled = viewState.status !is ProfileCategoriesUiStatus.Error,
+                    value = viewState.search
+                ) {
+                    onSearchValueChanged(it)
+                }
             }
 
             CategoriesGrid(
@@ -89,6 +90,7 @@ private fun CategoriesGrid(
     }
 
     val rows = when {
+        itemCount == 0 -> 0
         itemCount <= 8 -> 1
         itemCount <= 16 -> 2
         itemCount <= 32 -> 3
@@ -103,52 +105,73 @@ private fun CategoriesGrid(
     Column(
         modifier = Modifier
             .padding(top = 20.dp)
+            .fillMaxWidth()
     ) {
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
-            text = "*${stringResource(R.string.long_click_on_items_to_delete)}",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onBackground
-        )
 
-        LazyHorizontalStaggeredGrid(
-            rows = StaggeredGridCells.Fixed(rows),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(gridHeight),
-            horizontalItemSpacing = 4.dp,
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
-            ),
-            userScrollEnabled = viewState.status !is ProfileCategoriesUiStatus.Loading
-        ) {
-            when (viewState.status) {
-                is ProfileCategoriesUiStatus.Idle, is ProfileCategoriesUiStatus.Error -> {
-                    items(viewState.filteredCategories) { item ->
-                        Box {
-                            TransactionCategoryChip(
-                                modifier = Modifier,
-                                category = item,
-                                isSelected = false,
-                                onItemClick = { onChipClicked(it) },
-                                onItemLongClick = { onDeleteChipClick(it) }
-                            )
+        if (viewState.categories.isEmpty() && viewState.status == ProfileCategoriesUiStatus.Idle) {
+            NoCategories(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp)
+            )
+        }
+
+        if (viewState.filteredCategories.isEmpty() && viewState.status == ProfileCategoriesUiStatus.Idle && viewState.search.isNotEmpty()) {
+            NothingFound(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp)
+            )
+        }
+
+        if (rows != 0) {
+            if (viewState.status != ProfileCategoriesUiStatus.Loading) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+                    text = "*${stringResource(R.string.long_click_on_items_to_delete)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            LazyHorizontalStaggeredGrid(
+                rows = StaggeredGridCells.Fixed(rows),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(gridHeight),
+                horizontalItemSpacing = 4.dp,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                ),
+                userScrollEnabled = viewState.status !is ProfileCategoriesUiStatus.Loading
+            ) {
+                when (viewState.status) {
+                    is ProfileCategoriesUiStatus.Idle, is ProfileCategoriesUiStatus.Error -> {
+                        items(viewState.filteredCategories) { item ->
+                            Box {
+                                TransactionCategoryChip(
+                                    modifier = Modifier,
+                                    category = item,
+                                    isSelected = false,
+                                    onItemClick = { onChipClicked(it) },
+                                    onItemLongClick = { onDeleteChipClick(it) })
+                            }
                         }
                     }
-                }
 
-                is ProfileCategoriesUiStatus.Loading -> {
-                    items(30) { index ->
-                        Box {
-                            TransactionCategoryChipPlaceHolder(
-                                Modifier.shimmerBackground(
-                                    RoundedCornerShape(100)
+                    is ProfileCategoriesUiStatus.Loading -> {
+                        items(30) { index ->
+                            Box {
+                                TransactionCategoryChipPlaceHolder(
+                                    Modifier.shimmerBackground(
+                                        RoundedCornerShape(100)
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -182,6 +205,30 @@ private fun CategoriesGrid(
 }
 
 @Composable
+private fun NothingFound(
+    modifier: Modifier
+) {
+    Text(
+        modifier = modifier,
+        text = stringResource(R.string.nothing_found),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+}
+
+@Composable
+private fun NoCategories(
+    modifier: Modifier
+) {
+    Text(
+        modifier = modifier,
+        text = stringResource(R.string.you_have_no_categories),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+}
+
+@Composable
 @Preview(showBackground = true)
 private fun Preview() {
     AppTheme {
@@ -189,12 +236,12 @@ private fun Preview() {
             modifier = Modifier,
             viewState = ProfileCategoriesViewState(
                 status = ProfileCategoriesUiStatus.Idle,
-                categories = PreviewMocks.categories
+                categories = PreviewMocks.categories,
+                search = ""
             ),
             onChipClicked = {},
             onDeleteChipClick = {},
             onSearchValueChanged = {},
-            onAddCategoryClick = {}
-        )
+            onAddCategoryClick = {})
     }
 }

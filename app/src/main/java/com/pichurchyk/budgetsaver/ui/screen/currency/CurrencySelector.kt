@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
+import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItem
 import java.util.Currency
 
 @Composable
@@ -58,31 +59,12 @@ fun CurrencySelector(
 
             items(items = currencies) { currency ->
                 val isSelected = selectedCurrency == currency
-                val borderColor =
-                    if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
 
-                Box(
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primary.copy(0.1f)
-                                else Color.Transparent,
-                                RoundedCornerShape(8.dp)
-                            )
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable {
-                                onValueSelected(currency)
-                            }
-                            .padding(10.dp),
-                        textAlign = TextAlign.Center,
-                        text = currency.currencyCode,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                CurrencyItem(
+                    isSelected = isSelected,
+                    currency = currency,
+                    onClick = onValueSelected
+                )
             }
         }
     }

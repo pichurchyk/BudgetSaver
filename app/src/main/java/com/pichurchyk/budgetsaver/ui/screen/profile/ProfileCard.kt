@@ -18,12 +18,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pichurchyk.budgetsaver.R
+import com.pichurchyk.budgetsaver.domain.model.user.User
 import com.pichurchyk.budgetsaver.ui.common.Loader
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
+import com.pichurchyk.budgetsaver.ui.ext.shimmerBackground
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileUserUiStatus
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileUserViewState
+import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 
 @Composable
 fun ProfileCard(
@@ -68,9 +73,8 @@ fun ProfileCard(
             }
 
             is ProfileUserUiStatus.Loading -> {
-                Loader(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onBackground
+                ProfileCardLoader(
+                    modifier = Modifier
                 )
             }
 
@@ -80,5 +84,18 @@ fun ProfileCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun Preview() {
+    AppTheme {
+        ProfileCard(
+            viewState = ProfileUserViewState(
+                status = ProfileUserUiStatus.Idle,
+                userData = PreviewMocks.user
+            ),
+        )
     }
 }

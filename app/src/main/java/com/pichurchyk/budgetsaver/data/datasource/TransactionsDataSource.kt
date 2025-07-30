@@ -15,6 +15,8 @@ import io.ktor.resources.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
+import java.util.Currency
+import kotlin.collections.mapOf
 
 internal class TransactionsDataSource(
     private val httpClient: HttpClient,
@@ -85,6 +87,18 @@ internal class TransactionsDataSource(
         }.body<Unit>()
     }
 
+    suspend fun addFavoriteCurrency(currency: Currency) {
+        httpClient.post(AddFavoriteCurrency()) {
+            parameter("currency", currency.currencyCode)
+        }.body<Unit>()
+    }
+
+    suspend fun removeFavoriteCurrency(currency: Currency) {
+        httpClient.delete(RemoveFavoriteCurrency()) {
+            parameter("currency", currency.currencyCode)
+        }.body<Unit>()
+    }
+
     companion object {
         private const val TAG = "AuthDataSource"
     }
@@ -109,3 +123,11 @@ private class Category()
 @Serializable
 @Resource("/rest/v1/Transaction")
 private class Transaction()
+
+@Serializable
+@Resource("/functions/v1/add-favorite-currency")
+private class AddFavoriteCurrency()
+
+@Serializable
+@Resource("/functions/v1/remove-favorite-currency")
+private class RemoveFavoriteCurrency()

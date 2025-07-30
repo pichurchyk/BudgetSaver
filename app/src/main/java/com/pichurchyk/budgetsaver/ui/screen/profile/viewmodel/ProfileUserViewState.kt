@@ -1,7 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
-import com.pichurchyk.budgetsaver.domain.model.User
+import com.pichurchyk.budgetsaver.domain.model.user.User
 
 sealed class ProfileUserUiStatus {
     data object Idle : ProfileUserUiStatus()
