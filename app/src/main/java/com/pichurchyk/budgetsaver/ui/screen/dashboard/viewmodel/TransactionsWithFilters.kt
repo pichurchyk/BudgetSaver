@@ -1,6 +1,6 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.math.BigInteger

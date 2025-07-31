@@ -96,7 +96,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose) // Shared navigation
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor2)
-    implementation(libs.androidx.emodji.picker)
     implementation(libs.vico.compose)
 
     // Networking (Ktor)
@@ -153,4 +152,10 @@ dependencies {
 
     // Ktor Client (Android-Specific)
     implementation(libs.ktor.client.android)
+
+    // Color picker
+    implementation(libs.compose.colorpicker)
+
+    // Emojies
+    implementation(libs.emojies)
 }

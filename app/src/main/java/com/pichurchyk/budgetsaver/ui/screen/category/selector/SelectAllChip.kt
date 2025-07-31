@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.category
+package com.pichurchyk.budgetsaver.ui.screen.category.selector
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

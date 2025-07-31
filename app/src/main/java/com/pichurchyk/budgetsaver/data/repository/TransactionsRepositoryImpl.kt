@@ -6,7 +6,7 @@ import com.pichurchyk.budgetsaver.data.ext.toDomain
 import com.pichurchyk.budgetsaver.data.ext.toPayload
 import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository

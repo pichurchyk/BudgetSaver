@@ -1,6 +1,6 @@
 package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.util.Currency
 

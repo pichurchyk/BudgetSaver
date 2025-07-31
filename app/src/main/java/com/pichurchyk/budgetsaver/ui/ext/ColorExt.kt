@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import java.util.Locale
+import kotlin.random.Random
 
 fun Color.Companion.fromHex(colorString: String): Color {
     val formatted = if (colorString.startsWith("#")) colorString else "#$colorString"
@@ -18,4 +19,13 @@ fun Color.toHex(withAlpha: Boolean = false): String {
     } else {
         String.format(Locale.US, "#%06X", 0xFFFFFF and argb)
     }
+}
+
+fun Color.Companion.random(): Color {
+    return Color(
+        red = Random.nextFloat(),
+        green = Random.nextFloat(),
+        blue = Random.nextFloat(),
+        alpha = 1f
+    )
 }

@@ -38,6 +38,7 @@ import com.pichurchyk.budgetsaver.ui.MainViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
+import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileViewModel
@@ -71,6 +72,7 @@ val mainModule = module {
     viewModelOf(::AppThemeSelectorViewModel)
     viewModelOf(::MainViewModel)
     viewModelOf(::FavoriteCurrenciesSelectorViewModel)
+    viewModelOf(::AddCategoryViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }

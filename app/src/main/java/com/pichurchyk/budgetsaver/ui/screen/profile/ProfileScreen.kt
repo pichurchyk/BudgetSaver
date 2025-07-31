@@ -9,14 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import com.pichurchyk.budgetsaver.ui.screen.category.add.AddCategory
 import com.pichurchyk.budgetsaver.ui.screen.currency.FavoriteCurrenciesSelector
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileCategoriesViewState
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileIntent
@@ -50,6 +56,11 @@ fun ProfileScreen(
     }
 }
 
+private enum class BottomSheetState {
+    NONE, CATEGORY_CREATION
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -57,6 +68,25 @@ private fun Content(
     categoriesViewState: ProfileCategoriesViewState,
     callViewModel: (ProfileIntent) -> Unit,
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
+
+    when (modalBottomSheetState) {
+        BottomSheetState.NONE -> {}
+        BottomSheetState.CATEGORY_CREATION -> {
+            ModalBottomSheet(
+                modifier = Modifier,
+                sheetState = sheetState,
+                onDismissRequest = { modalBottomSheetState = BottomSheetState.NONE },
+                content = {
+                    AddCategory(
+                        modifier = Modifier
+                    )
+                }
+            )
+        }
+    }
+
     Column(
         modifier = Modifier
             .padding(top = 16.dp)
@@ -88,7 +118,9 @@ private fun Content(
             onDeleteChipClick = {
                 callViewModel.invoke(ProfileIntent.DeleteCategory(it.uuid))
             },
-            onAddCategoryClick = {}
+            onAddCategoryClick = {
+                modalBottomSheetState = BottomSheetState.CATEGORY_CREATION
+            }
         )
 
         FavoriteCurrenciesSelector(
