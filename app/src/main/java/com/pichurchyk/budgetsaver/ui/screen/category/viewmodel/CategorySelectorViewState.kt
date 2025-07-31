@@ -1,6 +1,6 @@
 package com.pichurchyk.budgetsaver.ui.screen.category.viewmodel
 
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 
 sealed class CategorySelectorViewState {
 

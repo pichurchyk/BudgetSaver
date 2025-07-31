@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.domain.model.transaction
+package com.pichurchyk.budgetsaver.domain.model.category
 
 import kotlinx.serialization.Serializable
 

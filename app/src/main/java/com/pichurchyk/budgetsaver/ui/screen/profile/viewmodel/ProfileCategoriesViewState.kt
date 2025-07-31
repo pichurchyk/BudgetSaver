@@ -1,7 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 
 sealed class ProfileCategoriesUiStatus {
     data object Idle : ProfileCategoriesUiStatus()

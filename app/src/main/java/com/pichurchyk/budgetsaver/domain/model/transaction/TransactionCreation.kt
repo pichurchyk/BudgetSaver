@@ -1,5 +1,6 @@
 package com.pichurchyk.budgetsaver.domain.model.transaction
 
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import java.util.Currency

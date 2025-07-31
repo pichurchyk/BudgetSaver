@@ -1,7 +1,7 @@
 package com.pichurchyk.budgetsaver.data.ext.category
 
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import kotlin.random.Random
 
 fun MainCategoryResponse.toDomain() = TransactionCategory(

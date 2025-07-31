@@ -2,7 +2,7 @@ package com.pichurchyk.budgetsaver.ui.common
 
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency

@@ -27,7 +27,7 @@ import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape.Corner.Relative
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.ui.ext.toMajor
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import com.pichurchyk.budgetsaver.ui.theme.green
