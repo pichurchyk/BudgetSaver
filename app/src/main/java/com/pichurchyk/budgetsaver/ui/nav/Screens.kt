@@ -14,6 +14,9 @@ sealed class Screen {
     data object Profile: Screen()
 
     @Serializable
+    data object AddCategory: Screen()
+
+    @Serializable
     data object AddTransaction: Screen()
 
     @Serializable
@@ -26,7 +29,8 @@ sealed class Screen {
             Dashboard,
             Profile,
             AddTransaction,
-            EditTransaction("dummy") // you only need the class reference
+            EditTransaction("dummy"),
+            AddCategory,
         )
     }
 }

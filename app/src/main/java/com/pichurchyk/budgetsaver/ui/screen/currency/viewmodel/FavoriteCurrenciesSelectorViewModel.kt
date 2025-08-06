@@ -25,12 +25,14 @@ class FavoriteCurrenciesSelectorViewModel(
 
     init {
         viewModelScope.launch {
-            sessionManager.user.value?.let {
-                _viewState.update { currentState ->
-                    currentState.copy(
-                        selectedCurrencies = it.preferences.favoriteCurrencies,
-                        status = FavoriteCurrenciesSelectorUiStatus.Idle
-                    )
+            sessionManager.user.collect { user ->
+                user?.let {
+                    _viewState.update { currentState ->
+                        currentState.copy(
+                            selectedCurrencies = it.preferences.favoriteCurrencies,
+                            status = FavoriteCurrenciesSelectorUiStatus.Idle
+                        )
+                    }
                 }
             }
         }

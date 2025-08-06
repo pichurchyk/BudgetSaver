@@ -12,18 +12,34 @@ class AddCategoryViewModel : ViewModel() {
 
     fun handleIntent(intent: AddCategoryIntent) {
         when (intent) {
-            is AddCategoryIntent.ChangeColor -> {}
+            is AddCategoryIntent.ChangeColor -> {
+                changeColor(intent.value)
+            }
             is AddCategoryIntent.ChangeEmoji -> {
                 changeEmoji(intent.value)
             }
 
-            is AddCategoryIntent.ChangeTitle -> {}
+            is AddCategoryIntent.ChangeTitle -> {
+                changeTitle(intent.value)
+            }
+        }
+    }
+
+    private fun changeColor(value: String) {
+        _viewState.update { currentState ->
+            currentState.copy(model = currentState.model.copy(color = value))
         }
     }
 
     private fun changeEmoji(value: String) {
         _viewState.update { currentState ->
             currentState.copy(model = currentState.model.copy(emoji = value))
+        }
+    }
+
+    private fun changeTitle(value: String) {
+        _viewState.update { currentState ->
+            currentState.copy(model = currentState.model.copy(title = value))
         }
     }
 }

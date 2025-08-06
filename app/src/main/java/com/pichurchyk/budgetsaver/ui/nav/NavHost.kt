@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
+import com.pichurchyk.budgetsaver.ui.screen.category.add.AddCategoryScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
 import com.pichurchyk.budgetsaver.ui.screen.profile.ProfileScreen
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.EditTransactionScreen
@@ -38,7 +39,19 @@ fun NavHost(
         }
 
         composable<Screen.Profile> {
-            ProfileScreen()
+            ProfileScreen(
+                openAddCategory = {
+                    navController.navigate(Screen.AddCategory)
+                }
+            )
+        }
+
+        composable<Screen.AddCategory> {
+            AddCategoryScreen(
+                closeScreen = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable<Screen.AddTransaction> {

@@ -60,7 +60,13 @@
     <string name="primary_currency">Favorite currencies</string>
     <string name="info">Info</string>
     <string name="primary_currency_description">Favorite currencies will appear in all lists first. Transactions with favorite currencies will be shown before the others</string>
+    <string name="create_transaction_description">The icon and color of the category are designed for convenience and quick identification</string>
+    <string name="create_transaction_tip">Tip: you can use similar colors for similar categories</string>
     <string name="currencies">Currencies</string>
     <string name="you_have_no_categories">You have no categories</string>
     <string name="nothing_found">Nothing found</string>
+    <string name="select_emoji">Please, select emoji</string>
+    <string name="preview">Preview</string>
+    <string name="click_to_select_unselect">Click to select or unselect</string>
+    <string name="here_will_be_title">Here will be title</string>
 </resources>

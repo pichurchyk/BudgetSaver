@@ -155,7 +155,4 @@ dependencies {
 
     // Color picker
     implementation(libs.compose.colorpicker)
-
-    // Emojies
-    implementation(libs.emojies)
 }
