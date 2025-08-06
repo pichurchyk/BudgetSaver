@@ -1,6 +1,5 @@
 package com.pichurchyk.budgetsaver.data.datasource
 
-import android.util.Log
 import com.pichurchyk.budgetsaver.domain.model.user.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

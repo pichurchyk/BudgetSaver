@@ -51,7 +51,7 @@ class AuthViewModel(
                         }
 
                         is SignInResult.Cancelled -> {
-                            _state.update { AuthViewState.Init }
+                            checkIfUserSignedIn()
                         }
                     }
                 }
