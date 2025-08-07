@@ -7,9 +7,11 @@ import com.pichurchyk.budgetsaver.data.preferences.AuthPreferences
 import com.pichurchyk.budgetsaver.data.preferences.AuthPreferencesActions
 import com.pichurchyk.budgetsaver.data.preferences.SystemPreferences
 import com.pichurchyk.budgetsaver.data.repository.AuthRepositoryImpl
+import com.pichurchyk.budgetsaver.data.repository.EmojiRepositoryImpl
 import com.pichurchyk.budgetsaver.data.repository.SystemRepositoryImpl
 import com.pichurchyk.budgetsaver.data.repository.TransactionsRepositoryImpl
 import com.pichurchyk.budgetsaver.domain.repository.AuthRepository
+import com.pichurchyk.budgetsaver.domain.repository.EmojiRepository
 import com.pichurchyk.budgetsaver.domain.repository.SystemRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import com.pichurchyk.budgetsaver.domain.usecase.AddFavoriteCurrencyUseCase
@@ -30,8 +32,12 @@ import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCas
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.LoadEmojisUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.LoadEmojisUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
 import com.pichurchyk.budgetsaver.ui.MainViewModel
@@ -57,6 +63,7 @@ val mainModule = module {
     single<GetSignedInUserUseCase> { GetSignedInUserUseCaseImpl(get()) }
     single<SignInUseCase> { SignInUseCaseImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+    single<EmojiRepository> { EmojiRepositoryImpl(get()) }
     single { AuthDataSource(get(), get(), get()) }
 
     single<AuthPreferencesActions> { AuthPreferences(get()) }
@@ -86,4 +93,8 @@ val mainModule = module {
 
     single<AddFavoriteCurrencyUseCase> { AddFavoriteCurrencyUseCaseImpl(get(), get()) }
     single<DeleteFavoriteCurrencyUseCase> { DeleteFavoriteCurrencyUseCaseImpl(get(), get()) }
+
+
+    single<LoadEmojisUseCase> { LoadEmojisUseCaseImpl(get()) }
+    single<SearchEmojiUseCase> { SearchEmojiUseCaseImpl(get()) }
 }
