@@ -61,6 +61,7 @@ import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.fromHex
+import com.pichurchyk.budgetsaver.ui.ext.toHex
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryIntent
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewState
@@ -186,7 +187,12 @@ private fun Content(
                                 }
 
                                 BottomSheetState.COLOR_PICKER -> {
-                                    // Your color picker content
+                                    ColorPicker(
+                                        initialColor = Color.fromHex(viewState.model.color),
+                                        onColorChanged = {
+                                            callViewModel.invoke(AddCategoryIntent.ChangeColor(it.toHex()))
+                                        }
+                                    )
                                 }
 
                                 BottomSheetState.NONE -> {
@@ -356,9 +362,11 @@ private fun CategoryPreview(
 ) {
     var isSelected by remember { mutableStateOf(true) }
 
-    Column {
+    Column(
+        modifier = modifier
+    ) {
         Text(
-            modifier = modifier.padding(bottom = 4.dp),
+            modifier = Modifier.padding(bottom = 4.dp),
             text = stringResource(R.string.preview),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
