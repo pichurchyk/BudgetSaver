@@ -7,6 +7,7 @@ import com.pichurchyk.budgetsaver.data.ext.toPayload
 import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
@@ -37,6 +38,8 @@ internal class TransactionsRepositoryImpl(
         transactionsDataSource.getTransaction(transactionId).toDomain()
 
     override suspend fun deleteCategory(categoryId: String) = transactionsDataSource.deleteCategory(categoryId)
+
+    override suspend fun addCategory(category: TransactionCategoryCreation) = transactionsDataSource.addCategory(category)
 
     override suspend fun getRelativeTransaction(
         transactionId: String,

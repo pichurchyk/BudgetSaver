@@ -30,7 +30,7 @@ class ProfileViewModel(
         )
     val categoriesViewState = _categoriesViewState.asStateFlow()
 
-    init {
+    private fun initLoad() {
         loadUserData()
         loadCategories()
     }
@@ -98,6 +98,10 @@ class ProfileViewModel(
 
             is ProfileIntent.DeleteCategory -> {
                 deleteCategory(intent.categoryId)
+            }
+
+            is ProfileIntent.InitLoad -> {
+                initLoad()
             }
         }
     }

@@ -1,6 +1,8 @@
 package com.pichurchyk.budgetsaver.ui.screen.category.add
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,10 +62,17 @@ import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreat
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
+import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
+import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
+import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
+import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
+import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.fromHex
+import com.pichurchyk.budgetsaver.ui.ext.random
 import com.pichurchyk.budgetsaver.ui.ext.toHex
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryIntent
+import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryNotification
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
@@ -74,6 +84,44 @@ fun AddCategoryScreen(
     closeScreen: () -> Unit
 ) {
     val viewState by viewModel.viewState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.notificationEvent.collect { notificationState ->
+            when (notificationState) {
+                is AddCategoryNotification.Success -> {
+                    NotificationController.sendEvent(
+                        NotificationEvent(
+                            message = context.getString(R.string.category_created),
+                            type = NotificationType.SUCCESS,
+                        )
+                    )
+                }
+
+                is AddCategoryNotification.Error -> {
+                    NotificationController.sendEvent(
+                        NotificationEvent(
+                            message = context.getString(notificationState.error.asErrorMessage()),
+                            type = NotificationType.ERROR,
+                            action = NotificationAction(
+                                name = context.getString(R.string.retry),
+                                action = { notificationState.lastAction?.invoke() }
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(viewState.model.color) {
+        val color = Color.random().toHex()
+//        val primaryColor = while (color.startsWith())
+
+        if (viewState.model.color.isEmpty()) {
+            viewModel.handleIntent(AddCategoryIntent.ChangeColor(color))
+        }
+    }
 
     Content(
         viewState = viewState,
@@ -107,6 +155,7 @@ private fun Content(
                     sheetState.hide()
                 }
             }
+
             else -> {
                 if (!sheetState.isVisible) {
                     sheetState.show()
@@ -176,23 +225,29 @@ private fun Content(
                                             ),
                                         emojisList = viewState.availableEmojis,
                                         onSelect = { emoji ->
-                                            callViewModel.invoke(AddCategoryIntent.ChangeEmoji(emoji))
+                                            callViewModel(AddCategoryIntent.ChangeEmoji(emoji))
                                             hideSheet()
                                         },
                                         onSearchChanged = { searchValue ->
-                                            callViewModel.invoke(AddCategoryIntent.ChangeSearchEmojiValue(searchValue))
+                                            callViewModel(
+                                                AddCategoryIntent.ChangeSearchEmojiValue(
+                                                    searchValue
+                                                )
+                                            )
                                         },
                                         search = viewState.searchEmojisValue
                                     )
                                 }
 
                                 BottomSheetState.COLOR_PICKER -> {
-                                    ColorPicker(
-                                        initialColor = Color.fromHex(viewState.model.color),
-                                        onColorChanged = {
-                                            callViewModel.invoke(AddCategoryIntent.ChangeColor(it.toHex()))
-                                        }
-                                    )
+                                    if (viewState.model.color.isNotEmpty()) {
+                                        ColorPicker(
+                                            initialColor = Color.fromHex(viewState.model.color),
+                                            onColorChanged = {
+                                                callViewModel(AddCategoryIntent.ChangeColor(it.toHex()))
+                                            }
+                                        )
+                                    }
                                 }
 
                                 BottomSheetState.NONE -> {
@@ -213,22 +268,25 @@ private fun Content(
                         modifier = Modifier.weight(1f),
                         value = viewState.model.title,
                         headline = stringResource(R.string.title),
-                        isOptional = false,
                         onValueChanged = {
-                            callViewModel.invoke(AddCategoryIntent.ChangeTitle(it))
+                            callViewModel(AddCategoryIntent.ChangeTitle(it))
                         }
                     )
 
-                    Box(
-                        modifier = Modifier
-                            .padding(top = 12.dp)
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(100))
-                            .background(Color.fromHex(viewState.model.color))
-                            .doOnClick {
-                                showSheet(BottomSheetState.COLOR_PICKER)
-                            }
-                    )
+                    if (viewState.model.color.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 12.dp)
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(100))
+                                .padding(2.dp)
+                                .clip(RoundedCornerShape(100))
+                                .background(Color.fromHex(viewState.model.color))
+                                .doOnClick {
+                                    showSheet(BottomSheetState.COLOR_PICKER)
+                                }
+                        )
+                    }
 
                     Box(
                         modifier = Modifier
@@ -262,15 +320,17 @@ private fun Content(
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                CategoryPreview(
-                    modifier = Modifier.padding(top = 26.dp, start = 16.dp, end = 16.dp),
-                    transactionCategory = TransactionCategory(
-                        uuid = "",
-                        title = viewState.model.title,
-                        emoji = viewState.model.emoji,
-                        color = viewState.model.color
+                if (viewState.model.color.isNotEmpty()) {
+                    CategoryPreview(
+                        modifier = Modifier.padding(top = 26.dp, start = 16.dp, end = 16.dp),
+                        transactionCategory = TransactionCategory(
+                            uuid = "",
+                            title = viewState.model.title,
+                            emoji = viewState.model.emoji,
+                            color = viewState.model.color
+                        )
                     )
-                )
+                }
             }
         },
         bottomBar = {
@@ -284,7 +344,9 @@ private fun Content(
                     )
                     .padding(horizontal = 16.dp),
                 value = stringResource(R.string.submit),
-                onClick = {}
+                onClick = {
+                    callViewModel(AddCategoryIntent.Submit)
+                }
             )
         },
     )

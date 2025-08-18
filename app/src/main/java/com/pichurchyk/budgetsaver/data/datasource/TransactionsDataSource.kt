@@ -1,13 +1,16 @@
 package com.pichurchyk.budgetsaver.data.datasource
 
+import com.pichurchyk.budgetsaver.data.ext.category.toPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.delete
 import io.ktor.client.plugins.resources.get
+import io.ktor.client.plugins.resources.patch
 import io.ktor.client.plugins.resources.post
 import io.ktor.client.request.parameter
 import io.ktor.client.request.setBody
@@ -67,6 +70,13 @@ internal class TransactionsDataSource(
             .body<Unit>()
     }
 
+    suspend fun addCategory(category: TransactionCategoryCreation) {
+        httpClient.post(Category()) {
+            setBody(category.toPayload())
+        }
+            .body<Unit>()
+    }
+
     suspend fun addTransaction(transactionPayload: TransactionPayload) {
         httpClient.post(Transaction()) {
             setBody(transactionPayload)
@@ -74,7 +84,7 @@ internal class TransactionsDataSource(
     }
 
     suspend fun editTransaction(transactionId: String, transactionPayload: TransactionPayload) {
-        httpClient.post(Transaction()) {
+        httpClient.patch(Transaction()) {
             parameter("id", "eq.$transactionId")
 
             setBody(transactionPayload)
