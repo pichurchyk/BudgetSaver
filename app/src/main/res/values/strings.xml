@@ -69,4 +69,5 @@
     <string name="preview">Preview</string>
     <string name="click_to_select_unselect">Click to select or unselect</string>
     <string name="here_will_be_title">Here will be title</string>
+    <string name="category_created">Category created</string>
 </resources>

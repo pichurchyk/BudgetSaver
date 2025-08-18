@@ -29,7 +29,7 @@ fun TransactionCategoryChip(
 ) {
     val categoryColor = Color.fromHex(category.color ?: MaterialTheme.colorScheme.primary.toHex())
     val bgColor = if (isSelected) categoryColor.copy(0.1f) else disableGrey.copy(0.1f)
-    val textColor = if (isSelected) categoryColor else MaterialTheme.colorScheme.onBackground
+    val textColor = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onBackground
 
     Text(
         modifier = modifier

@@ -14,6 +14,8 @@ import com.pichurchyk.budgetsaver.domain.repository.AuthRepository
 import com.pichurchyk.budgetsaver.domain.repository.EmojiRepository
 import com.pichurchyk.budgetsaver.domain.repository.SystemRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
+import com.pichurchyk.budgetsaver.domain.usecase.AddCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.AddCategoryUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.AddFavoriteCurrencyUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.AddFavoriteCurrencyUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
@@ -82,8 +84,10 @@ val mainModule = module {
     viewModelOf(::AddCategoryViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
+
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
     single<DeleteCategoryUseCase> { DeleteCategoryUseCaseImpl(get()) }
+    single<AddCategoryUseCase> { AddCategoryUseCaseImpl(get()) }
 
     single<AddTransactionUseCase> { AddTransactionUseCaseImpl(get()) }
     single<EditTransactionUseCase> { EditTransactionUseCaseImpl(get()) }
@@ -93,7 +97,6 @@ val mainModule = module {
 
     single<AddFavoriteCurrencyUseCase> { AddFavoriteCurrencyUseCaseImpl(get(), get()) }
     single<DeleteFavoriteCurrencyUseCase> { DeleteFavoriteCurrencyUseCaseImpl(get(), get()) }
-
 
     single<LoadEmojisUseCase> { LoadEmojisUseCaseImpl(get()) }
     single<SearchEmojiUseCase> { SearchEmojiUseCaseImpl(get()) }

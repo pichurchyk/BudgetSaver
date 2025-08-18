@@ -7,4 +7,6 @@ sealed interface AddCategoryIntent {
     data class ChangeSearchEmojiValue(val value: String) : AddCategoryIntent
 
     data class ChangeColor(val value: String) : AddCategoryIntent
+
+    data object Submit: AddCategoryIntent
 }

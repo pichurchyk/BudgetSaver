@@ -2,20 +2,31 @@ package com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pichurchyk.budgetsaver.di.DomainException
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
+import com.pichurchyk.budgetsaver.domain.usecase.AddCategoryUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.LoadEmojisUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddCategoryViewModel(
     private val loadEmojisUseCase: LoadEmojisUseCase,
-    private val searchEmojiUseCase: SearchEmojiUseCase
+    private val searchEmojiUseCase: SearchEmojiUseCase,
+    private val addCategoryUseCase: AddCategoryUseCase
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(AddCategoryViewState())
     val viewState = _viewState.asStateFlow()
+
+    private val _notificationEvent = Channel<AddCategoryNotification>(Channel.BUFFERED)
+    val notificationEvent = _notificationEvent.receiveAsFlow()
 
     init {
         loadEmojis()
@@ -38,6 +49,48 @@ class AddCategoryViewModel(
             is AddCategoryIntent.ChangeTitle -> {
                 changeTitle(intent.value)
             }
+
+            is AddCategoryIntent.Submit -> {
+                submit()
+            }
+        }
+    }
+
+    private fun submit() {
+        viewModelScope.launch {
+            addCategoryUseCase.invoke(viewState.value.model)
+                .onStart {
+                    _viewState.update { currentState ->
+                        currentState.copy(status = AddCategoryUiStatus.Loading)
+                    }
+                }
+                .catch {
+                    _viewState.update { currentState ->
+                        currentState.copy(status = AddCategoryUiStatus.Idle)
+                    }
+
+                    _notificationEvent.send(
+                        AddCategoryNotification.Error(
+                             error = it as DomainException,
+                            lastAction = {
+                                submit()
+                            }
+                        )
+                    )
+                }
+                .collect {
+                    _notificationEvent.send(
+                        AddCategoryNotification.Success
+                    )
+
+                    resetData()
+                }
+        }
+    }
+
+    private fun resetData() {
+        _viewState.update { currentState ->
+            currentState.copy(model = TransactionCategoryCreation())
         }
     }
 
