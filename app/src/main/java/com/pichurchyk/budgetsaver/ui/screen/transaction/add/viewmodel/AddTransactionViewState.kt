@@ -6,8 +6,7 @@ import java.util.Currency
 
 data class AddTransactionViewState(
     val transaction: TransactionCreation = TransactionCreation(),
-
-    val allCurrencies: List<Currency> = Currency.getAvailableCurrencies().toList(),
+    val allCurrencies: List<Currency>? = null,
     val currenciesSearch: String = "",
 
     val validationError: List<AddTransactionValidationError> = emptyList<AddTransactionValidationError>(),
@@ -17,10 +16,11 @@ data class AddTransactionViewState(
     val filteredCurrencies: List<Currency>
         get() =
             allCurrencies
-                .filter {
-                    it.currencyCode.lowercase().contains(currenciesSearch.lowercase())
+                ?.filter {
+                    it.currencyCode.lowercase().contains(currenciesSearch.lowercase()) ||
+                            it.displayName.lowercase().contains(currenciesSearch.lowercase())
                 }
-                .sortedByDescending { it == transaction.currency }
+                ?.sortedByDescending { it == transaction.currency } ?: emptyList()
 }
 
 sealed interface AddTransactionUiStatus {

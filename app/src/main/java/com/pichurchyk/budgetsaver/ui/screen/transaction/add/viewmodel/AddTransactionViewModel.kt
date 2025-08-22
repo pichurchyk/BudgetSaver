@@ -6,11 +6,14 @@ import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
 import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,13 +21,18 @@ import java.util.Currency
 import kotlin.text.iterator
 
 class AddTransactionViewModel(
-    private val addTransactionUseCase: AddTransactionUseCase
+    private val addTransactionUseCase: AddTransactionUseCase,
+    private val currencyRepository: CurrencyRepository,
 ) : ViewModel() {
 
     private val _viewState: MutableStateFlow<AddTransactionViewState> = MutableStateFlow(
         AddTransactionViewState()
     )
     val viewState = _viewState.asStateFlow()
+
+    init {
+        loadInitialCurrencies()
+    }
 
     fun handleIntent(intent: AddTransactionIntent) {
         when (intent) {
@@ -39,6 +47,28 @@ class AddTransactionViewModel(
             is AddTransactionIntent.ClearData -> clearData()
             is AddTransactionIntent.DismissNotification -> dismissNotification()
         }
+    }
+
+    private fun loadInitialCurrencies() {
+        currencyRepository.getAllCurrencies()
+            .onEach { currencies ->
+                _viewState.update { currentState ->
+                    val defaultTransactionCurrency = currentState.transaction.currency
+
+                    currentState.copy(
+                        allCurrencies = currencies,
+                        transaction = currentState.transaction.copy(currency = defaultTransactionCurrency)
+                    )
+                }
+            }
+            .catch { e ->
+                _viewState.update {
+                    it.copy(
+                        allCurrencies = null
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun dismissNotification() {

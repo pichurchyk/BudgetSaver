@@ -24,11 +24,12 @@ import kotlin.collections.mapOf
 internal class TransactionsDataSource(
     private val httpClient: HttpClient,
 ) {
-    fun getTransactions(): Flow<List<TransactionResponse>> = flow {
+    fun getTransactions(currency: String): Flow<List<TransactionResponse>> = flow {
         httpClient
             .get(GetTransactions()) {
                 parameter("sort", "dateMillis")
                 parameter("order", "desc")
+                parameter("currency", currency)
             }
             .body<List<TransactionResponse>>()
             .also { emit(it) }

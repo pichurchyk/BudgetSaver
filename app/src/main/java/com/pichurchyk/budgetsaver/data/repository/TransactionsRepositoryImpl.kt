@@ -19,18 +19,11 @@ internal class TransactionsRepositoryImpl(
     private val transactionsDataSource: TransactionsDataSource
 ) : TransactionsRepository {
 
-    override suspend fun getTransactions(): Flow<List<TransactionsByCurrency>> =
-        transactionsDataSource.getTransactions().map { transactions ->
+    override suspend fun getTransactions(currency: String): Flow<List<Transaction>> =
+        transactionsDataSource.getTransactions(currency).map { transactions ->
             transactions
                 .map { transaction ->
                     transaction.toDomain()
-                }
-                .groupBy { it.value.currency }
-                .map { (currency, transactions) ->
-                    TransactionsByCurrency(
-                        transactions = transactions,
-                        currencyCode = currency
-                    )
                 }
         }
 

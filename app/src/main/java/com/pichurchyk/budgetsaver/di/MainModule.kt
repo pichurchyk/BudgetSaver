@@ -7,10 +7,12 @@ import com.pichurchyk.budgetsaver.data.preferences.AuthPreferences
 import com.pichurchyk.budgetsaver.data.preferences.AuthPreferencesActions
 import com.pichurchyk.budgetsaver.data.preferences.SystemPreferences
 import com.pichurchyk.budgetsaver.data.repository.AuthRepositoryImpl
+import com.pichurchyk.budgetsaver.data.repository.CurrencyRepositoryImpl
 import com.pichurchyk.budgetsaver.data.repository.EmojiRepositoryImpl
 import com.pichurchyk.budgetsaver.data.repository.SystemRepositoryImpl
 import com.pichurchyk.budgetsaver.data.repository.TransactionsRepositoryImpl
 import com.pichurchyk.budgetsaver.domain.repository.AuthRepository
+import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
 import com.pichurchyk.budgetsaver.domain.repository.EmojiRepository
 import com.pichurchyk.budgetsaver.domain.repository.SystemRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
@@ -66,6 +68,7 @@ val mainModule = module {
     single<SignInUseCase> { SignInUseCaseImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<EmojiRepository> { EmojiRepositoryImpl(get()) }
+    single<CurrencyRepository> { CurrencyRepositoryImpl(get()) }
     single { AuthDataSource(get(), get(), get()) }
 
     single<AuthPreferencesActions> { AuthPreferences(get()) }
