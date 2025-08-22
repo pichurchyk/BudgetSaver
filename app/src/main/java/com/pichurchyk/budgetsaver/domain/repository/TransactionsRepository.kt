@@ -11,7 +11,7 @@ import java.util.Currency
 
 internal interface TransactionsRepository {
 
-    suspend fun getTransactions(): Flow<List<TransactionsByCurrency>>
+    suspend fun getTransactions(currency: String): Flow<List<Transaction>>
 
     suspend fun getTransaction(transactionId: String): Transaction
 

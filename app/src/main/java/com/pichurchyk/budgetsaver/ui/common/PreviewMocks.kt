@@ -1,14 +1,14 @@
 package com.pichurchyk.budgetsaver.ui.common
 
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.model.user.User
 import com.pichurchyk.budgetsaver.domain.model.user.UserPreferences
-import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.TransactionsWithFilters
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigInteger
@@ -55,13 +55,9 @@ object PreviewMocks {
 
     val transactionByCurrency = TransactionsByCurrency(
         transactions = listOf(transaction),
-        currencyCode = "BYN"
-    )
-
-    val transactionWithFilters = TransactionsWithFilters(
-        transactions = transactionByCurrency,
-        selectedCategories = listOf(),
-        selectedTransactionType = listOf()
+        currencyCode = "BYN",
+        selectedCategories = listOf(category),
+        selectedTransactionType = listOf(TransactionType.EXPENSES)
     )
 
     val money = Money(

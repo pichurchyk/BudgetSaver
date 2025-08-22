@@ -17,8 +17,8 @@ class EmojiRepositoryImpl(
     override suspend fun loadEmojis(): List<Emoji> = withContext(Dispatchers.IO) {
         val json = Json {
             ignoreUnknownKeys = true
-            isLenient = true // Optional: allows relaxed parsing
-            coerceInputValues = true // Optional: coerces null values to defaults
+            isLenient = true
+            coerceInputValues = true
         }
 
 

@@ -27,7 +27,6 @@ class AuthViewModel(
     private var emojiLoadingJob: Job? = null
 
     init {
-        // Start loading emojis immediately when ViewModel is created
         emojiLoadingJob = loadEmojis()
     }
 
@@ -37,7 +36,7 @@ class AuthViewModel(
                 auth(intent.googleIdToken)
             }
             is AuthIntent.CheckSignedInUser -> {
-                checkIfUserSignedIn()
+                getAndFetchSignedUser()
             }
         }
     }
@@ -56,12 +55,13 @@ class AuthViewModel(
                         is SignInResult.Success -> {
                             emojiLoadingJob?.let { job ->
                                 if (job.isCompleted) {
-                                    _state.update { AuthViewState.Success.SignedIn }
+                                    getAndFetchSignedUser()
+
                                 } else {
                                     _state.update { AuthViewState.Loading }
                                     job.join()
 
-                                    _state.update { AuthViewState.Success.SignedIn }
+                                    getAndFetchSignedUser()
                                 }
                             }
                         }
@@ -71,14 +71,14 @@ class AuthViewModel(
                         }
 
                         is SignInResult.Cancelled -> {
-                            checkIfUserSignedIn()
+                            getAndFetchSignedUser()
                         }
                     }
                 }
         }
     }
 
-    private fun checkIfUserSignedIn() {
+    private fun getAndFetchSignedUser() {
         viewModelScope.launch {
             getSignedInUserUseCase.invoke()
                 .catch {
@@ -102,26 +102,6 @@ class AuthViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
-    }
-
-    private suspend fun waitForEmojisAndUpdateState(targetState: AuthViewState) {
-        emojiLoadingJob?.let { job ->
-            if (job.isCompleted) {
-                // Emojis already loaded, update state immediately
-                _state.update { targetState }
-            } else {
-                // Show loading while waiting for emojis
-                _state.update { AuthViewState.Loading }
-
-                // Wait for the job to complete
-                job.join()
-
-                _state.update { targetState }
-            }
-        } ?: run {
-            // Job is null, proceed immediately
-            _state.update { targetState }
         }
     }
 }

@@ -5,6 +5,8 @@ import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 
 sealed class DashboardIntent {
+    data object Init: DashboardIntent()
+
     data object LoadData: DashboardIntent()
 
     data object ToggleAllTypesFilter: DashboardIntent()
