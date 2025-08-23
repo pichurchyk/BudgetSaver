@@ -6,8 +6,12 @@ import java.util.Currency
 data class FavoriteCurrenciesSelectorViewState(
     val allCurrencies: List<Currency> = emptyList(),
     val selectedCurrencies: List<Currency> = emptyList(),
+    val searchValue: String = "",
     val status: FavoriteCurrenciesSelectorUiStatus = FavoriteCurrenciesSelectorUiStatus.Loading
-)
+) {
+    val filteredCurrencies: List<Currency>
+        get() = allCurrencies.filter { it.currencyCode.lowercase().contains(searchValue.lowercase()) }
+}
 
 sealed class FavoriteCurrenciesSelectorUiStatus {
     data object Loading: FavoriteCurrenciesSelectorUiStatus()
