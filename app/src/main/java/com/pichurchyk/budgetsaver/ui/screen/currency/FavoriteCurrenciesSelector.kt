@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -109,24 +110,19 @@ private fun Content(
         when (viewState.status) {
             is FavoriteCurrenciesSelectorUiStatus.Idle, is FavoriteCurrenciesSelectorUiStatus.Error -> {
 
-                val (selectedCurrencies, unselectedCurrencies) = remember(viewState.selectedCurrencies, viewState.filteredCurrencies) {
-                    val selected = mutableListOf<Currency>()
-                    val unselected = mutableListOf<Currency>()
-
-                    for (currency in viewState.allCurrencies) {
-                        if (viewState.selectedCurrencies.contains(currency)) {
-                            selected += currency
-                        } else {
-                            unselected += currency
-                        }
-                    }
-
+                val (selectedCurrencies, unselectedCurrencies) = remember(
+                    viewState.selectedCurrencies,
+                    viewState.filteredCurrencies
+                ) {
+                    val selected = viewState.selectedCurrencies
+                    val unselected = viewState.filteredCurrencies.filterNot { selected.contains(it) }
                     selected to unselected
                 }
 
                 LazyRow(
                     modifier = Modifier
-                        .padding(top = 4.dp),
+                        .padding(top = 4.dp)
+                        .height(100.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -228,6 +224,7 @@ private fun Preview() {
                 .aspectRatio(1f),
             viewState = FavoriteCurrenciesSelectorViewState(
                 status = FavoriteCurrenciesSelectorUiStatus.Idle,
+                allCurrencies = Currency.getAvailableCurrencies().toList(),
                 selectedCurrencies = listOf(Currency.getInstance("USD"))
             ),
             callViewModel = {})
