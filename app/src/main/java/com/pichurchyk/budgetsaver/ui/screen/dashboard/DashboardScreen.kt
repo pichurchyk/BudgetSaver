@@ -208,10 +208,10 @@ private fun Content(
                                                 totalExpenses = totalExpenses
                                             )
 
-                                            TransactionsDashboardLineChart(
-                                                modifier = Modifier,
-                                                transactions = activeData.filteredTransactionsWithCurrency.reversed(),
-                                            )
+//                                            TransactionsDashboardLineChart(
+//                                                modifier = Modifier,
+//                                                transactions = activeData.filteredTransactionsWithCurrency.reversed(),
+//                                            )
 
                                             if (activeData.filteredTransactionsWithCurrency.isNotEmpty()) {
                                                 Column(

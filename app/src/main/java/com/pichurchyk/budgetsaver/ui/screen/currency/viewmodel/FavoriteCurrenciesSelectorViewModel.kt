@@ -65,6 +65,16 @@ class FavoriteCurrenciesSelectorViewModel(
             is FavoriteCurrenciesSelectorIntent.UnselectCurrency -> {
                 unselectCurrency(intent.currency)
             }
+
+            is FavoriteCurrenciesSelectorIntent.Search -> {
+                changeSearchValue(intent.value)
+            }
+        }
+    }
+
+    private fun changeSearchValue(value: String) {
+        _viewState.update { currentState ->
+            currentState.copy(searchValue = value)
         }
     }
 

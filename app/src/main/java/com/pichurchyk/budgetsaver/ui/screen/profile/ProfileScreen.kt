@@ -4,9 +4,14 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -51,6 +56,7 @@ fun ProfileScreen(
                     focusManager.clearFocus()
                 })
             }
+            .padding(WindowInsets.ime.asPaddingValues())
     ) {
         Content(
             profileViewState = userViewState,
@@ -61,11 +67,6 @@ fun ProfileScreen(
     }
 }
 
-private enum class BottomSheetState {
-    NONE
-}
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
@@ -74,33 +75,25 @@ private fun Content(
     callViewModel: (ProfileIntent) -> Unit,
     onAddCategoryClick: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
-
-    when (modalBottomSheetState) {
-        BottomSheetState.NONE -> {}
-    }
-
     Column(
         modifier = Modifier
             .padding(top = 16.dp)
+            .verticalScroll(rememberScrollState())
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(44.dp)
     ) {
         ProfileCard(
             modifier = Modifier,
             viewState = profileViewState
         )
 
-        AppThemeSelector(
+        FavoriteCurrenciesSelector(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
         )
 
         ProfileCategories(
-            modifier = Modifier.padding(top = 44.dp),
+            modifier = Modifier,
             viewState = categoriesViewState,
             onChipClicked = {
 
@@ -116,8 +109,10 @@ private fun Content(
             }
         )
 
-        FavoriteCurrenciesSelector(
+        AppThemeSelector(
             modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         )
     }
 }

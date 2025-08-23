@@ -1,5 +1,6 @@
 package com.pichurchyk.budgetsaver.ui.screen.currency
 
+import androidx.activity.result.launch
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -10,10 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,19 +25,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
+import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItem
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorIntent
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorUiStatus
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.Currency
 
@@ -56,8 +65,12 @@ private fun Content(
     viewState: FavoriteCurrenciesSelectorViewState,
     callViewModel: (FavoriteCurrenciesSelectorIntent) -> Unit
 ) {
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .bringIntoViewRequester(bringIntoViewRequester),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -75,11 +88,28 @@ private fun Content(
             color = MaterialTheme.colorScheme.onBackground.copy(0.5f)
         )
 
+        CommonInput(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+                    .onFocusEvent { focusState ->
+                        if (focusState.isFocused) {
+                            coroutineScope.launch {
+                                bringIntoViewRequester.bringIntoView()
+                            }
+                        }
+                    }
+            ,
+            placeholder = stringResource(R.string.search),
+            value = viewState.searchValue
+        ) {
+            callViewModel(FavoriteCurrenciesSelectorIntent.Search(it))
+        }
 
         when (viewState.status) {
             is FavoriteCurrenciesSelectorUiStatus.Idle, is FavoriteCurrenciesSelectorUiStatus.Error -> {
 
-                val (selectedCurrencies, unselectedCurrencies) = remember(viewState.selectedCurrencies, viewState.allCurrencies) {
+                val (selectedCurrencies, unselectedCurrencies) = remember(viewState.selectedCurrencies, viewState.filteredCurrencies) {
                     val selected = mutableListOf<Currency>()
                     val unselected = mutableListOf<Currency>()
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +13,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -45,7 +48,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -86,6 +91,8 @@ fun AddCategoryScreen(
     val viewState by viewModel.viewState.collectAsState()
     val context = LocalContext.current
 
+    val focusManager = LocalFocusManager.current
+
     LaunchedEffect(Unit) {
         viewModel.notificationEvent.collect { notificationState ->
             when (notificationState) {
@@ -122,14 +129,24 @@ fun AddCategoryScreen(
             viewModel.handleIntent(AddCategoryIntent.ChangeColor(color))
         }
     }
-
-    Content(
-        viewState = viewState,
-        closeScreen = closeScreen,
-        callViewModel = {
-            viewModel.handleIntent(it)
-        }
-    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
+            .padding(WindowInsets.ime.asPaddingValues()) // Use asPaddingValues to get PaddingValues
+    ) {
+        Content(
+            viewState = viewState,
+            closeScreen = closeScreen,
+            callViewModel = {
+                viewModel.handleIntent(it)
+            }
+        )
+    }
 }
 
 private enum class BottomSheetState {
