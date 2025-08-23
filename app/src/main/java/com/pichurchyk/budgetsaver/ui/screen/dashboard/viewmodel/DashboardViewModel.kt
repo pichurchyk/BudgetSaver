@@ -122,22 +122,35 @@ class DashboardViewModel(
                 }
                 .collect {
                     _state.update { currentState ->
-                        val updatedTransactions =
-                            currentState.transactions?.map { transactionsByCurrency ->
-                                if (transactionsByCurrency.currencyCode == currentState.selectedCurrency) {
-                                    transactionsByCurrency.copy(
-                                        transactions = transactionsByCurrency.transactions.filter { it.uuid != transaction.uuid }
-                                    )
-                                } else {
-                                    transactionsByCurrency
-                                }
+                        val updatedTransactions = currentState.transactions?.map { transactionsByCurrency ->
+                            if (transactionsByCurrency.currencyCode == currentState.selectedCurrency) {
+                                val newTransactions = transactionsByCurrency.transactions
+                                    .filter { it.uuid != transaction.uuid }
+
+                                val newAllCategories = newTransactions
+                                    .map { it.mainCategory }
+                                    .distinct()
+
+                                val newSelectedCategories = transactionsByCurrency.selectedCategories
+                                    .filter { it in newAllCategories }
+                                    .ifEmpty { newAllCategories }
+
+                                transactionsByCurrency.copy(
+                                    transactions = newTransactions,
+                                    selectedCategories = newSelectedCategories
+                                )
+                            } else {
+                                transactionsByCurrency
                             }
+                        }
+
                         currentState.copy(
                             transactionsStatus = TransactionsUiStatus.Idle,
                             transactions = updatedTransactions
                         )
                     }
                 }
+
         }
     }
 

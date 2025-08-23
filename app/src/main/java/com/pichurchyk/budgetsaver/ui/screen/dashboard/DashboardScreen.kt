@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -147,10 +149,10 @@ private fun Content(
 
                 when (viewState.transactionsStatus) {
                     TransactionsUiStatus.Idle -> {
-                        if (viewState.transactions != null) {
-                            Column {
-                                viewState.transactions.find { it.currencyCode == viewState.selectedCurrency }
-                                    ?.let { activeData ->
+                        Column {
+                            viewState.transactions?.find { it.currencyCode == viewState.selectedCurrency }
+                                ?.let { activeData ->
+                                    if (activeData.transactions.isNotEmpty()) {
                                         Column(
                                             modifier = Modifier
                                                 .fillMaxSize()
@@ -189,17 +191,6 @@ private fun Content(
 
                                             val totalIncomes = activeData.totalIncomes
                                             val totalExpenses = activeData.totalExpenses
-
-                                            if (totalExpenses.amountMinor == BigInteger("0") &&
-                                                totalIncomes.amountMinor == BigInteger("0")
-                                            ) {
-                                                Text(
-                                                    modifier = Modifier.padding(top = 10.dp),
-                                                    text = stringResource(R.string.no_data_available),
-                                                    style = MaterialTheme.typography.titleSmall,
-                                                    color = MaterialTheme.colorScheme.error
-                                                )
-                                            }
 
                                             DashboardTotal(
                                                 modifier = Modifier
@@ -248,11 +239,28 @@ private fun Content(
                                                 }
                                             }
                                         }
+                                    } else {
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            verticalArrangement = Arrangement.Center,
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Icon(
+                                                modifier = Modifier.size(60.dp),
+                                                imageVector = Icons.Rounded.Search,
+                                                contentDescription = "",
+                                                tint = disableGrey
+                                            )
+
+                                            Text(
+                                                modifier = Modifier,
+                                                text = stringResource(R.string.no_data_available),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = disableGrey
+                                            )
+                                        }
                                     }
-                            }
-                        } else {
-                            // Handle case where transactions list is null
-                            // You could show a placeholder or a message here.
+                                }
                         }
                     }
 
