@@ -1,20 +1,25 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -24,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SwipeToDismissBox
@@ -52,7 +56,6 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
-import com.pichurchyk.budgetsaver.ui.screen.dashboard.chart.TransactionsDashboardLineChart
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.ExpenseIncomeFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.total.DashboardTotal
@@ -67,7 +70,6 @@ import com.pichurchyk.budgetsaver.ui.theme.notificationRedDark
 import com.pichurchyk.budgetsaver.ui.theme.notificationRedLight
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.math.BigInteger
 import java.util.Currency
 
 @Composable
@@ -153,87 +155,111 @@ private fun Content(
                             viewState.transactions?.find { it.currencyCode == viewState.selectedCurrency }
                                 ?.let { activeData ->
                                     if (activeData.transactions.isNotEmpty()) {
-                                        Column(
+                                        LazyColumn(
                                             modifier = Modifier
                                                 .fillMaxSize()
-                                                .padding(top = 16.dp)
-                                                .verticalScroll(rememberScrollState()),
+                                                .padding(top = 16.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.spacedBy(16.dp),
+                                            contentPadding = PaddingValues(
+                                                bottom = (WindowInsets.navigationBars)
+                                                    .only(WindowInsetsSides.Bottom)
+                                                    .asPaddingValues()
+                                                    .calculateBottomPadding() + paddingValues.calculateBottomPadding()
+                                            )
                                         ) {
-                                            ExpenseIncomeFilter(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                selectedItems = activeData.selectedTransactionType,
-                                                onItemClick = {
-                                                    callViewModel(
-                                                        DashboardIntent.ToggleTypeFilter(it)
-                                                    )
-                                                },
-                                                onSelectAllClick = {
-                                                    callViewModel(DashboardIntent.ToggleAllTypesFilter)
-                                                }
-                                            )
+                                            item {
+                                                ExpenseIncomeFilter(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    selectedItems = activeData.selectedTransactionType,
+                                                    onItemClick = {
+                                                        callViewModel(
+                                                            DashboardIntent.ToggleTypeFilter(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    onSelectAllClick = {
+                                                        callViewModel(
+                                                            DashboardIntent.ToggleAllTypesFilter
+                                                        )
+                                                    }
+                                                )
+                                            }
 
-                                            CategoriesFilter(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                allCategories = activeData.allCategories,
-                                                selectedItems = activeData.selectedCategories,
-                                                onItemClick = {
-                                                    callViewModel(
-                                                        DashboardIntent.ToggleCategoriesFilter(it)
-                                                    )
-                                                },
-                                                onSelectAllClick = {
-                                                    callViewModel(DashboardIntent.ToggleAllCategoriesFilter)
-                                                }
-                                            )
+                                            item {
+                                                CategoriesFilter(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    allCategories = activeData.allCategories,
+                                                    selectedItems = activeData.selectedCategories,
+                                                    onItemClick = {
+                                                        callViewModel(
+                                                            DashboardIntent.ToggleCategoriesFilter(
+                                                                it
+                                                            )
+                                                        )
+                                                    },
+                                                    onSelectAllClick = {
+                                                        callViewModel(
+                                                            DashboardIntent.ToggleAllCategoriesFilter
+                                                        )
+                                                    }
+                                                )
+                                            }
 
-                                            val totalIncomes = activeData.totalIncomes
-                                            val totalExpenses = activeData.totalExpenses
-
-                                            DashboardTotal(
-                                                modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                totalIncomes = totalIncomes,
-                                                totalExpenses = totalExpenses
-                                            )
-
-//                                            TransactionsDashboardLineChart(
-//                                                modifier = Modifier,
-//                                                transactions = activeData.filteredTransactionsWithCurrency.reversed(),
-//                                            )
+                                            item {
+                                                DashboardTotal(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    totalIncomes = activeData.totalIncomes,
+                                                    totalExpenses = activeData.totalExpenses
+                                                )
+                                            }
 
                                             if (activeData.filteredTransactionsWithCurrency.isNotEmpty()) {
-                                                Column(
-                                                    modifier = Modifier.padding(
-                                                        bottom = paddingValues.calculateBottomPadding(),
-                                                        top = 40.dp
-                                                    ),
-                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                                ) {
+                                                item {
                                                     Text(
                                                         modifier = Modifier
-                                                            .padding(start = 16.dp)
+                                                            .padding(start = 16.dp, top = 40.dp)
                                                             .fillMaxWidth(),
                                                         text = stringResource(R.string.recent_transactions),
                                                         textAlign = TextAlign.Start,
                                                         style = MaterialTheme.typography.titleMedium,
                                                         color = MaterialTheme.colorScheme.onBackground
                                                     )
+                                                }
 
-                                                    activeData.filteredTransactionsWithCurrency.forEach { transaction ->
-                                                        ListTransactionItem(
-                                                            modifier = Modifier,
-                                                            transaction = transaction,
-                                                            onEditTransactionClick = onEditTransactionClick,
-                                                            onDeleteTransactionClick = {
-                                                                callViewModel(
-                                                                    DashboardIntent.DeleteTransaction(
-                                                                        it
-                                                                    )
-                                                                )
-                                                            }
+                                                items(
+                                                    items = activeData.filteredTransactionsWithCurrency,
+                                                    key = { it.uuid }
+                                                ) { transaction ->
+                                                    ListTransactionItem(
+                                                        modifier = Modifier,
+                                                        transaction = transaction,
+                                                        onEditTransactionClick = onEditTransactionClick,
+                                                        onDeleteTransactionClick = {
+                                                            callViewModel(
+                                                                DashboardIntent.DeleteTransaction(it)
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            } else {
+                                                item {
+                                                    Column(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        verticalArrangement = Arrangement.Center,
+                                                        horizontalAlignment = Alignment.CenterHorizontally
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.size(60.dp),
+                                                            imageVector = Icons.Rounded.Search,
+                                                            contentDescription = "",
+                                                            tint = disableGrey
+                                                        )
+                                                        Text(
+                                                            text = stringResource(R.string.no_data_available),
+                                                            style = MaterialTheme.typography.titleMedium,
+                                                            color = disableGrey
                                                         )
                                                     }
                                                 }
@@ -293,7 +319,13 @@ private fun Content(
             ) {
                 if (viewState.transactionsStatus !is TransactionsUiStatus.Error) {
                     FloatingActionButton(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier
+                            .padding(
+                                (WindowInsets.navigationBars)
+                                    .only(WindowInsetsSides.Bottom)
+                                    .asPaddingValues()
+                            )
+                            .padding(20.dp),
                         shape = RoundedCornerShape(12.dp),
                         containerColor = MaterialTheme.colorScheme.primary,
                         onClick = onAddTransactionClick,

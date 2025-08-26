@@ -262,8 +262,7 @@ private fun Content(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize()
-                    .imePadding(),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
