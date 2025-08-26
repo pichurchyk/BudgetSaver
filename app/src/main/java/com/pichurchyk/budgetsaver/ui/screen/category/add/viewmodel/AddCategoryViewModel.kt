@@ -71,7 +71,7 @@ class AddCategoryViewModel(
 
                     _notificationEvent.send(
                         AddCategoryNotification.Error(
-                             error = it as DomainException,
+                            error = it as DomainException,
                             lastAction = {
                                 submit()
                             }
@@ -90,7 +90,11 @@ class AddCategoryViewModel(
 
     private fun resetData() {
         _viewState.update { currentState ->
-            currentState.copy(model = TransactionCategoryCreation())
+            currentState.copy(
+                model = TransactionCategoryCreation(
+                    emoji = currentState.availableEmojis.random().emoji
+                )
+            )
         }
     }
 

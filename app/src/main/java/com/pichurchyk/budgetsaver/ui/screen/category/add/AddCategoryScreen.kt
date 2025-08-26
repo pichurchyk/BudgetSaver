@@ -1,8 +1,6 @@
 package com.pichurchyk.budgetsaver.ui.screen.category.add
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -16,17 +14,20 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -43,6 +44,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +83,8 @@ import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryNo
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -122,13 +126,13 @@ fun AddCategoryScreen(
     }
 
     LaunchedEffect(viewState.model.color) {
-        val color = Color.random().toHex()
-//        val primaryColor = while (color.startsWith())
-
         if (viewState.model.color.isEmpty()) {
+            val color = Color.random().toHex()
+
             viewModel.handleIntent(AddCategoryIntent.ChangeColor(color))
         }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -137,7 +141,6 @@ fun AddCategoryScreen(
                     focusManager.clearFocus()
                 })
             }
-            .padding(WindowInsets.ime.asPaddingValues()) // Use asPaddingValues to get PaddingValues
     ) {
         Content(
             viewState = viewState,
@@ -162,22 +165,14 @@ private fun Content(
     closeScreen: () -> Unit,
     callViewModel: (AddCategoryIntent) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
 
     LaunchedEffect(modalBottomSheetState) {
         when (modalBottomSheetState) {
-            BottomSheetState.NONE -> {
-                if (sheetState.isVisible) {
-                    sheetState.hide()
-                }
-            }
-
-            else -> {
-                if (!sheetState.isVisible) {
-                    sheetState.show()
-                }
-            }
+            BottomSheetState.NONE -> sheetState.hide()
+            else -> sheetState.show()
         }
     }
 
@@ -186,7 +181,10 @@ private fun Content(
     }
 
     val hideSheet = {
-        modalBottomSheetState = BottomSheetState.NONE
+        coroutineScope.launch {
+            sheetState.hide()
+            modalBottomSheetState = BottomSheetState.NONE
+        }
     }
 
     Scaffold(
@@ -223,23 +221,30 @@ private fun Content(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
             ) {
 
                 if (modalBottomSheetState != BottomSheetState.NONE) {
                     ModalBottomSheet(
-                        modifier = Modifier,
+                        modifier = Modifier
+                            .padding(
+                                top = (WindowInsets.statusBars.asPaddingValues()
+                                    .calculateTopPadding())
+                            ),
                         sheetState = sheetState,
-                        onDismissRequest = hideSheet,
+                        onDismissRequest = {
+                            coroutineScope.launch {
+                                hideSheet.invoke()
+                            }
+                        },
+                        contentWindowInsets = {
+                            BottomSheetDefaults.windowInsets.only(WindowInsetsSides.Top)
+                        },
                         content = {
                             when (modalBottomSheetState) {
                                 BottomSheetState.EMOJI_PICKER -> {
                                     EmojiPicker(
-                                        modifier = Modifier
-                                            .padding(
-                                                (WindowInsets.navigationBars)
-                                                    .only(WindowInsetsSides.Bottom)
-                                                    .asPaddingValues()
-                                            ),
+                                        modifier = Modifier,
                                         emojisList = viewState.availableEmojis,
                                         onSelect = { emoji ->
                                             callViewModel(AddCategoryIntent.ChangeEmoji(emoji))
@@ -267,9 +272,7 @@ private fun Content(
                                     }
                                 }
 
-                                BottomSheetState.NONE -> {
-                                    // This should never happen due to the outer if condition
-                                }
+                                BottomSheetState.NONE -> {}
                             }
                         }
                     )
@@ -377,10 +380,12 @@ private fun EmojiPicker(
     search: String,
     onSearchChanged: (String) -> Unit
 ) {
-    Column {
+    Column(
+        modifier = modifier
+    ) {
         CommonInput(
             value = search,
-            modifier = modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
             placeholder = stringResource(R.string.search),
             onValueChanged = {
                 onSearchChanged(it)
@@ -389,17 +394,19 @@ private fun EmojiPicker(
 
         LazyVerticalGrid(
             modifier = Modifier
-                .weight(1f)
-                .padding(top = 4.dp),
+                .padding(horizontal = 16.dp),
             columns = GridCells.Adaptive(minSize = 60.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            contentPadding = PaddingValues(
+                top = 16.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + 16.dp
+            ),
+            horizontalArrangement = Arrangement.spacedBy(40.dp),
+            verticalArrangement = Arrangement.spacedBy(40.dp),
         ) {
             items(emojisList) { emoji ->
                 Text(
                     modifier = Modifier
-                        .padding(10.dp)
                         .clip(RoundedCornerShape(100))
                         .clickable {
                             onSelect(emoji.emoji)
@@ -413,6 +420,32 @@ private fun EmojiPicker(
     }
 }
 
+@Composable
+@Preview
+private fun EmojiPickerPreview() {
+    AppTheme {
+        val context = LocalContext.current
+        val jsonString = context.assets.open("emojis.json")
+            .bufferedReader()
+            .use { it.readText() }
+
+        val json = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            coerceInputValues = true
+        }
+
+        val emojis = json.decodeFromString<List<Emoji>>(jsonString)
+
+        EmojiPicker(
+            modifier = Modifier,
+            emojisList = emojis,
+            onSelect = {},
+            search = "",
+            onSearchChanged = {}
+        )
+    }
+}
 
 @Composable
 private fun ColorPicker(
@@ -424,8 +457,14 @@ private fun ColorPicker(
     HsvColorPicker(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
-            .padding(10.dp),
+            .padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 16.dp,
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + 16.dp
+            )
+            .height(200.dp),
         controller = controller,
         initialColor = initialColor,
         onColorChanged = { colorEnvelope: ColorEnvelope ->

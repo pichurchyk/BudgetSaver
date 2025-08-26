@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
@@ -301,10 +303,11 @@ private fun Content(
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .imePadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(120.dp)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -381,7 +384,9 @@ private fun Content(
                 }
 
                 CommonInput(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 32.dp),
                     height = 150.dp,
                     headline = stringResource(R.string.comments),
                     value = transactionData.notes,
