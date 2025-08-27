@@ -24,7 +24,7 @@ fun TransactionCategoryChip(
     modifier: Modifier,
     category: TransactionCategory,
     isSelected: Boolean,
-    onItemClick: (TransactionCategory) -> Unit,
+    onItemClick: (TransactionCategory) -> Unit = {},
     onItemLongClick: (TransactionCategory) -> Unit = {}
 ) {
     val categoryColor = Color.fromHex(category.color ?: MaterialTheme.colorScheme.primary.toHex())
