@@ -184,6 +184,7 @@ private fun Content(
     }
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = {
             CenterAlignedTopAppBar(
                 windowInsets = TopAppBarDefaults.windowInsets,
@@ -304,10 +305,9 @@ private fun Content(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .imePadding(),
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(120.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -385,8 +385,7 @@ private fun Content(
 
                 CommonInput(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 32.dp),
+                        .padding(horizontal = 16.dp),
                     height = 150.dp,
                     headline = stringResource(R.string.comments),
                     value = transactionData.notes,
