@@ -4,14 +4,13 @@ import com.pichurchyk.budgetsaver.data.datasource.TransactionsDataSource
 import com.pichurchyk.budgetsaver.data.ext.category.toDomain
 import com.pichurchyk.budgetsaver.data.ext.toDomain
 import com.pichurchyk.budgetsaver.data.ext.toPayload
-import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
-import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
+import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.Currency
 
@@ -19,26 +18,64 @@ internal class TransactionsRepositoryImpl(
     private val transactionsDataSource: TransactionsDataSource
 ) : TransactionsRepository {
 
-    override suspend fun getTransactions(currency: String): Flow<List<Transaction>> =
-        transactionsDataSource.getTransactions(currency).map { transactions ->
-            transactions
-                .map { transaction ->
-                    transaction.toDomain()
+    private val transactionsCache = mutableMapOf<String, List<Transaction>>()
+    private val categoriesCache = mutableMapOf<String, List<TransactionCategory>>()
+
+    override suspend fun getTransactions(currency: String): Flow<List<Transaction>> {
+        return flow {
+            transactionsCache[currency]?.let { cachedTransactions ->
+                emit(cachedTransactions)
+            }
+
+            transactionsDataSource.getTransactions(currency)
+                .map { transactions ->
+                    transactions.map { transaction ->
+                        transaction.toDomain()
+                    }
+                }
+                .collect { freshTransactions ->
+                    transactionsCache[currency] = freshTransactions
+
+                    emit(freshTransactions)
                 }
         }
+    }
 
     override suspend fun getTransaction(transactionId: String): Transaction =
         transactionsDataSource.getTransaction(transactionId).toDomain()
 
-    override suspend fun deleteCategory(categoryId: String) = transactionsDataSource.deleteCategory(categoryId)
+    override suspend fun deleteCategory(categoryId: String) {
+        transactionsDataSource.deleteCategory(categoryId)
 
-    override suspend fun addCategory(category: TransactionCategoryCreation) = transactionsDataSource.addCategory(category)
+        categoriesCache.forEach { (key, categories) ->
+            val updatedCategories = categories.filter { it.uuid != categoryId }
+            categoriesCache[key] = updatedCategories
+        }
 
-    override suspend fun getRelativeTransaction(
-        transactionId: String,
-        direction: RelativeTransactionType
-    ): Transaction =
-        transactionsDataSource.getRelativeTransaction(transactionId, direction).toDomain()
+        // Update transactions cache - remove the category from all transactions
+        transactionsCache.forEach { (currencyCode, transactions) ->
+            val updatedTransactions = transactions.map { transaction ->
+                val updatedMainCategory = if (transaction.mainCategory?.uuid == categoryId) {
+                    null // Remove main category if it matches deleted category
+                } else {
+                    transaction.mainCategory
+                }
+
+                transaction.copy(
+                    mainCategory = updatedMainCategory,
+                )
+            }
+            transactionsCache[currencyCode] = updatedTransactions
+        }
+    }
+
+    override suspend fun addCategory(category: TransactionCategoryCreation) {
+        val newCategory = transactionsDataSource.addCategory(category)
+
+//        categoriesCache.forEach { (key, categories) ->
+//            categoriesCache[key] = categories + newCategory.toDomain()
+//        }
+    }
 
     override suspend fun getCategories(): Flow<List<TransactionCategory>> =
         transactionsDataSource.getCategories().map { categories ->
@@ -48,17 +85,51 @@ internal class TransactionsRepositoryImpl(
                 }
         }
 
-    override suspend fun addTransaction(transaction: TransactionCreation): Unit =
-        transactionsDataSource.addTransaction(transaction.toPayload())
+    override suspend fun addTransaction(transaction: TransactionCreation) {
+        val newTransaction = transactionsDataSource.addTransaction(transaction.toPayload())
+            .toDomain()
 
-    override suspend fun editTransaction(transactionId: String, transaction: TransactionCreation): Unit =
-        transactionsDataSource.editTransaction(transactionId = transactionId, transaction.toPayload())
+        val currencyCode = transaction.currency.currencyCode
+        transactionsCache[currencyCode]?.let { cached ->
+            transactionsCache[currencyCode] = cached + newTransaction
+        }
+    }
 
-    override suspend fun deleteTransaction(transactionId: String): Unit =
+    override suspend fun editTransaction(transactionId: String, transaction: TransactionCreation) {
+        val updatedTransaction = transactionsDataSource.editTransaction(
+            transactionId = transactionId,
+            transaction.toPayload()
+        )
+
+        val currencyCode = transaction.currency.currencyCode
+        transactionsCache[currencyCode]?.let { cached ->
+            val updatedList = cached.map { cachedTransaction ->
+                if (cachedTransaction.uuid == transactionId) {
+                    updatedTransaction.toDomain()
+                } else {
+                    cachedTransaction
+                }
+            }
+            transactionsCache[currencyCode] = updatedList
+        }
+    }
+
+    override suspend fun deleteTransaction(transactionId: String) {
         transactionsDataSource.deleteTransaction(transactionId = transactionId)
 
-    override suspend fun addFavoriteCurrency(currency: Currency) = transactionsDataSource.addFavoriteCurrency(currency)
+        transactionsCache.forEach { (currencyCode, transactions) ->
+            val updatedTransactions = transactions.filter { it.uuid != transactionId }
+            if (updatedTransactions.size != transactions.size) {
+                transactionsCache[currencyCode] = updatedTransactions
+                return@forEach
+            }
+        }
+    }
 
-    override suspend fun deleteFavoriteCurrency(currency: Currency) = transactionsDataSource.removeFavoriteCurrency(currency)
+    override suspend fun addFavoriteCurrency(currency: Currency) =
+        transactionsDataSource.addFavoriteCurrency(currency)
+
+    override suspend fun deleteFavoriteCurrency(currency: Currency) =
+        transactionsDataSource.removeFavoriteCurrency(currency)
 
 }

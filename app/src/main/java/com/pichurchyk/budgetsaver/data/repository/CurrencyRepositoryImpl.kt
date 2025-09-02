@@ -11,11 +11,17 @@ class CurrencyRepositoryImpl(
     private val sessionManager: SessionManager
 ) : CurrencyRepository {
 
+    private val cachedCurrencies = mutableListOf<Currency>()
+
     private fun fetchAllAvailableCurrencies(): List<Currency> {
         return Currency.getAvailableCurrencies().toList().sortedBy { it.displayName }
     }
 
     override fun getAllCurrencies(): Flow<List<Currency>> {
+        if (cachedCurrencies.isNotEmpty()) {
+            return flowOf(cachedCurrencies)
+        }
+
         val allCurrenciesFlow = flowOf(fetchAllAvailableCurrencies())
 
         return combine(allCurrenciesFlow, sessionManager.user) { allCurrencies, user ->
@@ -28,7 +34,10 @@ class CurrencyRepositoryImpl(
                 val (favoritesInList, otherCurrencies) = allCurrencies.partition { it in favoritesSet }
 
                 val sortedFavorites = favoriteCurrencies.filter { it in favoritesInList }
-                (sortedFavorites + otherCurrencies).distinct()
+                val currenciesWithFavoriteFirst = (sortedFavorites + otherCurrencies).distinct()
+
+                cachedCurrencies.addAll(currenciesWithFavoriteFirst)
+                currenciesWithFavoriteFirst
             }
         }
     }

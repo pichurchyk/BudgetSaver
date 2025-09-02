@@ -19,5 +19,5 @@ data class TransactionPayload(
     val dateTimeZone: String,
 
     @SerialName("main_category")
-    val mainCategory: String
+    val mainCategory: String?
 )

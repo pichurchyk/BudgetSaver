@@ -53,11 +53,11 @@ object PreviewMocks {
         )
     )
 
-    val transactionByCurrency = TransactionsByCurrency(
+    val transactionByCurrency = TransactionsByCurrency.create(
         transactions = listOf(transaction),
         currencyCode = "BYN",
         selectedCategories = listOf(category),
-        selectedTransactionType = listOf(TransactionType.EXPENSES)
+        selectedTransactionType = listOf(TransactionType.EXPENSES),
     )
 
     val money = Money(

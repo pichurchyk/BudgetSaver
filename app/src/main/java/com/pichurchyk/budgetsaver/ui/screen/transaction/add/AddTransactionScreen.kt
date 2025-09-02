@@ -357,28 +357,33 @@ private fun Content(
             }
         },
         bottomBar = {
-            when (viewState.status) {
-                is AddTransactionUiStatus.Loading -> {
-                    Loader(modifier = Modifier)
-                }
-
-                else -> {
-                    CommonButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                (WindowInsets.navigationBars)
-                                    .only(WindowInsetsSides.Bottom)
-                                    .asPaddingValues()
-                            )
-                            .padding(horizontal = 16.dp),
-                        value = stringResource(R.string.submit),
-                        onClick = {
-                            if (!isLoading) {
-                                callViewModel.invoke(AddTransactionIntent.Submit)
-                            }
-                        }
+            Box(
+                modifier = Modifier
+                    .padding(
+                        (WindowInsets.navigationBars)
+                            .only(WindowInsetsSides.Bottom)
+                            .asPaddingValues()
                     )
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                when (viewState.status) {
+                    is AddTransactionUiStatus.Loading -> {
+                        Loader()
+                    }
+
+                    else -> {
+                        CommonButton(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            value = stringResource(R.string.submit),
+                            onClick = {
+                                if (!isLoading) {
+                                    callViewModel.invoke(AddTransactionIntent.Submit)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

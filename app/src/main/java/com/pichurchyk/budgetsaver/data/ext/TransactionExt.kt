@@ -53,9 +53,7 @@ fun TransactionCreation.toPayload(): TransactionPayload {
         notes = this.notes,
         dateMillis = currentMillis,
         dateTimeZone = utcOffset,
-        mainCategory = checkNotNull(this.mainCategory?.uuid) {
-            "Category must not be null"
-        }
+        mainCategory = this.mainCategory?.uuid
     )
 }
 

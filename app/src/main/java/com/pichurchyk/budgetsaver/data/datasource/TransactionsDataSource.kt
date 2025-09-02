@@ -43,18 +43,6 @@ internal class TransactionsDataSource(
             .body<TransactionResponse>()
     }
 
-    suspend fun getRelativeTransaction(
-        transactionId: String,
-        direction: RelativeTransactionType
-    ): TransactionResponse {
-        return httpClient
-            .get(GetTransaction()) {
-                parameter("id", transactionId)
-                parameter("direction", direction.name.lowercase())
-            }
-            .body<TransactionResponse>()
-    }
-
     fun getCategories(): Flow<List<MainCategoryResponse>> = flow {
         httpClient
             .get(Category()) {
@@ -78,18 +66,18 @@ internal class TransactionsDataSource(
             .body<Unit>()
     }
 
-    suspend fun addTransaction(transactionPayload: TransactionPayload) {
-        httpClient.post(Transaction()) {
+    suspend fun addTransaction(transactionPayload: TransactionPayload): TransactionResponse {
+        return httpClient.post(CreateTransaction()) {
             setBody(transactionPayload)
-        }.body<Unit>()
+        }.body<TransactionResponse>()
     }
 
-    suspend fun editTransaction(transactionId: String, transactionPayload: TransactionPayload) {
-        httpClient.patch(Transaction()) {
-            parameter("id", "eq.$transactionId")
+    suspend fun editTransaction(transactionId: String, transactionPayload: TransactionPayload): TransactionResponse {
+        return httpClient.patch(EditTransaction()) {
+            parameter("id", transactionId)
 
             setBody(transactionPayload)
-        }.body<Unit>()
+        }.body<TransactionResponse>()
     }
 
     suspend fun deleteTransaction(transactionId: String) {
@@ -134,6 +122,14 @@ private class Category()
 @Serializable
 @Resource("/rest/v1/Transaction")
 private class Transaction()
+
+@Serializable
+@Resource("/functions/v1/create-transaction")
+private class CreateTransaction()
+
+@Serializable
+@Resource("/functions/v1/edit-transaction")
+private class EditTransaction()
 
 @Serializable
 @Resource("/functions/v1/add-favorite-currency")

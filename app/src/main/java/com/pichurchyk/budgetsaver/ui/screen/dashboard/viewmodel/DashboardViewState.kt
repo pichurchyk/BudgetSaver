@@ -1,30 +1,23 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
+import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 
-sealed class TransactionsUiStatus {
-    data object Idle : TransactionsUiStatus()
-    data object Loading : TransactionsUiStatus()
+sealed class DashboardUiStatus {
+    data object Idle: DashboardUiStatus()
+    data class IdleDeletingTransaction(val transaction: Transaction): DashboardUiStatus()
+    data object LoadingAll : DashboardUiStatus()
+    data object LoadingTransactions : DashboardUiStatus()
     data class Error(
         val error: DomainException,
         val lastAction: () -> Unit
-    ) : TransactionsUiStatus()
-}
-
-sealed class CurrenciesUiStatus {
-    data object Idle : CurrenciesUiStatus()
-    data object Loading : CurrenciesUiStatus()
-    data class Error(
-        val error: DomainException,
-        val lastAction: () -> Unit
-    ) : CurrenciesUiStatus()
+    ) : DashboardUiStatus()
 }
 
 data class DashboardViewState(
-    val transactionsStatus: TransactionsUiStatus = TransactionsUiStatus.Idle,
-    val currenciesStatus: CurrenciesUiStatus = CurrenciesUiStatus.Idle,
+    val status: DashboardUiStatus = DashboardUiStatus.Idle,
     val availableCurrencies: List<String> = emptyList(),
     val selectedCurrency: String? = null,
-    val transactions: List<TransactionsByCurrency>? = null
+    val currentTransactions: TransactionsByCurrency? = null
 )

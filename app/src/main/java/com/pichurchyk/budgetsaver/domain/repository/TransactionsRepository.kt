@@ -19,8 +19,6 @@ internal interface TransactionsRepository {
 
     suspend fun addCategory(category: TransactionCategoryCreation)
 
-    suspend fun getRelativeTransaction(transactionId: String, direction: RelativeTransactionType): Transaction
-
     suspend fun getCategories(): Flow<List<TransactionCategory>>
 
     suspend fun addTransaction(transaction: TransactionCreation)

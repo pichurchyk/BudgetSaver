@@ -39,7 +39,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -51,19 +50,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
-import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.ExpenseIncomeFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.total.DashboardTotal
-import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.CurrenciesUiStatus
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardIntent
+import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardUiStatus
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewState
-import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.TransactionsUiStatus
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import com.pichurchyk.budgetsaver.ui.theme.notificationRedDark
@@ -78,7 +76,7 @@ fun DashboardScreen(
     openEditTransactionScreen: (transactionId: String) -> Unit,
     openAddTransactionScreen: () -> Unit
 ) {
-    val viewState by viewModel.state.collectAsState()
+    val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     Content(
         viewState = viewState,
@@ -105,209 +103,216 @@ private fun Content(
         callViewModel(DashboardIntent.Init)
     }
 
+    if (viewState.status == DashboardUiStatus.LoadingAll) {
+        Box(
+            Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Loader(Modifier.align(Alignment.Center))
+        }
+        return
+    }
+
+    if (viewState.status is DashboardUiStatus.Error) {
+        ErrorBlock(
+            modifier = Modifier.fillMaxSize(),
+            message = stringResource(R.string.error_while_loading_occurred)
+        ) {
+            viewState.status.lastAction()
+        }
+        return
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = { paddingValues ->
             Column {
-                when (viewState.currenciesStatus) {
-                    CurrenciesUiStatus.Idle -> {
-                        ScrollableTabRow(
-                            modifier = Modifier.height(60.dp),
-                            divider = {},
-                            containerColor = MaterialTheme.colorScheme.background,
-                            selectedTabIndex = viewState.availableCurrencies.indexOf(viewState.selectedCurrency),
-                        ) {
-                            viewState.availableCurrencies.forEachIndexed { index, currency ->
-                                Tab(
-                                    selected = viewState.selectedCurrency == currency,
-                                    onClick = {
-                                        coroutineContext.launch {
-                                            scrollState.animateScrollToItem(0)
-                                        }
-                                        callViewModel(DashboardIntent.SelectCurrency(currency))
-                                    },
-                                    text = {
-                                        Text(
-                                            text = currency,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    },
-                                    selectedContentColor = MaterialTheme.colorScheme.primary,
-                                    unselectedContentColor = disableGrey
-                                )
-                            }
+                if (viewState.availableCurrencies.isNotEmpty()) {
+                    ScrollableTabRow(
+                        modifier = Modifier.height(60.dp),
+                        divider = {},
+                        containerColor = MaterialTheme.colorScheme.background,
+                        selectedTabIndex = viewState.availableCurrencies.indexOf(viewState.selectedCurrency),
+                    ) {
+                        viewState.availableCurrencies.forEachIndexed { index, currency ->
+                            Tab(
+                                selected = viewState.selectedCurrency == currency,
+                                onClick = {
+                                    coroutineContext.launch {
+                                        scrollState.animateScrollToItem(0)
+                                    }
+                                    callViewModel(DashboardIntent.SelectCurrency(currency))
+                                },
+                                text = {
+                                    Text(
+                                        text = currency,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
+                                selectedContentColor = MaterialTheme.colorScheme.primary,
+                                unselectedContentColor = disableGrey
+                            )
                         }
-                    }
-
-                    is CurrenciesUiStatus.Error -> {}
-                    CurrenciesUiStatus.Loading -> {
-                        Loader(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(60.dp)
-                        )
                     }
                 }
 
-                when (viewState.transactionsStatus) {
-                    TransactionsUiStatus.Idle -> {
-                        Column {
-                            viewState.transactions?.find { it.currencyCode == viewState.selectedCurrency }
-                                ?.let { activeData ->
-                                    if (activeData.transactions.isNotEmpty()) {
-                                        LazyColumn(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(top = 16.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                                            contentPadding = PaddingValues(
-                                                bottom = (WindowInsets.navigationBars)
-                                                    .only(WindowInsetsSides.Bottom)
-                                                    .asPaddingValues()
-                                                    .calculateBottomPadding() + paddingValues.calculateBottomPadding()
-                                            )
-                                        ) {
-                                            item {
-                                                ExpenseIncomeFilter(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    selectedItems = activeData.selectedTransactionType,
-                                                    onItemClick = {
-                                                        callViewModel(
-                                                            DashboardIntent.ToggleTypeFilter(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                    onSelectAllClick = {
-                                                        callViewModel(
-                                                            DashboardIntent.ToggleAllTypesFilter
-                                                        )
-                                                    }
-                                                )
-                                            }
-
-                                            item {
-                                                CategoriesFilter(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    allCategories = activeData.allCategories,
-                                                    selectedItems = activeData.selectedCategories,
-                                                    onItemClick = {
-                                                        callViewModel(
-                                                            DashboardIntent.ToggleCategoriesFilter(
-                                                                it
-                                                            )
-                                                        )
-                                                    },
-                                                    onSelectAllClick = {
-                                                        callViewModel(
-                                                            DashboardIntent.ToggleAllCategoriesFilter
-                                                        )
-                                                    }
-                                                )
-                                            }
-
-                                            item {
-                                                DashboardTotal(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    totalIncomes = activeData.totalIncomes,
-                                                    totalExpenses = activeData.totalExpenses
-                                                )
-                                            }
-
-                                            if (activeData.filteredTransactionsWithCurrency.isNotEmpty()) {
-                                                item {
-                                                    Text(
-                                                        modifier = Modifier
-                                                            .padding(start = 16.dp, top = 40.dp)
-                                                            .fillMaxWidth(),
-                                                        text = stringResource(R.string.recent_transactions),
-                                                        textAlign = TextAlign.Start,
-                                                        style = MaterialTheme.typography.titleMedium,
-                                                        color = MaterialTheme.colorScheme.onBackground
-                                                    )
-                                                }
-
-                                                items(
-                                                    items = activeData.filteredTransactionsWithCurrency,
-                                                    key = { it.uuid }
-                                                ) { transaction ->
-                                                    ListTransactionItem(
-                                                        modifier = Modifier,
-                                                        transaction = transaction,
-                                                        onEditTransactionClick = onEditTransactionClick,
-                                                        onDeleteTransactionClick = {
-                                                            callViewModel(
-                                                                DashboardIntent.DeleteTransaction(it)
-                                                            )
-                                                        }
-                                                    )
-                                                }
-                                            } else {
-                                                item {
-                                                    Column(
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        verticalArrangement = Arrangement.Center,
-                                                        horizontalAlignment = Alignment.CenterHorizontally
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.size(60.dp),
-                                                            imageVector = Icons.Rounded.Search,
-                                                            contentDescription = "",
-                                                            tint = disableGrey
-                                                        )
-                                                        Text(
-                                                            text = stringResource(R.string.no_data_available),
-                                                            style = MaterialTheme.typography.titleMedium,
-                                                            color = disableGrey
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        Column(
-                                            modifier = Modifier.fillMaxSize(),
-                                            verticalArrangement = Arrangement.Center,
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            Icon(
-                                                modifier = Modifier.size(60.dp),
-                                                imageVector = Icons.Rounded.Search,
-                                                contentDescription = "",
-                                                tint = disableGrey
-                                            )
-
-                                            Text(
-                                                modifier = Modifier,
-                                                text = stringResource(R.string.no_data_available),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = disableGrey
-                                            )
-                                        }
-                                    }
-                                }
-                        }
-                    }
-
-                    is TransactionsUiStatus.Loading -> {
+                // Transactions content area
+                when (viewState.status) {
+                    DashboardUiStatus.LoadingTransactions -> {
+                        // Small loader only for transactions section
                         Box(
-                            Modifier
-                                .fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Loader(Modifier.align(Alignment.Center))
                         }
                     }
 
-                    is TransactionsUiStatus.Error -> {
-                        ErrorBlock(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            message = stringResource(R.string.error_while_loading_occurred)
-                        ) {
-                            viewState.transactionsStatus.lastAction.invoke()
+                    is DashboardUiStatus.Idle -> {
+                        viewState.currentTransactions?.let { activeData ->
+                            if (activeData.transactions.isNotEmpty()) {
+                                LazyColumn(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(top = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                                    contentPadding = PaddingValues(
+                                        bottom = (WindowInsets.navigationBars)
+                                            .only(WindowInsetsSides.Bottom)
+                                            .asPaddingValues()
+                                            .calculateBottomPadding() + paddingValues.calculateBottomPadding()
+                                    )
+                                ) {
+                                    item {
+                                        ExpenseIncomeFilter(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            selectedItems = activeData.selectedTransactionType,
+                                            onItemClick = {
+                                                callViewModel(
+                                                    DashboardIntent.ToggleTypeFilter(
+                                                        it
+                                                    )
+                                                )
+                                            },
+                                            onSelectAllClick = {
+                                                callViewModel(
+                                                    DashboardIntent.ToggleAllTypesFilter
+                                                )
+                                            }
+                                        )
+                                    }
+
+                                    item {
+                                        CategoriesFilter(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            allCategories = activeData.allCategories,
+                                            selectedItems = activeData.selectedCategories,
+                                            onItemClick = {
+                                                callViewModel(
+                                                    DashboardIntent.ToggleCategoriesFilter(
+                                                        it
+                                                    )
+                                                )
+                                            },
+                                            onSelectAllClick = {
+                                                callViewModel(
+                                                    DashboardIntent.ToggleAllCategoriesFilter
+                                                )
+                                            }
+                                        )
+                                    }
+
+                                    item {
+                                        DashboardTotal(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            totalIncomes = activeData.totalIncomes,
+                                            totalExpenses = activeData.totalExpenses
+                                        )
+                                    }
+
+                                    if (activeData.filteredTransactions.isNotEmpty()) {
+                                        item {
+                                            Text(
+                                                modifier = Modifier
+                                                    .padding(start = 16.dp, top = 40.dp)
+                                                    .fillMaxWidth(),
+                                                text = stringResource(R.string.recent_transactions),
+                                                textAlign = TextAlign.Start,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onBackground
+                                            )
+                                        }
+
+                                        items(
+                                            items = activeData.filteredTransactions,
+                                            key = { it.uuid }
+                                        ) { transaction ->
+                                            val deletingTransaction =
+                                                (viewState.status as? DashboardUiStatus.IdleDeletingTransaction)?.transaction
+
+                                            ListTransactionItem(
+                                                modifier = Modifier,
+                                                transaction = transaction,
+                                                isDeleting = deletingTransaction == transaction,
+                                                onEditTransactionClick = onEditTransactionClick,
+                                                onDeleteTransactionClick = {
+                                                    callViewModel(
+                                                        DashboardIntent.DeleteTransaction(it)
+                                                    )
+                                                }
+                                            )
+                                        }
+                                    } else {
+                                        item {
+                                            Column(
+                                                modifier = Modifier.fillMaxSize(),
+                                                verticalArrangement = Arrangement.Center,
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                Icon(
+                                                    modifier = Modifier.size(60.dp),
+                                                    imageVector = Icons.Rounded.Search,
+                                                    contentDescription = "",
+                                                    tint = disableGrey
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.no_data_available),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = disableGrey
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(60.dp),
+                                        imageVector = Icons.Rounded.Search,
+                                        contentDescription = "",
+                                        tint = disableGrey
+                                    )
+
+                                    Text(
+                                        modifier = Modifier,
+                                        text = stringResource(R.string.no_data_available),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = disableGrey
+                                    )
+                                }
+                            }
                         }
+                    }
+
+                    else -> {
+                        // Handle other states if needed
                     }
                 }
             }
@@ -317,7 +322,10 @@ private fun Content(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.BottomEnd
             ) {
-                if (viewState.transactionsStatus !is TransactionsUiStatus.Error) {
+                // Show FAB when not in error or loading states
+                if (viewState.status !is DashboardUiStatus.Error &&
+                    viewState.status != DashboardUiStatus.LoadingAll
+                ) {
                     FloatingActionButton(
                         modifier = Modifier
                             .padding(
@@ -346,6 +354,7 @@ private fun Content(
 private fun ListTransactionItem(
     modifier: Modifier,
     transaction: Transaction,
+    isDeleting: Boolean,
     onEditTransactionClick: (transactionId: String) -> Unit,
     onDeleteTransactionClick: (transaction: Transaction) -> Unit
 ) {
@@ -401,6 +410,7 @@ private fun ListTransactionItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp),
                 transaction = transaction,
+                isDeleting = isDeleting,
                 onEditClick = { onEditTransactionClick(it) }
             )
         }
@@ -413,14 +423,9 @@ private fun Preview() {
     AppTheme {
         Content(
             viewState = DashboardViewState(
-                transactionsStatus = TransactionsUiStatus.Idle,
-                currenciesStatus = CurrenciesUiStatus.Idle,
+                status = DashboardUiStatus.Idle,
                 availableCurrencies = Currency.getAvailableCurrencies().map { it.currencyCode },
                 selectedCurrency = "USD",
-                transactions = listOf(
-                    PreviewMocks.transactionByCurrency,
-                    PreviewMocks.transactionByCurrency
-                )
             ),
             callViewModel = {},
             onAddTransactionClick = {},
