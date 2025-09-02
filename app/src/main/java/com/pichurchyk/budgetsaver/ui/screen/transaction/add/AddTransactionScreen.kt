@@ -48,12 +48,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
@@ -70,7 +73,9 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransac
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionValidationError
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
+import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import org.koin.androidx.compose.koinViewModel
+import java.util.Currency
 
 private enum class BottomSheetState {
     NONE, CATEGORY, CURRENCY
@@ -388,4 +393,19 @@ private fun Content(
             }
         }
     )
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    AppTheme {
+        Content(
+            viewState = AddTransactionViewState(
+                transaction = PreviewMocks.transactionCreation,
+                allCurrencies = Currency.getAvailableCurrencies().toList(),
+            ),
+            callViewModel = {},
+            closeScreen = {}
+        )
+    }
 }

@@ -1,11 +1,9 @@
 package com.pichurchyk.budgetsaver.domain.repository
 
-import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import kotlinx.coroutines.flow.Flow
 import java.util.Currency
 

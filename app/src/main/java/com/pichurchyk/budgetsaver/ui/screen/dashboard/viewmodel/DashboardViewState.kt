@@ -1,8 +1,10 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import java.util.Currency
 
 sealed class DashboardUiStatus {
     data object Idle: DashboardUiStatus()
@@ -17,7 +19,10 @@ sealed class DashboardUiStatus {
 
 data class DashboardViewState(
     val status: DashboardUiStatus = DashboardUiStatus.Idle,
-    val availableCurrencies: List<String> = emptyList(),
-    val selectedCurrency: String? = null,
-    val currentTransactions: TransactionsByCurrency? = null
+    val availableCurrencies: List<Currency> = emptyList(),
+    val selectedCurrency: Currency? = null,
+    val allTransactions: List<Transaction> = emptyList(),
+    val allCategories: List<TransactionCategory?> = emptyList(),
+    val selectedCategories: List<TransactionCategory?> = emptyList(),
+    val selectedTransactionType: List<TransactionType> = TransactionType.entries
 )

@@ -3,12 +3,13 @@ package com.pichurchyk.budgetsaver.ui.common
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.model.user.User
 import com.pichurchyk.budgetsaver.domain.model.user.UserPreferences
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigInteger
@@ -53,13 +54,6 @@ object PreviewMocks {
         )
     )
 
-    val transactionByCurrency = TransactionsByCurrency.create(
-        transactions = listOf(transaction),
-        currencyCode = "BYN",
-        selectedCategories = listOf(category),
-        selectedTransactionType = listOf(TransactionType.EXPENSES),
-    )
-
     val money = Money(
         amountMinor = BigInteger("132123123"),
          currency = "USD"
@@ -75,5 +69,18 @@ object PreviewMocks {
         avatarUrl = "",
         email = "pichurchyk@gmail.com",
         preferences = userPreferences
+    )
+
+    val transactionCreation = TransactionCreation(
+        title = "Title",
+        value = 10.toString(),
+        currency = Currency.getInstance("USD"),
+        notes = "Notes",
+        date = TransactionDate(
+            dateInstant = Clock.System.now(),
+            timeZone = TimeZone.currentSystemDefault()
+        ),
+        type = TransactionType.EXPENSES,
+        mainCategory = category
     )
 }

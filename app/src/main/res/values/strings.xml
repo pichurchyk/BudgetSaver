@@ -11,7 +11,8 @@
     <string name="categories">Categories</string>
     <string name="summary">Summary</string>
     <string name="selected">Selected</string>
-    <string name="no_data_available">There are no data to show</string>
+    <string name="no_filtered_data">Nothing found matching your filter</string>
+    <string name="no_currency_transactions">You dont have transactions with this currency</string>
     <string name="recent_transactions">Recent transactions</string>
     <string name="expenses_by_category">Expenses by category</string>
     <string name="add_transaction">Add transaction</string>
