@@ -98,7 +98,7 @@ val mainModule = module {
 
     single<LoadTransactionUseCase> { LoadTransactionUseCaseImpl(get()) }
 
-    single<AddFavoriteCurrencyUseCase> { AddFavoriteCurrencyUseCaseImpl(get(), get()) }
+    single<AddFavoriteCurrencyUseCase> { AddFavoriteCurrencyUseCaseImpl(get(), get(), get()) }
     single<DeleteFavoriteCurrencyUseCase> { DeleteFavoriteCurrencyUseCaseImpl(get(), get()) }
 
     single<LoadEmojisUseCase> { LoadEmojisUseCaseImpl(get()) }

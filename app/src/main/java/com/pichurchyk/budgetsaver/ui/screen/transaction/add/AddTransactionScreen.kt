@@ -51,13 +51,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
+import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
@@ -66,7 +66,6 @@ import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
 import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.selector.CategorySelector
-import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionIntent
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionUiStatus
@@ -364,6 +363,7 @@ private fun Content(
         bottomBar = {
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(
                         (WindowInsets.navigationBars)
                             .only(WindowInsetsSides.Bottom)
@@ -374,7 +374,7 @@ private fun Content(
             ) {
                 when (viewState.status) {
                     is AddTransactionUiStatus.Loading -> {
-                        Loader()
+                        Loader(modifier = Modifier)
                     }
 
                     else -> {

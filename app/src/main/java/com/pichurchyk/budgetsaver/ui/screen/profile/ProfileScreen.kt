@@ -82,7 +82,7 @@ private fun Content(
             .verticalScroll(rememberScrollState())
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(44.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         ProfileCard(
             modifier = Modifier,

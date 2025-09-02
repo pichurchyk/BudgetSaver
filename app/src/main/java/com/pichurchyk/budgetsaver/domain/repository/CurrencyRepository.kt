@@ -5,4 +5,6 @@ import java.util.Currency
 
 interface CurrencyRepository {
     fun getAllCurrencies(): Flow<List<Currency>>
+
+    suspend fun updateCache()
 }

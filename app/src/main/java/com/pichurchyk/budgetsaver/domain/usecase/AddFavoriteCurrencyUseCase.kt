@@ -2,6 +2,7 @@ package com.pichurchyk.budgetsaver.domain.usecase
 
 import com.pichurchyk.budgetsaver.data.datasource.SessionManager
 import com.pichurchyk.budgetsaver.di.DomainException
+import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,12 +14,15 @@ interface AddFavoriteCurrencyUseCase {
 
 internal class AddFavoriteCurrencyUseCaseImpl(
     private val repository: TransactionsRepository,
+    private val currencyRepository: CurrencyRepository,
     private val sessionManager: SessionManager
 ) : AddFavoriteCurrencyUseCase {
     override suspend fun invoke(currency: Currency) = flow {
         try {
             emit(repository.addFavoriteCurrency(currency)).also {
                 sessionManager.addFavoriteCurrency(currency)
+
+                currencyRepository.updateCache()
             }
         } catch (e: DomainException) {
             throw e
