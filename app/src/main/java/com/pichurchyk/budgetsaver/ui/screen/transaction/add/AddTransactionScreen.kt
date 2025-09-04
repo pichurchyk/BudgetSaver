@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,10 +46,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.CommonButton
@@ -57,6 +58,7 @@ import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.TransactionTypeChip
+import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyButton
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationAction
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
@@ -64,15 +66,16 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
-import com.pichurchyk.budgetsaver.ui.screen.category.CategoryButton
 import com.pichurchyk.budgetsaver.ui.screen.category.selector.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
+import com.pichurchyk.budgetsaver.ui.screen.transaction.TransactionValueInput
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionIntent
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionUiStatus
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionValidationError
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
+import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import org.koin.androidx.compose.koinViewModel
 import java.util.Currency
 
@@ -180,7 +183,6 @@ private fun Content(
     }
 
     Scaffold(
-        modifier = Modifier.imePadding(),
         topBar = {
             CenterAlignedTopAppBar(
                 windowInsets = WindowInsets(top = 0.dp),
@@ -299,8 +301,37 @@ private fun Content(
                     }
                 }
 
-                CommonInput(
+                Row(
                     modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    TransactionValueInput(
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        value = if (transactionData.value.toDoubleOrNull() == 0.0 && transactionData.value.isNotEmpty()) "" else transactionData.value,
+                        error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_AMOUNT),
+                        transactionType = viewState.transaction.type
+                    ) {
+                        callViewModel.invoke(AddTransactionIntent.ChangeValue(it))
+                    }
+
+                    CurrencyButton(
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .clickable {
+                                if (!isLoading) {
+                                    modalBottomSheetState = BottomSheetState.CURRENCY
+                                }
+                            },
+                        value = transactionData.currency.currencyCode
+                    )
+                }
+                CommonInput(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 10.dp),
                     headline = stringResource(R.string.title),
                     value = transactionData.title,
                     placeholder = transactionData.mainCategory?.let { "${transactionData.type.getTitle()} (${transactionData.mainCategory.title})" },
@@ -309,44 +340,46 @@ private fun Content(
                 }
 
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    CommonInput(
-                        modifier = Modifier
-                            .weight(3f)
-                            .focusRequester(focusRequester),
-                        headline = stringResource(R.string.amount),
-                        isOptional = false,
-                        keyboardType = KeyboardType.Decimal,
-                        value = if (transactionData.value.toDoubleOrNull() == 0.0 && transactionData.value.isNotEmpty()) "" else transactionData.value,
-                        error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_AMOUNT),
-                    ) {
-                        callViewModel.invoke(AddTransactionIntent.ChangeValue(it))
+                    val selectedCategory = viewState.transaction.mainCategory
+                    selectedCategory?.let {
+                        TransactionCategoryChip(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .padding(horizontal = 4.dp),
+                            category = it,
+                            isSelected = true
+                        )
+                    } ?: run {
+                        Text(
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .padding(horizontal = 4.dp),
+                            text = "No category",
+                            color = disableGrey,
+                            fontSize = 16.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
-                    CurrencyButton(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(46.dp)
-                            .padding(bottom = 2.dp)
-                            .clickable {
-                                if (!isLoading) {
-                                    modalBottomSheetState = BottomSheetState.CURRENCY
-                                }
-                            },
-                        value = transactionData.currency.currencyCode
-                    )
+                    val buttonText = if (selectedCategory != null) {
+                        stringResource(R.string.change_category)
+                    } else {
+                        stringResource(R.string.select_category)
+                    }
 
-                    CategoryButton(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(bottom = 2.dp)
-                            .clickable(enabled = !isLoading) {
-                                modalBottomSheetState = BottomSheetState.CATEGORY
-                            },
-                        value = transactionData.mainCategory
+                    CommonButton(
+                        modifier = Modifier,
+                        value = buttonText,
+                        onClick = {
+                            modalBottomSheetState = BottomSheetState.CATEGORY
+                        }
                     )
                 }
 

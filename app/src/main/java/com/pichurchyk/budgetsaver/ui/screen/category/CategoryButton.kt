@@ -46,10 +46,9 @@ fun CategoryButton(
 
     Box(
         modifier = modifier
-            .height(46.dp)
             .background(bgColor, RoundedCornerShape(10))
             .border(1.dp, bgColor.copy(0.6f), RoundedCornerShape(10))
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 10.dp, vertical = 14.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(

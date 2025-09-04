@@ -17,7 +17,7 @@ import java.util.Currency
 
 object PreviewMocks {
 
-    val category = TransactionCategory("Food", "🍔", "#FF7043")
+    val category = TransactionCategory("Food", "Food", "🍔", "#FF7043")
 
     val categories = listOf(
         TransactionCategory("Food", "🍔", "#FF7043"),

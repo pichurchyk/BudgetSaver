@@ -37,6 +37,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationHost
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationHostState
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
+import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
 import com.pichurchyk.budgetsaver.ui.ext.resolveTheme
 import com.pichurchyk.budgetsaver.ui.nav.NavHost
@@ -77,7 +78,7 @@ class MainActivity : ComponentActivity() {
 
             AppTheme(darkTheme = isDark) {
                 Scaffold(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                    modifier = Modifier.imePaddingWithoutNavBars(),
                     topBar = {
                         val currentScreen =
                             Screen.screensWithMenu.firstOrNull { currentDestination?.route == it::class.qualifiedName }

@@ -9,6 +9,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -27,6 +32,14 @@ fun Modifier.doOnClick(onClick: () -> Unit): Modifier = composed {
         interactionSource = remember { MutableInteractionSource() }) {
         onClick()
     }
+}
+
+fun Modifier.imePaddingWithoutNavBars(): Modifier = composed {
+    val imeInsets = WindowInsets.ime
+    val navBarInsets = WindowInsets.navigationBars
+    val adjustedImePadding = imeInsets.asPaddingValues().calculateBottomPadding() - navBarInsets.asPaddingValues().calculateBottomPadding()
+
+    this.padding(bottom = maxOf(0.dp, adjustedImePadding))
 }
 
 fun Modifier.shimmerBackground(shape: Shape = RoundedCornerShape(12.dp)): Modifier = composed {

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -31,10 +30,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -43,21 +40,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pichurchyk.budgetsaver.R
+import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
+import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
+import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItem
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.ExpenseIncomeFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.total.DashboardTotal
@@ -69,15 +68,9 @@ import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import com.pichurchyk.budgetsaver.ui.theme.notificationRedDark
 import com.pichurchyk.budgetsaver.ui.theme.notificationRedLight
-import java.util.Currency
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.math.BigInteger
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
-import com.pichurchyk.budgetsaver.domain.model.transaction.Money
-import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
-import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItem
-import com.pichurchyk.budgetsaver.ui.theme.errorLight
+import java.util.Currency
 
 
 @Composable
@@ -228,6 +221,14 @@ private fun Content(
                                 )
                             ) {
                                 item {
+                                    DashboardTotal(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        totalIncomes = totalIncomes,
+                                        totalExpenses = totalExpenses
+                                    )
+                                }
+
+                                item {
                                     ExpenseIncomeFilter(
                                         modifier = Modifier.fillMaxWidth(),
                                         selectedItems = selectedTransactionType,
@@ -259,14 +260,6 @@ private fun Content(
                                                 DashboardIntent.ToggleAllCategoriesFilter
                                             )
                                         }
-                                    )
-                                }
-
-                                item {
-                                    DashboardTotal(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        totalIncomes = totalIncomes,
-                                        totalExpenses = totalExpenses
                                     )
                                 }
 

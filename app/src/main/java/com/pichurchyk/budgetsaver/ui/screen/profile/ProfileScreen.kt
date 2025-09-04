@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -49,14 +47,11 @@ fun ProfileScreen(
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     focusManager.clearFocus()
                 })
-            }
-            .padding(WindowInsets.ime.asPaddingValues())
-    ) {
+            }) {
         Content(
             profileViewState = userViewState,
             categoriesViewState = categoriesViewState,
@@ -79,8 +74,7 @@ private fun Content(
             .padding(
                 top = 16.dp,
             )
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize(),
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -114,11 +108,14 @@ private fun Content(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    start = 16.dp, end = 16.dp, bottom = WindowInsets
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = WindowInsets
                         .navigationBars
                         .only(WindowInsetsSides.Bottom)
                         .asPaddingValues()
                         .calculateBottomPadding()
+                            + 8.dp
                 )
         )
     }
