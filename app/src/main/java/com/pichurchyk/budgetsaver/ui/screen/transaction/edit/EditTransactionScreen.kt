@@ -1,5 +1,10 @@
 package com.pichurchyk.budgetsaver.ui.screen.transaction.edit
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +28,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -64,6 +70,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
+import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
 import com.pichurchyk.budgetsaver.ui.screen.category.selector.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
@@ -310,7 +317,8 @@ private fun Content(
                     )
                 }
 
-                BottomSheetState.NONE -> { /* No sheet visible */ }
+                BottomSheetState.NONE -> { /* No sheet visible */
+                }
             }
 
             Column(
@@ -412,19 +420,38 @@ private fun Content(
                         )
                     }
 
-                    val buttonText = if (selectedCategory != null) {
-                        stringResource(R.string.change_category)
-                    } else {
-                        stringResource(R.string.select_category)
-                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.animateContentSize(
+                            animationSpec = tween()
+                        )
+                    ) {
+                        CommonButton(
+                            modifier = Modifier.padding(end = 16.dp),
+                            value = stringResource(R.string.select_category),
+                            onClick = {
+                                modalBottomSheetState = BottomSheetState.CATEGORY
+                            }
+                        )
 
-                    CommonButton(
-                        modifier = Modifier,
-                        value = buttonText,
-                        onClick = {
-                            modalBottomSheetState = BottomSheetState.CATEGORY
+                        AnimatedVisibility(
+                            visible = selectedCategory != null,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .doOnClick {
+                                        callViewModel(EditTransactionIntent.ChangeCategory(null))
+                                    },
+                                imageVector = Icons.Rounded.Clear,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = stringResource(R.string.clear_category)
+                            )
                         }
-                    )
+                    }
                 }
 
                 CommonInput(

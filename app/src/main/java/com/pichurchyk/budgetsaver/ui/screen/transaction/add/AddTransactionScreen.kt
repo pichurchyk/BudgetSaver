@@ -1,5 +1,10 @@
 package com.pichurchyk.budgetsaver.ui.screen.transaction.add
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -12,15 +17,18 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,13 +45,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +76,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationController
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationEvent
 import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
+import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
 import com.pichurchyk.budgetsaver.ui.screen.category.selector.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
@@ -76,6 +88,8 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransac
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.Currency
 
@@ -153,6 +167,7 @@ fun AddTransactionScreen(
             viewState = viewState,
             callViewModel = { viewModel.handleIntent(it) },
             closeScreen = closeScreen,
+            focusManager = focusManager
         )
     }
 }
@@ -162,8 +177,14 @@ fun AddTransactionScreen(
 private fun Content(
     viewState: AddTransactionViewState,
     callViewModel: (AddTransactionIntent) -> Unit,
+    focusManager: FocusManager,
     closeScreen: () -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
+    val density = LocalDensity.current
+    val coroutineScope = rememberCoroutineScope()
+    val insets = WindowInsets.ime.getBottom(density)
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
 
@@ -294,6 +315,7 @@ private fun Content(
                             value = type,
                             onClick = {
                                 if (!isLoading) {
+                                    focusManager.clearFocus(true)
                                     callViewModel.invoke(AddTransactionIntent.ChangeType(type))
                                 }
                             }
@@ -368,19 +390,48 @@ private fun Content(
                         )
                     }
 
-                    val buttonText = if (selectedCategory != null) {
-                        stringResource(R.string.change_category)
-                    } else {
-                        stringResource(R.string.select_category)
-                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.animateContentSize(
+                            animationSpec = tween()
+                        )
+                    ) {
+                        CommonButton(
+                            modifier = Modifier.padding(end = 16.dp),
+                            value = stringResource(R.string.select_category),
+                            onClick = {
+                                coroutineScope.launch {
+                                    focusManager.clearFocus(true)
 
-                    CommonButton(
-                        modifier = Modifier,
-                        value = buttonText,
-                        onClick = {
-                            modalBottomSheetState = BottomSheetState.CATEGORY
+                                    while (insets > 0) {
+                                        delay(16)
+                                    }
+
+                                    modalBottomSheetState = BottomSheetState.CATEGORY
+
+                                }
+                            }
+                        )
+
+                        AnimatedVisibility(
+                            visible = selectedCategory != null,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .doOnClick {
+                                        focusManager.clearFocus(true)
+                                        callViewModel(AddTransactionIntent.ChangeCategory(null))
+                                    },
+                                imageVector = Icons.Rounded.Clear,
+                                tint = MaterialTheme.colorScheme.primary,
+                                contentDescription = stringResource(R.string.clear_category)
+                            )
                         }
-                    )
+                    }
                 }
 
                 CommonInput(
@@ -438,7 +489,8 @@ private fun Preview() {
                 allCurrencies = Currency.getAvailableCurrencies().toList(),
             ),
             callViewModel = {},
-            closeScreen = {}
+            closeScreen = {},
+            focusManager = LocalFocusManager.current
         )
     }
 }
