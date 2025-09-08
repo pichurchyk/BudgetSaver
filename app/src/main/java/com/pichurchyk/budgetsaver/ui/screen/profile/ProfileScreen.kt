@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.screen.currency.FavoriteCurrenciesSelector
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileCategoriesViewState
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileIntent
@@ -74,6 +75,7 @@ private fun Content(
             .padding(
                 top = 16.dp,
             )
+            .imePaddingWithoutNavBars()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp)

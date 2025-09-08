@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -48,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -72,6 +75,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
+import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.screen.category.selector.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
 import com.pichurchyk.budgetsaver.ui.screen.transaction.TransactionValueInput
@@ -114,15 +118,17 @@ fun EditTransactionScreen(
             viewState = viewState,
             callViewModel = { viewModel.handleIntent(it) },
             closeScreen = closeScreen,
+            focusManager = focusManager
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun Content(
     viewState: EditTransactionViewState,
     callViewModel: (EditTransactionIntent) -> Unit,
+    focusManager: FocusManager,
     closeScreen: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -132,6 +138,26 @@ private fun Content(
     val isLoading = viewState.status is EditTransactionUiStatus.Loading
 
     val context = LocalContext.current
+
+
+    var pendingSheet by remember { mutableStateOf<BottomSheetState?>(null) }
+    val isKeyboardVisible = WindowInsets.isImeVisible
+
+    LaunchedEffect(isKeyboardVisible) {
+        if (!isKeyboardVisible && pendingSheet != null) {
+            modalBottomSheetState = pendingSheet!!
+            pendingSheet = null
+        }
+    }
+
+    fun showBottomSheet(sheetType: BottomSheetState) {
+        focusManager.clearFocus()
+        if (!isKeyboardVisible) {
+            modalBottomSheetState = sheetType
+        } else {
+            pendingSheet = sheetType
+        }
+    }
 
     LaunchedEffect(viewState.status) {
         when (val uiStatus = viewState.status) {
@@ -186,7 +212,7 @@ private fun Content(
             }
 
             is EditTransactionUiStatus.Deleting -> {
-                modalBottomSheetState = BottomSheetState.DELETE_TRANSACTION
+                showBottomSheet(BottomSheetState.DELETE_TRANSACTION)
             }
 
             else -> {}
@@ -194,6 +220,7 @@ private fun Content(
     }
 
     Scaffold(
+        modifier = Modifier.imePaddingWithoutNavBars(),
         topBar = {
             CenterAlignedTopAppBar(
                 windowInsets = WindowInsets(top = 0.dp),
@@ -373,7 +400,7 @@ private fun Content(
                             .wrapContentWidth()
                             .clickable {
                                 if (!isLoading) {
-                                    modalBottomSheetState = BottomSheetState.CURRENCY
+                                    showBottomSheet(BottomSheetState.CURRENCY)
                                 }
                             },
                         value = transactionData.currency.currencyCode
@@ -431,7 +458,9 @@ private fun Content(
                             modifier = Modifier.padding(end = 16.dp),
                             value = stringResource(R.string.select_category),
                             onClick = {
-                                modalBottomSheetState = BottomSheetState.CATEGORY
+                                if (!isLoading) {
+                                    showBottomSheet(BottomSheetState.CATEGORY)
+                                }
                             }
                         )
 

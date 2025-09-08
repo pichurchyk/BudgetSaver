@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -78,6 +80,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.getTitle
+import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.screen.category.selector.CategorySelector
 import com.pichurchyk.budgetsaver.ui.screen.currency.CurrencySelector
 import com.pichurchyk.budgetsaver.ui.screen.transaction.TransactionValueInput
@@ -88,8 +91,6 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransac
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import com.pichurchyk.budgetsaver.ui.theme.disableGrey
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.Currency
 
@@ -127,7 +128,6 @@ fun AddTransactionScreen(
                             name = context.getString(R.string.retry),
                             action = {
                                 uiStatus.lastAction.invoke()
-
                                 viewModel.handleIntent(AddTransactionIntent.DismissNotification)
                             }
                         )
@@ -172,7 +172,7 @@ fun AddTransactionScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun Content(
     viewState: AddTransactionViewState,
@@ -180,11 +180,6 @@ private fun Content(
     focusManager: FocusManager,
     closeScreen: () -> Unit,
 ) {
-    val focusManager = LocalFocusManager.current
-    val density = LocalDensity.current
-    val coroutineScope = rememberCoroutineScope()
-    val insets = WindowInsets.ime.getBottom(density)
-
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var modalBottomSheetState by remember { mutableStateOf(BottomSheetState.NONE) }
 
@@ -192,18 +187,36 @@ private fun Content(
     val isLoading = viewState.status is AddTransactionUiStatus.Loading
 
     val focusRequester = remember { FocusRequester() }
-
     var isInitialFocusTriggered by remember { mutableStateOf(false) }
+
+    var pendingSheet by remember { mutableStateOf<BottomSheetState?>(null) }
+    val isKeyboardVisible = WindowInsets.isImeVisible
+
+    LaunchedEffect(isKeyboardVisible) {
+        if (!isKeyboardVisible && pendingSheet != null) {
+            modalBottomSheetState = pendingSheet!!
+            pendingSheet = null
+        }
+    }
+
+    fun showBottomSheet(sheetType: BottomSheetState) {
+        focusManager.clearFocus()
+        if (!isKeyboardVisible) {
+            modalBottomSheetState = sheetType
+        } else {
+            pendingSheet = sheetType
+        }
+    }
 
     LaunchedEffect(viewState.status) {
         if (viewState.status == AddTransactionUiStatus.Idle && !isInitialFocusTriggered) {
             focusRequester.requestFocus()
-
             isInitialFocusTriggered = true
         }
     }
 
     Scaffold(
+        modifier = Modifier.imePaddingWithoutNavBars(),
         topBar = {
             CenterAlignedTopAppBar(
                 windowInsets = WindowInsets(top = 0.dp),
@@ -250,7 +263,7 @@ private fun Content(
                                     .wrapContentHeight(),
                                 selectedValues = selectedValues,
                                 onValuesSelected = {
-                                    callViewModel.invoke(AddTransactionIntent.ChangeCategory(it.firstOrNull())) // Use firstOrNull for safety
+                                    callViewModel.invoke(AddTransactionIntent.ChangeCategory(it.firstOrNull()))
                                     modalBottomSheetState = BottomSheetState.NONE
                                 },
                                 isMultiSelect = false,
@@ -285,8 +298,7 @@ private fun Content(
                     )
                 }
 
-                BottomSheetState.NONE -> { /* No sheet visible */
-                }
+                BottomSheetState.NONE -> {}
             }
 
             Column(
@@ -343,13 +355,12 @@ private fun Content(
                         modifier = Modifier
                             .wrapContentWidth()
                             .clickable {
-                                if (!isLoading) {
-                                    modalBottomSheetState = BottomSheetState.CURRENCY
-                                }
+                                showBottomSheet(BottomSheetState.CURRENCY)
                             },
                         value = transactionData.currency.currencyCode
                     )
                 }
+
                 CommonInput(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -369,6 +380,7 @@ private fun Content(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val selectedCategory = viewState.transaction.mainCategory
+
                     selectedCategory?.let {
                         TransactionCategoryChip(
                             modifier = Modifier
@@ -401,16 +413,7 @@ private fun Content(
                             modifier = Modifier.padding(end = 16.dp),
                             value = stringResource(R.string.select_category),
                             onClick = {
-                                coroutineScope.launch {
-                                    focusManager.clearFocus(true)
-
-                                    while (insets > 0) {
-                                        delay(16)
-                                    }
-
-                                    modalBottomSheetState = BottomSheetState.CATEGORY
-
-                                }
+                                showBottomSheet(BottomSheetState.CATEGORY)
                             }
                         )
 
@@ -448,11 +451,7 @@ private fun Content(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        (WindowInsets.navigationBars)
-                            .only(WindowInsetsSides.Bottom)
-                            .asPaddingValues()
-                    )
+                    .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.Center
             ) {

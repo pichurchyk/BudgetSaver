@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
 
             AppTheme(darkTheme = isDark) {
                 Scaffold(
-                    modifier = Modifier.imePaddingWithoutNavBars(),
+                    modifier = Modifier,
                     topBar = {
                         val currentScreen =
                             Screen.screensWithMenu.firstOrNull { currentDestination?.route == it::class.qualifiedName }
