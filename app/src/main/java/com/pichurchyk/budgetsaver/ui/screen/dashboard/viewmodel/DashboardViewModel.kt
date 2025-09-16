@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
@@ -40,7 +41,16 @@ class DashboardViewModel(
             is DashboardIntent.ToggleCategoriesFilter -> toggleCategoriesFilter(intent.category)
             is DashboardIntent.SelectCurrency -> selectCurrency(intent.currency)
             is DashboardIntent.DeleteTransaction -> deleteTransaction(intent.transaction)
+            is DashboardIntent.ChangeDateRange -> changeDateRange(intent.dateRange)
             is DashboardIntent.Init -> loadCurrencies()
+        }
+    }
+
+    private fun changeDateRange(
+        dateRange: Pair<TransactionDate?, TransactionDate?>
+    ) {
+        _state.update {
+            it.copy(datePeriod = dateRange)
         }
     }
 
@@ -161,13 +171,20 @@ class DashboardViewModel(
                     .collect { data ->
                         val categories = data.map { it.mainCategory }.distinct()
 
+                        val oldestTransactionDate =
+                            data.minByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date
+
+                        val newestTransactionDate =
+                            data.maxByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date
+
                         _state.update {
                             it.copy(
                                 status = DashboardUiStatus.Idle,
                                 allTransactions = data,
                                 allCategories = categories,
                                 selectedCategories = categories,
-                                selectedTransactionType = TransactionType.entries
+                                selectedTransactionType = TransactionType.entries,
+                                datePeriod = oldestTransactionDate to newestTransactionDate
                             )
                         }
                     }

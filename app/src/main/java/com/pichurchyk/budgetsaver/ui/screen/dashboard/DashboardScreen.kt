@@ -1,6 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,13 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -29,17 +33,21 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +65,8 @@ import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItem
+import com.pichurchyk.budgetsaver.ui.screen.dashboard.calendar.DashboardCalendarButton
+import com.pichurchyk.budgetsaver.ui.screen.dashboard.calendar.DashboardDateRangeCalendar
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.ExpenseIncomeFilter
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.total.DashboardTotal
@@ -100,6 +110,8 @@ private fun Content(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    var showCalendar by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         callViewModel(DashboardIntent.Init)
     }
@@ -128,11 +140,13 @@ private fun Content(
     val selectedCategories = viewState.selectedCategories
     val selectedTransactionType = viewState.selectedTransactionType
     val selectedCurrency = viewState.selectedCurrency
+    val datePeriod = viewState.datePeriod
 
     val filteredTransactions by remember(
         allTransactions,
         selectedCategories,
-        selectedTransactionType
+        selectedTransactionType,
+        datePeriod
     ) {
         derivedStateOf {
             allTransactions
@@ -144,8 +158,18 @@ private fun Content(
                         else -> TransactionType.EXPENSES in selectedTransactionType
                     }
                 }
+                .filter { tx ->
+                    val (from, to) = datePeriod
+                    when {
+                        from == null && to == null -> true // no filter
+                        from != null && to == null -> tx.date.dateInstant >= from.dateInstant
+                        from == null && to != null -> tx.date.dateInstant <= to.dateInstant
+                        else -> tx.date.dateInstant in from!!.dateInstant..to!!.dateInstant
+                    }
+                }
         }
     }
+
 
     val totalIncomes by remember(filteredTransactions, selectedCurrency) {
         derivedStateOf {
@@ -170,6 +194,29 @@ private fun Content(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         content = { paddingValues ->
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+
+            if (showCalendar) {
+                ModalBottomSheet(
+                    modifier = Modifier
+                        .padding(
+                            top = (WindowInsets.statusBars.asPaddingValues()
+                                .calculateTopPadding())
+                        ),
+                    sheetState = sheetState,
+                    onDismissRequest = { showCalendar = false },
+                    content = {
+                        DashboardDateRangeCalendar(
+                            modifier = Modifier,
+                            selectedDates = viewState.datePeriod,
+                            onDatesSelected = {
+                                callViewModel(DashboardIntent.ChangeDateRange(it))
+                            }
+                        )
+                    }
+                )
+            }
+
             Column {
                 if (viewState.availableCurrencies.isNotEmpty()) {
                     LazyRow(
@@ -220,6 +267,17 @@ private fun Content(
                                         .calculateBottomPadding() + paddingValues.calculateBottomPadding()
                                 )
                             ) {
+                                item {
+                                    DashboardCalendarButton(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                showCalendar = true
+                                            },
+                                        dateRange = viewState.datePeriod,
+                                    )
+                                }
+
                                 item {
                                     DashboardTotal(
                                         modifier = Modifier.fillMaxWidth(),

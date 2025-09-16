@@ -3,6 +3,7 @@ package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.util.Currency
 
@@ -24,5 +25,6 @@ data class DashboardViewState(
     val allTransactions: List<Transaction> = emptyList(),
     val allCategories: List<TransactionCategory?> = emptyList(),
     val selectedCategories: List<TransactionCategory?> = emptyList(),
-    val selectedTransactionType: List<TransactionType> = TransactionType.entries
+    val selectedTransactionType: List<TransactionType> = TransactionType.entries,
+    val datePeriod: Pair<TransactionDate?, TransactionDate?> = null to null,
 )

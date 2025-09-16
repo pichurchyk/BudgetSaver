@@ -2,6 +2,7 @@ package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.util.Currency
 
@@ -19,4 +20,6 @@ sealed class DashboardIntent {
     data class SelectCurrency(val currency: Currency): DashboardIntent()
 
     data class DeleteTransaction(val transaction: Transaction): DashboardIntent()
+
+    data class ChangeDateRange(val dateRange: Pair<TransactionDate?, TransactionDate?>): DashboardIntent()
 }
