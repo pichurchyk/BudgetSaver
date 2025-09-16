@@ -2,9 +2,11 @@ package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import java.math.BigInteger
 import java.util.Currency
 
 sealed class DashboardUiStatus {
@@ -22,7 +24,11 @@ data class DashboardViewState(
     val status: DashboardUiStatus = DashboardUiStatus.Idle,
     val availableCurrencies: List<Currency> = emptyList(),
     val selectedCurrency: Currency? = null,
-    val allTransactions: List<Transaction> = emptyList(),
+
+    val filteredTransactions: List<Transaction> = emptyList(),
+    val totalIncomes: Money = Money(BigInteger.ZERO, ""),
+    val totalExpenses: Money = Money(BigInteger.ZERO, ""),
+
     val allCategories: List<TransactionCategory?> = emptyList(),
     val selectedCategories: List<TransactionCategory?> = emptyList(),
     val selectedTransactionType: List<TransactionType> = TransactionType.entries,

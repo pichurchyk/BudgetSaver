@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -43,7 +41,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,9 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pichurchyk.budgetsaver.R
-import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
 import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
@@ -79,7 +74,6 @@ import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import com.pichurchyk.budgetsaver.ui.theme.notificationRedDark
 import com.pichurchyk.budgetsaver.ui.theme.notificationRedLight
 import org.koin.androidx.compose.koinViewModel
-import java.math.BigInteger
 import java.util.Currency
 
 
@@ -136,60 +130,14 @@ private fun Content(
         return
     }
 
-    val allTransactions = viewState.allTransactions
+    // No more filtering logic - just use the data from viewState
+    val filteredTransactions = viewState.filteredTransactions
     val selectedCategories = viewState.selectedCategories
     val selectedTransactionType = viewState.selectedTransactionType
     val selectedCurrency = viewState.selectedCurrency
     val datePeriod = viewState.datePeriod
-
-    val filteredTransactions by remember(
-        allTransactions,
-        selectedCategories,
-        selectedTransactionType,
-        datePeriod
-    ) {
-        derivedStateOf {
-            allTransactions
-                .filter { it.mainCategory in selectedCategories }
-                .filter { tx ->
-                    when {
-                        selectedTransactionType.containsAll(TransactionType.entries) -> true
-                        tx.value.amountMinor >= BigInteger("0") -> TransactionType.INCOMES in selectedTransactionType
-                        else -> TransactionType.EXPENSES in selectedTransactionType
-                    }
-                }
-                .filter { tx ->
-                    val (from, to) = datePeriod
-                    when {
-                        from == null && to == null -> true // no filter
-                        from != null && to == null -> tx.date.dateInstant >= from.dateInstant
-                        from == null && to != null -> tx.date.dateInstant <= to.dateInstant
-                        else -> tx.date.dateInstant in from!!.dateInstant..to!!.dateInstant
-                    }
-                }
-        }
-    }
-
-
-    val totalIncomes by remember(filteredTransactions, selectedCurrency) {
-        derivedStateOf {
-            Money(
-                filteredTransactions.filter { it.value.amountMinor > BigInteger("0") }
-                    .sumOf { it.value.amountMinor },
-                selectedCurrency?.currencyCode ?: ""
-            )
-        }
-    }
-
-    val totalExpenses by remember(filteredTransactions, selectedCurrency) {
-        derivedStateOf {
-            Money(
-                filteredTransactions.filter { it.value.amountMinor < BigInteger("0") }
-                    .sumOf { it.value.amountMinor },
-                selectedCurrency?.currencyCode ?: ""
-            )
-        }
-    }
+    val totalIncomes = viewState.totalIncomes
+    val totalExpenses = viewState.totalExpenses
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -253,7 +201,8 @@ private fun Content(
                     }
 
                     is DashboardUiStatus.Idle, is DashboardUiStatus.IdleDeletingTransaction -> {
-                        if (allTransactions.isNotEmpty()) {
+                        // Check if we have any transactions at all (based on categories)
+                        if (viewState.allCategories.isNotEmpty()) {
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -503,7 +452,6 @@ private fun Preview() {
                 status = DashboardUiStatus.Idle,
                 availableCurrencies = Currency.getAvailableCurrencies().toList(),
                 selectedCurrency = Currency.getInstance("USD"),
-                allTransactions = listOf(PreviewMocks.transaction)
             ),
             callViewModel = {},
             onAddTransactionClick = {},

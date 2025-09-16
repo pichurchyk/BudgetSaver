@@ -5,17 +5,24 @@ import androidx.lifecycle.viewModelScope
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 import java.util.Currency
 
 class DashboardViewModel(
@@ -24,13 +31,41 @@ class DashboardViewModel(
     private val currencyRepository: CurrencyRepository
 ) : ViewModel() {
 
+    private var allTransactions: List<Transaction> = emptyList()
+
     private val _state: MutableStateFlow<DashboardViewState> =
         MutableStateFlow(
             DashboardViewState(
                 status = DashboardUiStatus.LoadingAll,
             )
         )
-    val state = _state.asStateFlow()
+
+    val state = _state
+        .map { viewState ->
+            // Compute filtered data on background thread
+            val filteredTransactions = filterTransactions(
+                allTransactions, // Use internal field, not viewState
+                viewState.selectedCategories,
+                viewState.selectedTransactionType,
+                viewState.datePeriod
+            )
+
+            val totalIncomes = calculateTotalIncomes(filteredTransactions, viewState.selectedCurrency)
+            val totalExpenses = calculateTotalExpenses(filteredTransactions, viewState.selectedCurrency)
+
+            // Return updated state with computed values
+            viewState.copy(
+                filteredTransactions = filteredTransactions,
+                totalIncomes = totalIncomes,
+                totalExpenses = totalExpenses
+            )
+        }
+        .flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = DashboardViewState(status = DashboardUiStatus.LoadingAll)
+        )
 
     fun handleIntent(intent: DashboardIntent) {
         when (intent) {
@@ -44,6 +79,54 @@ class DashboardViewModel(
             is DashboardIntent.ChangeDateRange -> changeDateRange(intent.dateRange)
             is DashboardIntent.Init -> loadCurrencies()
         }
+    }
+
+    private suspend fun filterTransactions(
+        allTransactions: List<Transaction>,
+        selectedCategories: List<TransactionCategory?>,
+        selectedTransactionType: List<TransactionType>,
+        datePeriod: Pair<TransactionDate?, TransactionDate?>
+    ): List<Transaction> {
+        return allTransactions
+            .filter { it.mainCategory in selectedCategories }
+            .filter { tx ->
+                when {
+                    selectedTransactionType.containsAll(TransactionType.entries) -> true
+                    tx.value.amountMinor >= BigInteger("0") -> TransactionType.INCOMES in selectedTransactionType
+                    else -> TransactionType.EXPENSES in selectedTransactionType
+                }
+            }
+            .filter { tx ->
+                val (from, to) = datePeriod
+                when {
+                    from == null && to == null -> true // no filter
+                    from != null && to == null -> tx.date.dateInstant >= from.dateInstant
+                    from == null && to != null -> tx.date.dateInstant <= to.dateInstant
+                    else -> tx.date.dateInstant in from!!.dateInstant..to!!.dateInstant
+                }
+            }
+    }
+
+    private suspend fun calculateTotalIncomes(
+        filteredTransactions: List<Transaction>,
+        selectedCurrency: Currency?
+    ): Money {
+        return Money(
+            filteredTransactions.filter { it.value.amountMinor > BigInteger("0") }
+                .sumOf { it.value.amountMinor },
+            selectedCurrency?.currencyCode ?: ""
+        )
+    }
+
+    private suspend fun calculateTotalExpenses(
+        filteredTransactions: List<Transaction>,
+        selectedCurrency: Currency?
+    ): Money {
+        return Money(
+            filteredTransactions.filter { it.value.amountMinor < BigInteger("0") }
+                .sumOf { it.value.amountMinor },
+            selectedCurrency?.currencyCode ?: ""
+        )
     }
 
     private fun changeDateRange(
@@ -78,8 +161,10 @@ class DashboardViewModel(
                         selectCurrency(currencies.first())
                     } else {
                         _state.update {
-                            it.copy(selectedCurrency = null, allTransactions = emptyList())
+                            it.copy(selectedCurrency = null)
                         }
+                        // Clear internal data when no currency
+                        allTransactions = emptyList()
                     }
                 }
         }
@@ -153,7 +238,7 @@ class DashboardViewModel(
     }
 
     private fun loadData() {
-        state.value.selectedCurrency?.let { selectedCurrency ->
+        _state.value.selectedCurrency?.let { selectedCurrency ->
             viewModelScope.launch {
                 getTransactionsUseCase.invoke(selectedCurrency.currencyCode)
                     .onStart {
@@ -169,6 +254,9 @@ class DashboardViewModel(
                         }
                     }
                     .collect { data ->
+                        // Store all transactions internally
+                        allTransactions = data
+
                         val categories = data.map { it.mainCategory }.distinct()
 
                         val oldestTransactionDate =
@@ -180,7 +268,6 @@ class DashboardViewModel(
                         _state.update {
                             it.copy(
                                 status = DashboardUiStatus.Idle,
-                                allTransactions = data,
                                 allCategories = categories,
                                 selectedCategories = categories,
                                 selectedTransactionType = TransactionType.entries,
