@@ -90,29 +90,29 @@ internal class TransactionsRepositoryImpl(
             .toDomain()
 
         val currencyCode = transaction.currency.currencyCode
-        transactionsCache[currencyCode]?.let { cached ->
-            transactionsCache[currencyCode] = cached + newTransaction
-        }
+        val cached = transactionsCache[currencyCode].orEmpty()
+        transactionsCache[currencyCode] = cached + newTransaction
     }
 
     override suspend fun editTransaction(transactionId: String, transaction: TransactionCreation) {
         val updatedTransaction = transactionsDataSource.editTransaction(
             transactionId = transactionId,
             transaction.toPayload()
-        )
+        ).toDomain()
 
-        val currencyCode = transaction.currency.currencyCode
-        transactionsCache[currencyCode]?.let { cached ->
-            val updatedList = cached.map { cachedTransaction ->
-                if (cachedTransaction.uuid == transactionId) {
-                    updatedTransaction.toDomain()
-                } else {
-                    cachedTransaction
+        transactionsCache.forEach { (currencyCode, cached) ->
+            if (cached.any { it.uuid == transactionId }) {
+                transactionsCache[currencyCode] = cached.mapNotNull {
+                    if (it.uuid == transactionId) null else it
                 }
             }
-            transactionsCache[currencyCode] = updatedList
         }
+
+        val newCurrencyCode = updatedTransaction.value.currency
+        val existing = transactionsCache[newCurrencyCode] ?: emptyList()
+        transactionsCache[newCurrencyCode] = existing + updatedTransaction
     }
+
 
     override suspend fun deleteTransaction(transactionId: String) {
         transactionsDataSource.deleteTransaction(transactionId = transactionId)

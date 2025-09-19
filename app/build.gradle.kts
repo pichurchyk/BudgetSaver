@@ -64,11 +64,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -76,9 +76,20 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += setOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "META-INF/NOTICE.md",
+                "META-INF/DEPENDENCIES",
+                "META-INF/*.kotlin_module"
+            )
         }
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 dependencies {
@@ -115,15 +126,6 @@ dependencies {
     // Datastore (Shared Preferences)
     implementation(libs.androidx.datastore.preferences)
 
-    // Testing (Shared across modules)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
     // Lifecycle & Core
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
@@ -155,4 +157,10 @@ dependencies {
 
     // Color picker
     implementation(libs.compose.colorpicker)
+
+    // Test
+    implementation(libs.junit.jupiter)
+    implementation(libs.mockk)
+    implementation(libs.coroutines.test)
+    implementation(libs.turbine)
 }

@@ -34,9 +34,11 @@ class CurrencyRepositoryImpl(
                 val favoritesSet = favoriteCurrencies.toSet()
                 val (favoritesInList, otherCurrencies) = allCurrencies.partition { it in favoritesSet }
 
-                val sortedFavorites = favoriteCurrencies.filter { it in favoritesInList }
+                val sortedFavorites = favoritesInList.sortedBy { it.displayName }
+
                 val currenciesWithFavoriteFirst = (sortedFavorites + otherCurrencies).distinct()
 
+                cachedCurrencies.clear()
                 cachedCurrencies.addAll(currenciesWithFavoriteFirst)
                 currenciesWithFavoriteFirst
             }
