@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier,
                     topBar = {
                         val currentScreen =
-                            Screen.screensWithMenu.firstOrNull { currentDestination?.route == it::class.qualifiedName }
+                            Screen.screensWithMenu.firstOrNull { currentDestination?.route?.contains(it::class.qualifiedName!!) == true }
 
                         currentScreen?.let { currentScreen ->
                             if (currentScreen != Screen.Auth) {
