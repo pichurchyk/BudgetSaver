@@ -163,7 +163,6 @@ class DashboardViewModel(
                         _state.update {
                             it.copy(selectedCurrency = null)
                         }
-                        // Clear internal data when no currency
                         allTransactions = emptyList()
                     }
                 }

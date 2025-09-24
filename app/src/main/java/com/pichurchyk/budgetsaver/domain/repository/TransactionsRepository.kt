@@ -25,8 +25,4 @@ internal interface TransactionsRepository {
 
     suspend fun deleteTransaction(transactionId: String)
 
-    suspend fun addFavoriteCurrency(currency: Currency)
-
-    suspend fun deleteFavoriteCurrency(currency: Currency)
-
 }

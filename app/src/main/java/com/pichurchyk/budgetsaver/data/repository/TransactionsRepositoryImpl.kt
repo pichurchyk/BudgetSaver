@@ -125,11 +125,4 @@ internal class TransactionsRepositoryImpl(
             }
         }
     }
-
-    override suspend fun addFavoriteCurrency(currency: Currency) =
-        transactionsDataSource.addFavoriteCurrency(currency)
-
-    override suspend fun deleteFavoriteCurrency(currency: Currency) =
-        transactionsDataSource.removeFavoriteCurrency(currency)
-
 }

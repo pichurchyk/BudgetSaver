@@ -68,7 +68,7 @@ val mainModule = module {
     single<SignInUseCase> { SignInUseCaseImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<EmojiRepository> { EmojiRepositoryImpl(get()) }
-    single<CurrencyRepository> { CurrencyRepositoryImpl(get()) }
+    single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }
     single { AuthDataSource(get(), get(), get()) }
 
     single<AuthPreferencesActions> { AuthPreferences(get()) }
@@ -98,7 +98,7 @@ val mainModule = module {
 
     single<LoadTransactionUseCase> { LoadTransactionUseCaseImpl(get()) }
 
-    single<AddFavoriteCurrencyUseCase> { AddFavoriteCurrencyUseCaseImpl(get(), get(), get()) }
+    single<AddFavoriteCurrencyUseCase> { AddFavoriteCurrencyUseCaseImpl(get(), get()) }
     single<DeleteFavoriteCurrencyUseCase> { DeleteFavoriteCurrencyUseCaseImpl(get(), get()) }
 
     single<LoadEmojisUseCase> { LoadEmojisUseCaseImpl(get()) }

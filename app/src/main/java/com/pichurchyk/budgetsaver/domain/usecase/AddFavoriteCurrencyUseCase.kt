@@ -9,25 +9,21 @@ import kotlinx.coroutines.flow.flow
 import java.util.Currency
 
 interface AddFavoriteCurrencyUseCase {
-    suspend fun invoke(currency: Currency): Flow<Unit>
+    suspend fun invoke(currency: Currency): Flow<List<Currency>>
 }
 
 internal class AddFavoriteCurrencyUseCaseImpl(
-    private val repository: TransactionsRepository,
-    private val currencyRepository: CurrencyRepository,
+    private val repository: CurrencyRepository,
     private val sessionManager: SessionManager
 ) : AddFavoriteCurrencyUseCase {
-    override suspend fun invoke(currency: Currency) = flow {
+    override suspend fun invoke(currency: Currency) =
         try {
-            emit(repository.addFavoriteCurrency(currency)).also {
+            repository.addFavoriteCurrency(currency).also {
                 sessionManager.addFavoriteCurrency(currency)
-
-                currencyRepository.updateCache()
             }
         } catch (e: DomainException) {
             throw e
         } catch (e: Exception) {
             throw DomainException.UnknownApiException(cause = e)
         }
-    }
 }
