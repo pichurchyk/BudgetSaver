@@ -108,6 +108,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor2)
     implementation(libs.vico.compose)
+    debugImplementation("androidx.compose.ui:ui-tooling:1.8.0")
+
 
     // Networking (Ktor)
     implementation(libs.ktor.client.core)

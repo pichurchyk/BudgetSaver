@@ -27,6 +27,7 @@ import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.screen.currency.FavoriteCurrenciesSelector
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileCategoriesViewState
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileIntent
+import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfilePresetsViewState
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileUserViewState
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileViewModel
 import com.pichurchyk.budgetsaver.ui.screen.themeselector.AppThemeSelector
@@ -35,12 +36,14 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
-    openAddCategory: () -> Unit
+    openAddCategory: () -> Unit,
+    openAddPreset: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
     val userViewState by viewModel.userViewState.collectAsState()
     val categoriesViewState by viewModel.categoriesViewState.collectAsState()
+    val presetsViewState by viewModel.presetsViewState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.handleIntent(ProfileIntent.InitLoad)
@@ -57,7 +60,9 @@ fun ProfileScreen(
             profileViewState = userViewState,
             categoriesViewState = categoriesViewState,
             callViewModel = { viewModel.handleIntent(it) },
-            onAddCategoryClick = openAddCategory
+            onAddCategoryClick = openAddCategory,
+            presetsViewState = presetsViewState,
+            onAddPresetClick = openAddPreset
         )
     }
 }
@@ -67,8 +72,10 @@ fun ProfileScreen(
 private fun Content(
     profileViewState: ProfileUserViewState,
     categoriesViewState: ProfileCategoriesViewState,
+    presetsViewState: ProfilePresetsViewState,
     callViewModel: (ProfileIntent) -> Unit,
-    onAddCategoryClick: () -> Unit
+    onAddCategoryClick: () -> Unit,
+    onAddPresetClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -103,6 +110,23 @@ private fun Content(
             },
             onAddCategoryClick = {
                 onAddCategoryClick()
+            }
+        )
+
+        ProfilePresets(
+            modifier = Modifier,
+            viewState = presetsViewState,
+            onChipClicked = {
+
+            },
+            onSearchValueChanged = {
+                callViewModel.invoke(ProfileIntent.ChangeSearchPreset(it))
+            },
+            onDeleteChipClick = {
+                callViewModel.invoke(ProfileIntent.DeletePreset(it.uuid))
+            },
+            onAddPresetClick = {
+                onAddPresetClick()
             }
         )
 

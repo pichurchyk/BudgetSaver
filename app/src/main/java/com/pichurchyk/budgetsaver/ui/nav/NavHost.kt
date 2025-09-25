@@ -42,7 +42,8 @@ fun NavHost(
             ProfileScreen(
                 openAddCategory = {
                     navController.navigate(Screen.AddCategory)
-                }
+                },
+                openAddPreset = {}
             )
         }
 

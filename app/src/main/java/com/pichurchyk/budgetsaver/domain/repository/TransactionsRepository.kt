@@ -4,8 +4,8 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionPreset
 import kotlinx.coroutines.flow.Flow
-import java.util.Currency
 
 internal interface TransactionsRepository {
 
@@ -15,9 +15,13 @@ internal interface TransactionsRepository {
 
     suspend fun deleteCategory(categoryId: String)
 
+    suspend fun deletePreset(presetId: String)
+
     suspend fun addCategory(category: TransactionCategoryCreation)
 
     suspend fun getCategories(): Flow<List<TransactionCategory>>
+
+    suspend fun getPresets(): Flow<List<TransactionPreset>>
 
     suspend fun addTransaction(transaction: TransactionCreation)
 

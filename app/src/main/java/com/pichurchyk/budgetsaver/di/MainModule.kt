@@ -26,10 +26,14 @@ import com.pichurchyk.budgetsaver.domain.usecase.DeleteCategoryUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteCategoryUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteFavoriteCurrencyUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteFavoriteCurrencyUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.DeletePresetUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.DeletePresetUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.GetPresetsUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.GetPresetsUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCase
@@ -87,6 +91,9 @@ val mainModule = module {
     viewModelOf(::AddCategoryViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
+
+    single<GetPresetsUseCase> { GetPresetsUseCaseImpl(get()) }
+    single<DeletePresetUseCase> { DeletePresetUseCaseImpl(get()) }
 
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
     single<DeleteCategoryUseCase> { DeleteCategoryUseCaseImpl(get()) }

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.usecase.DeleteCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.DeletePresetUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.GetPresetsUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +18,9 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val getSignedInUserUseCase: GetSignedInUserUseCase,
     private val getCategoriesUseCase: GetTransactionsCategoriesUseCase,
+    private val getPresetsUseCase: GetPresetsUseCase,
     private val deleteCategoryUseCase: DeleteCategoryUseCase,
+    private val deletePresetUseCase: DeletePresetUseCase,
 ) : ViewModel() {
 
     private val _userViewState: MutableStateFlow<ProfileUserViewState> = MutableStateFlow(
@@ -30,9 +34,45 @@ class ProfileViewModel(
         )
     val categoriesViewState = _categoriesViewState.asStateFlow()
 
+    private val _presetsViewState: MutableStateFlow<ProfilePresetsViewState> =
+        MutableStateFlow(
+            ProfilePresetsViewState()
+        )
+    val presetsViewState = _presetsViewState.asStateFlow()
+
     private fun initLoad() {
         loadUserData()
         loadCategories()
+        loadPresets()
+    }
+
+    private fun loadPresets() {
+        viewModelScope.launch {
+            getPresetsUseCase.invoke()
+                .onStart {
+                    _presetsViewState.update { currentState ->
+                        currentState.copy(status = ProfilePresetsUiStatus.Loading)
+                    }
+                }
+                .catch { e ->
+                    _presetsViewState.update { currentState ->
+                        currentState.copy(
+                            status = ProfilePresetsUiStatus.Error(
+                                error = e as DomainException,
+                                lastAction = { loadUserData() }
+                            )
+                        )
+                    }
+                }
+                .collect { presets ->
+                    _presetsViewState.update { currentState ->
+                        currentState.copy(
+                            status = ProfilePresetsUiStatus.Idle,
+                            presets = presets
+                        )
+                    }
+                }
+        }
     }
 
     private fun loadUserData() {
@@ -103,8 +143,52 @@ class ProfileViewModel(
             is ProfileIntent.InitLoad -> {
                 initLoad()
             }
+
+            is ProfileIntent.ChangeSearchPreset -> {
+                changeSearchPreset(intent.value)
+            }
+
+            is ProfileIntent.DeletePreset -> {
+                deletePreset(intent.presetId)
+            }
         }
     }
+
+    private fun deletePreset(presetId: String) {
+        viewModelScope.launch {
+            deletePresetUseCase.invoke(presetId)
+                .catch { e ->
+                    _presetsViewState.update { currentState ->
+                        currentState.copy(
+                            status = ProfilePresetsUiStatus.Error(
+                                error = e as DomainException,
+                                lastAction = { deleteCategory(presetId) }
+                            )
+                        )
+                    }
+                }
+                .collect {
+                    val updatedPresets =
+                        _presetsViewState.value.presets.filter { it.uuid != presetId }
+
+                    _presetsViewState.update { currentState ->
+                        currentState.copy(
+                            presets = updatedPresets,
+                            status = ProfilePresetsUiStatus.Idle
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun changeSearchPreset(value: String) {
+        _presetsViewState.update { currentState ->
+            currentState.copy(
+                search = value
+            )
+        }
+    }
+
 
     private fun deleteCategory(categoryId: String) {
         viewModelScope.launch {

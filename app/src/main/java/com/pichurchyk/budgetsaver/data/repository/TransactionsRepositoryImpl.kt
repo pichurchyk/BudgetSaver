@@ -8,18 +8,17 @@ import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import java.util.Currency
 
 internal class TransactionsRepositoryImpl(
     private val transactionsDataSource: TransactionsDataSource
 ) : TransactionsRepository {
 
     private val transactionsCache = mutableMapOf<String, List<Transaction>>()
-    private val categoriesCache = mutableMapOf<String, List<TransactionCategory>>()
 
     override suspend fun getTransactions(currency: String): Flow<List<Transaction>> {
         return flow {
@@ -47,12 +46,6 @@ internal class TransactionsRepositoryImpl(
     override suspend fun deleteCategory(categoryId: String) {
         transactionsDataSource.deleteCategory(categoryId)
 
-        categoriesCache.forEach { (key, categories) ->
-            val updatedCategories = categories.filter { it.uuid != categoryId }
-            categoriesCache[key] = updatedCategories
-        }
-
-        // Update transactions cache - remove the category from all transactions
         transactionsCache.forEach { (currencyCode, transactions) ->
             val updatedTransactions = transactions.map { transaction ->
                 val updatedMainCategory = if (transaction.mainCategory?.uuid == categoryId) {
@@ -69,6 +62,8 @@ internal class TransactionsRepositoryImpl(
         }
     }
 
+    override suspend fun deletePreset(presetId: String) =  transactionsDataSource.deletePreset(presetId)
+
     override suspend fun addCategory(category: TransactionCategoryCreation) {
         val newCategory = transactionsDataSource.addCategory(category)
 
@@ -79,6 +74,14 @@ internal class TransactionsRepositoryImpl(
 
     override suspend fun getCategories(): Flow<List<TransactionCategory>> =
         transactionsDataSource.getCategories().map { categories ->
+            categories
+                .map { category ->
+                    category.toDomain()
+                }
+        }
+
+    override suspend fun getPresets(): Flow<List<TransactionPreset>> =
+        transactionsDataSource.getPresets().map { categories ->
             categories
                 .map { category ->
                     category.toDomain()

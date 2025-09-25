@@ -3,6 +3,7 @@ package com.pichurchyk.budgetsaver.data.datasource
 import com.pichurchyk.budgetsaver.data.ext.category.toPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
+import com.pichurchyk.budgetsaver.data.model.response.TransactionPresetResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
@@ -51,8 +52,24 @@ internal class TransactionsDataSource(
             .also { emit(it) }
     }
 
+    fun getPresets(): Flow<List<TransactionPresetResponse>> = flow {
+        httpClient
+            .get(GetPresets()) {
+                parameter("order", "created.desc")
+            }
+            .body<List<TransactionPresetResponse>>()
+            .also { emit(it) }
+    }
+
+    suspend fun deletePreset(presetId: String) {
+        httpClient.delete(Preset()) {
+            parameter("id", "eq.$presetId")
+        }
+            .body<Unit>()
+    }
+
     suspend fun deleteCategory(categoryId: String) {
-        httpClient.delete(DeleteTransaction()) {
+        httpClient.delete(DeleteTransactionCategory()) {
             parameter("categoryId", categoryId)
         }
             .body<Unit>()
@@ -112,11 +129,19 @@ private class GetTransaction()
 
 @Serializable
 @Resource("/functions/v1/delete-transaction-category")
-private class DeleteTransaction()
+private class DeleteTransactionCategory()
 
 @Serializable
 @Resource("/rest/v1/Category")
 private class Category()
+
+@Serializable
+@Resource("/functions/v1/get-presets")
+private class GetPresets()
+
+@Serializable
+@Resource("/rest/v1/Preset")
+private class Preset()
 
 @Serializable
 @Resource("/rest/v1/Transaction")

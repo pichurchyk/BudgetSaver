@@ -82,4 +82,7 @@
     <string name="select_date">Select date</string>
     <string name="oldest">Oldest</string>
     <string name="newest">Newest</string>
+    <string name="presets">Presets</string>
+    <string name="you_have_no_presets">You have no presets</string>
+    <string name="add_preset">Add preset</string>
 </resources>
