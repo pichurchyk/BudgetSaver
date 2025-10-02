@@ -11,14 +11,18 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.ui.ext.toMajor
 import com.pichurchyk.budgetsaver.ui.ext.toMajorString
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.ZoneId
 import java.util.Currency
 import kotlin.text.toBigDecimal
 
 fun TransactionResponse.toDomain(): Transaction {
+    val instant = Instant.fromEpochMilliseconds(this.dateMillis)
+    val zoneId = TimeZone.of(this.dateTimeZone)
 
     return Transaction(
         uuid = this.uuid,
@@ -29,8 +33,8 @@ fun TransactionResponse.toDomain(): Transaction {
             currency = this.currency
         ),
         date = TransactionDate(
-            Instant.fromEpochMilliseconds(this.dateMillis),
-            TimeZone.of(this.dateTimeZone)
+            dateInstant = instant,
+            timeZone = zoneId
         ),
         mainCategory = this.mainCategory?.toDomain(),
         subCategory = emptyList(),
@@ -38,22 +42,22 @@ fun TransactionResponse.toDomain(): Transaction {
 }
 
 fun TransactionCreation.toPayload(): TransactionPayload {
-    val currentMillis = System.currentTimeMillis()
+    val currentInstant = Clock.System.now()
+    val zoneId = ZoneId.systemDefault()
 
-    val zoneId = java.time.ZoneId.systemDefault()
-    val offset = java.time.ZonedDateTime.now(zoneId).offset
-    val utcOffset = "UTC" + offset.id
-
-    val value =
-        if (this.type == TransactionType.EXPENSES) -this.value.toBigDecimal() else this.value.toBigDecimal()
+    val value = if (this.type == TransactionType.EXPENSES) {
+        -this.value.toBigDecimal()
+    } else {
+        this.value.toBigDecimal()
+    }
 
     return TransactionPayload(
         title = this.title?.ifEmpty { null },
         value = Money.fromMajor(value, this.currency).amountMinor,
         currency = this.currency.currencyCode,
         notes = this.notes,
-        dateMillis = currentMillis,
-        dateTimeZone = utcOffset,
+        dateMillis = currentInstant.toEpochMilliseconds(),
+        dateTimeZone = zoneId.id,
         mainCategory = this.mainCategory?.uuid
     )
 }

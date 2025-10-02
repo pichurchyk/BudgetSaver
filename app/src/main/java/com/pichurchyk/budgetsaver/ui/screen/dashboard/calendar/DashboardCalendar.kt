@@ -30,6 +30,11 @@ import com.pichurchyk.budgetsaver.ui.ext.DateUtils.toTheEndOfDay
 import com.pichurchyk.budgetsaver.ui.ext.DateUtils.toTheStartOfDay
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun DashboardCalendarButton(
@@ -82,8 +87,20 @@ fun DashboardDateRangeCalendar(
 ) {
     val state = rememberDateRangePickerState(
         initialDisplayMode = DisplayMode.Picker,
-        initialSelectedStartDateMillis = selectedDates.first?.dateInstant?.toEpochMilliseconds(),
-        initialSelectedEndDateMillis = selectedDates.second?.dateInstant?.toEpochMilliseconds(),
+        initialSelectedStartDateMillis = selectedDates.first?.let { start ->
+            start.dateInstant
+                .toLocalDateTime(start.timeZone)
+                .date
+                .atStartOfDayIn(TimeZone.UTC)
+                .toEpochMilliseconds()
+        },
+        initialSelectedEndDateMillis = selectedDates.second?.let { end ->
+            end.dateInstant
+                .toLocalDateTime(end.timeZone)
+                .date
+                .atStartOfDayIn(TimeZone.UTC)
+                .toEpochMilliseconds()
+        },
     )
 
     DateRangePicker(
@@ -101,20 +118,30 @@ fun DashboardDateRangeCalendar(
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 8.dp),                textAlign = TextAlign.Center,
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
+                textAlign = TextAlign.Center,
                 text = stringResource(R.string.select_date_range),
                 style = MaterialTheme.typography.titleMedium,
             )
         },
         headline = {
-            val startDate = state.selectedStartDateMillis?.let { Instant.fromEpochMilliseconds(it) }
-            val endDate = state.selectedEndDateMillis?.let { Instant.fromEpochMilliseconds(it) }
+            val zone = TimeZone.currentSystemDefault()
 
-            val startDateTitle =
-                startDate?.let { DateUtils.toStringWithPattern(it, "MMM dd, yyyy") }
-                    ?: stringResource(R.string.select_date)
-            val endDateTitle = endDate?.let { DateUtils.toStringWithPattern(it, "MMM dd, yyyy") }
-                ?: stringResource(R.string.select_date)
+            val startDateTitle = state.selectedStartDateMillis?.let { millis ->
+                val localDate = Instant.fromEpochMilliseconds(millis)
+                    .toLocalDateTime(TimeZone.UTC)
+                    .date
+                val displayDate = localDate.atStartOfDayIn(zone).toLocalDateTime(zone).date
+                DateUtils.toStringWithPattern(displayDate.atStartOfDayIn(zone), "MMM dd, yyyy", zone)
+            } ?: stringResource(R.string.select_date)
+
+            val endDateTitle = state.selectedEndDateMillis?.let { millis ->
+                val localDate = Instant.fromEpochMilliseconds(millis)
+                    .toLocalDateTime(TimeZone.UTC)
+                    .date
+                val displayDate = localDate.atStartOfDayIn(zone).toLocalDateTime(zone).date
+                DateUtils.toStringWithPattern(displayDate.atStartOfDayIn(zone), "MMM dd, yyyy", zone)
+            } ?: stringResource(R.string.select_date)
 
             Text(
                 modifier = Modifier
@@ -125,17 +152,33 @@ fun DashboardDateRangeCalendar(
                 style = MaterialTheme.typography.titleLarge,
             )
         }
+
     )
 
     LaunchedEffect(state.selectedStartDateMillis, state.selectedEndDateMillis) {
-        val startDate = state.selectedStartDateMillis?.let { Instant.fromEpochMilliseconds(it) }?.toTheStartOfDay()
-        val endDate = state.selectedEndDateMillis?.let { Instant.fromEpochMilliseconds(it) }?.toTheEndOfDay()
+        val currentZone = TimeZone.currentSystemDefault()
 
-        onDatesSelected(startDate?.let { TransactionDate.createWithDefaultTimeZone(it) } to endDate?.let {
-            TransactionDate.createWithDefaultTimeZone(
-                it
-            )
-        })
+        val startDate = state.selectedStartDateMillis?.let { millis ->
+            val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
+            val startInstant = localDate.atStartOfDayIn(currentZone)
+            TransactionDate(startInstant, currentZone)
+        }
+
+        val endDate = state.selectedEndDateMillis?.let { millis ->
+            val localDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(TimeZone.UTC).date
+            val endInstant = LocalDateTime(
+                year = localDate.year,
+                monthNumber = localDate.monthNumber,
+                dayOfMonth = localDate.dayOfMonth,
+                hour = 23,
+                minute = 59,
+                second = 59,
+                nanosecond = 999_999_999
+            ).toInstant(currentZone)
+            TransactionDate(endInstant, currentZone)
+        }
+
+        onDatesSelected(startDate to endDate)
     }
 }
 

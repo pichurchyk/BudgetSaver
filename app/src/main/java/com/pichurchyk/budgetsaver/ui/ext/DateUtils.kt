@@ -18,41 +18,18 @@ object DateUtils {
         pattern: String,
         timeZone: TimeZone = TimeZone.currentSystemDefault()
     ): String {
-        val localDateTime = dateInstant.toLocalDateTime(timeZone)
-        val formatter = DateTimeFormatter.ofPattern(pattern)
-        return formatter.format(
-            java.time.LocalDateTime.of(
-                localDateTime.year,
-                localDateTime.monthNumber,
-                localDateTime.dayOfMonth,
-                localDateTime.hour,
-                localDateTime.minute,
-                localDateTime.second
-            )
+        val zoneId = java.time.ZoneId.of(timeZone.id)
+        val zonedDateTime = java.time.ZonedDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(dateInstant.toEpochMilliseconds()),
+            zoneId
         )
+        val formatter = DateTimeFormatter.ofPattern(pattern)
+        return formatter.format(zonedDateTime)
     }
 
-    fun Instant.toTheEndOfDay(timeZone: TimeZone = TimeZone.currentSystemDefault()): Instant {
+
+    fun Instant.toTheEndOfDay(timeZone: TimeZone): Instant {
         val localDate = this.toLocalDateTime(timeZone).date
-        return localDate
-            .plus(1, DateTimeUnit.DAY)
-            .atStartOfDayIn(timeZone)
-            .minus(1, DateTimeUnit.MILLISECOND)
-    }
-
-    fun Instant.toTheStartOfDay(timeZone: TimeZone = TimeZone.currentSystemDefault()): Instant {
-        val localDate = this.toLocalDateTime(timeZone).date
-        return localDate.atStartOfDayIn(timeZone)
-    }
-
-    fun TransactionDate.asStartOfTheDay(): TransactionDate {
-        val localDate = dateInstant.toLocalDateTime(timeZone).date
-        val startInstant = localDate.atStartOfDayIn(timeZone)
-        return TransactionDate(startInstant, timeZone)
-    }
-
-    fun TransactionDate.asEndOfTheDay(): TransactionDate {
-        val localDate = dateInstant.toLocalDateTime(timeZone).date
         val endOfDay = LocalDateTime(
             year = localDate.year,
             monthNumber = localDate.monthNumber,
@@ -62,6 +39,21 @@ object DateUtils {
             second = 59,
             nanosecond = 999_999_999
         )
-        return TransactionDate(endOfDay.toInstant(timeZone), timeZone)
+        return endOfDay.toInstant(timeZone)
+    }
+    fun Instant.toTheStartOfDay(timeZone: TimeZone = TimeZone.currentSystemDefault()): Instant {
+        val localDate = this.toLocalDateTime(timeZone).date
+        return localDate.atStartOfDayIn(timeZone)
+    }
+
+    fun TransactionDate.asStartOfTheDay(): TransactionDate {
+        val startInstant = dateInstant.toTheStartOfDay(timeZone)
+        return TransactionDate(startInstant, timeZone)
+    }
+
+
+    fun TransactionDate.asEndOfTheDay(): TransactionDate {
+        val endInstant = dateInstant.toTheEndOfDay(timeZone)
+        return TransactionDate(endInstant, timeZone)
     }
 }

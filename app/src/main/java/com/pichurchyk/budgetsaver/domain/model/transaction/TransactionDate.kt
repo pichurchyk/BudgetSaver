@@ -13,9 +13,4 @@ data class TransactionDate(
     fun toStringWithPattern(pattern: String): String {
         return DateUtils.toStringWithPattern(dateInstant, pattern, timeZone)
     }
-
-    companion object {
-        fun createWithDefaultTimeZone(dateInstant: Instant): TransactionDate =
-            TransactionDate(dateInstant, TimeZone.currentSystemDefault())
-    }
 }
