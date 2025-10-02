@@ -9,12 +9,10 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
-import com.pichurchyk.budgetsaver.ui.ext.toMajor
 import com.pichurchyk.budgetsaver.ui.ext.toMajorString
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.ZoneId
 import java.util.Currency

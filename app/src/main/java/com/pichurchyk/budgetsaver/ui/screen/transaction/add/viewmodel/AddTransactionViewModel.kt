@@ -2,8 +2,10 @@ package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pichurchyk.budgetsaver.data.ext.toTransactionCreation
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
@@ -77,7 +79,16 @@ class AddTransactionViewModel(
             is AddTransactionIntent.ClearData -> clearData()
             is AddTransactionIntent.DismissNotification -> dismissNotification()
             is AddTransactionIntent.ToggleSavePreset -> toggleSavePreset(intent.checked)
+            is AddTransactionIntent.SelectPreset -> selectPreset(intent.preset)
         }
+    }
+
+    private fun selectPreset(preset: TransactionPreset) {
+        _viewState.update { currentState ->
+            currentState.copy(transaction = preset.toTransactionCreation())
+        }
+
+        submit()
     }
 
     private fun toggleSavePreset(checked: Boolean) {
@@ -112,7 +123,15 @@ class AddTransactionViewModel(
     }
 
     private fun clearData() {
-        _viewState.update { AddTransactionViewState() }
+        _viewState.update { currentState ->
+            currentState.copy(
+                transaction = TransactionCreation(
+                    currency = currentState.transaction.currency,
+                    type = currentState.transaction.type
+                ),
+                saveAsPreset = false,
+            )
+        }
     }
 
     private fun changeCategory(category: TransactionCategory?) {

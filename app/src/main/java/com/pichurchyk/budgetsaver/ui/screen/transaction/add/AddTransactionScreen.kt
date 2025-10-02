@@ -452,7 +452,8 @@ private fun Content(
                     if (!it.isEmpty()) {
                         PresetsGrid(
                             uiStatus = viewState.presetsStatus,
-                            presets = it
+                            presets = it,
+                            onPresetClick = { callViewModel(AddTransactionIntent.SelectPreset(it)) }
                         )
                     }
                 }
@@ -520,7 +521,8 @@ private fun Content(
 private fun PresetsGrid(
     modifier: Modifier = Modifier,
     uiStatus: AddTransactionPresetsUiStatus,
-    presets: List<TransactionPreset>
+    presets: List<TransactionPreset>,
+    onPresetClick: (TransactionPreset) -> Unit
 ) {
     val itemCount = when (uiStatus) {
         is AddTransactionPresetsUiStatus.Idle, is AddTransactionPresetsUiStatus.Error -> presets.size
@@ -567,7 +569,9 @@ private fun PresetsGrid(
                                     modifier = Modifier,
                                     preset = item,
                                     isSelected = false,
-                                    onItemClick = {  },
+                                    onItemClick = {
+                                        onPresetClick(item)
+                                    },
                                     onItemLongClick = {  })
                             }
                         }

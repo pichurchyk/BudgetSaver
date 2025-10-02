@@ -1,6 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.util.Currency
 
@@ -26,4 +27,6 @@ sealed class AddTransactionIntent {
     data object DismissNotification: AddTransactionIntent()
 
     data class ToggleSavePreset(val checked: Boolean): AddTransactionIntent()
+
+    data class SelectPreset(val preset: TransactionPreset): AddTransactionIntent()
 }

@@ -6,7 +6,12 @@ import com.pichurchyk.budgetsaver.data.model.response.TransactionPresetResponse
 import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import com.pichurchyk.budgetsaver.ui.ext.toMajor
+import java.math.BigInteger
+import java.util.Currency
+import kotlin.math.abs
 
 fun TransactionPresetResponse.toDomain(): TransactionPreset {
 
@@ -32,5 +37,23 @@ fun TransactionPresetCreation.toPayload(): TransactionPresetPayload {
         currency = this.currency.currencyCode,
         notes = this.notes,
         mainCategory = this.mainCategory?.uuid
+    )
+}
+
+fun TransactionPreset.toTransactionCreation(): TransactionCreation {
+    val type =
+        if (value.amountMinor >= BigInteger("0")) TransactionType.INCOMES else TransactionType.EXPENSES
+
+    val currency = Currency.getInstance(value.currency)
+
+
+    return TransactionCreation(
+        title = this.title,
+        value = abs(this.value.toMajor()).toString(),
+        currency = currency,
+        notes = this.notes,
+        type = type,
+        mainCategory = this.mainCategory,
+        subCategory = this.subCategory
     )
 }
