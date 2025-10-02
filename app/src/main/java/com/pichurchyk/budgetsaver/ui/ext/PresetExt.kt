@@ -2,7 +2,7 @@ package com.pichurchyk.budgetsaver.ui.ext
 
 import androidx.compose.runtime.Composable
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.math.BigInteger
 

@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.domain.usecase
+package com.pichurchyk.budgetsaver.domain.usecase.category
 
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository

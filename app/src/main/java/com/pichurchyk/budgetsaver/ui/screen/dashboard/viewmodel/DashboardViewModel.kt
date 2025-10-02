@@ -9,12 +9,13 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.DeleteTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.GetTransactionsUseCase
+import com.pichurchyk.budgetsaver.ui.ext.DateUtils.asEndOfTheDay
+import com.pichurchyk.budgetsaver.ui.ext.DateUtils.asStartOfTheDay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -42,9 +43,8 @@ class DashboardViewModel(
 
     val state = _state
         .map { viewState ->
-            // Compute filtered data on background thread
             val filteredTransactions = filterTransactions(
-                allTransactions, // Use internal field, not viewState
+                allTransactions,
                 viewState.selectedCategories,
                 viewState.selectedTransactionType,
                 viewState.datePeriod
@@ -53,7 +53,6 @@ class DashboardViewModel(
             val totalIncomes = calculateTotalIncomes(filteredTransactions, viewState.selectedCurrency)
             val totalExpenses = calculateTotalExpenses(filteredTransactions, viewState.selectedCurrency)
 
-            // Return updated state with computed values
             viewState.copy(
                 filteredTransactions = filteredTransactions,
                 totalIncomes = totalIncomes,
@@ -67,6 +66,10 @@ class DashboardViewModel(
             initialValue = DashboardViewState(status = DashboardUiStatus.LoadingAll)
         )
 
+    init {
+        loadCurrencies()
+    }
+
     fun handleIntent(intent: DashboardIntent) {
         when (intent) {
             is DashboardIntent.LoadData -> loadData()
@@ -77,8 +80,12 @@ class DashboardViewModel(
             is DashboardIntent.SelectCurrency -> selectCurrency(intent.currency)
             is DashboardIntent.DeleteTransaction -> deleteTransaction(intent.transaction)
             is DashboardIntent.ChangeDateRange -> changeDateRange(intent.dateRange)
-            is DashboardIntent.Init -> loadCurrencies()
+            is DashboardIntent.Refresh -> refresh()
         }
+    }
+
+    private fun refresh() {
+        loadData()
     }
 
     private suspend fun filterTransactions(
@@ -157,12 +164,9 @@ class DashboardViewModel(
                         currentState.copy(availableCurrencies = currencies)
                     }
 
-                    if (currencies.isNotEmpty()) {
+                    if (currencies.isNotEmpty() && state.value.selectedCurrency == null) {
                         selectCurrency(currencies.first())
                     } else {
-                        _state.update {
-                            it.copy(selectedCurrency = null)
-                        }
                         allTransactions = emptyList()
                     }
                 }
@@ -253,16 +257,15 @@ class DashboardViewModel(
                         }
                     }
                     .collect { data ->
-                        // Store all transactions internally
                         allTransactions = data
 
                         val categories = data.map { it.mainCategory }.distinct()
 
                         val oldestTransactionDate =
-                            data.minByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date
+                            data.minByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date?.asStartOfTheDay()
 
                         val newestTransactionDate =
-                            data.maxByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date
+                            data.maxByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date?.asEndOfTheDay()
 
                         _state.update {
                             it.copy(

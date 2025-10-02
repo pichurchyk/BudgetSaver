@@ -290,7 +290,7 @@ private fun DashedDivider(
 }
 
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 private fun Preview() {
     AppTheme {
         TransactionCard(

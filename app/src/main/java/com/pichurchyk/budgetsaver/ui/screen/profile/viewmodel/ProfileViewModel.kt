@@ -3,11 +3,11 @@ package com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pichurchyk.budgetsaver.di.DomainException
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteCategoryUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.DeletePresetUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.GetPresetsUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.DeleteCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.DeletePresetUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.GetPresetsUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.GetTransactionsCategoriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch

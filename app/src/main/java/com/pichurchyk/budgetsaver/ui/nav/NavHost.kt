@@ -29,8 +29,8 @@ fun NavHost(
 
         composable<Screen.Dashboard> {
             DashboardScreen(
-                openAddTransactionScreen = {
-                    navController.navigate(Screen.AddTransaction)
+                openAddTransactionScreen = { selectedCurrency ->
+                    navController.navigate(Screen.AddTransaction(selectedCurrency = selectedCurrency))
                 },
                 openEditTransactionScreen = { transactionId ->
                     navController.navigate(Screen.EditTransaction(transactionId = transactionId))
@@ -55,8 +55,11 @@ fun NavHost(
             )
         }
 
-        composable<Screen.AddTransaction> {
+        composable<Screen.AddTransaction> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.AddTransaction>()
+
             AddTransactionScreen(
+                selectedCurrency = args.selectedCurrency,
                 closeScreen = { navController.popBackStack() },
             )
         }

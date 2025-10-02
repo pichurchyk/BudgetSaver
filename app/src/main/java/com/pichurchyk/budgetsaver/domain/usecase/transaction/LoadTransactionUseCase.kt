@@ -1,8 +1,7 @@
-package com.pichurchyk.budgetsaver.domain.usecase
+package com.pichurchyk.budgetsaver.domain.usecase.transaction
 
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

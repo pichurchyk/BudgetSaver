@@ -17,7 +17,7 @@ sealed class Screen {
     data object AddCategory: Screen()
 
     @Serializable
-    data object AddTransaction: Screen()
+    data class AddTransaction(val selectedCurrency: String): Screen()
 
     @Serializable
     data class EditTransaction(val transactionId: String): Screen()
@@ -28,7 +28,7 @@ sealed class Screen {
         val screensWithMenu = listOf(
             Dashboard,
             Profile,
-            AddTransaction,
+            AddTransaction("dummy"),
             EditTransaction("dummy"),
             AddCategory,
         )

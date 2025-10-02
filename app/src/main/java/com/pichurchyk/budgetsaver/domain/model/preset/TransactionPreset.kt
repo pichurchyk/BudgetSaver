@@ -1,6 +1,8 @@
-package com.pichurchyk.budgetsaver.domain.model.transaction
+package com.pichurchyk.budgetsaver.domain.model.preset
 
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.Money
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import kotlinx.serialization.Serializable
 
 @Serializable

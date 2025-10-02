@@ -1,23 +1,22 @@
-package com.pichurchyk.budgetsaver.domain.usecase
+package com.pichurchyk.budgetsaver.domain.usecase.preset
 
 import com.pichurchyk.budgetsaver.di.DomainException
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-interface AddTransactionUseCase {
-    suspend fun invoke(transaction: TransactionCreation): Flow<Unit>
+interface AddPresetUseCase {
+    suspend fun invoke(preset: TransactionPresetCreation): Flow<Unit>
 }
 
-internal class AddTransactionUseCaseImpl(
+internal class AddPresetUseCaseImpl(
     private val repository: TransactionsRepository
-) : AddTransactionUseCase {
-    override suspend fun invoke(transaction: TransactionCreation): Flow<Unit> = flow {
+) : AddPresetUseCase {
+    override suspend fun invoke(preset: TransactionPresetCreation) = flow {
         try {
-            repository.addTransaction(transaction)
-
-            emit(Unit)
+            emit(repository.addPreset(preset))
         } catch (e: DomainException) {
             throw e
         } catch (e: Exception) {

@@ -1,6 +1,6 @@
-package com.pichurchyk.budgetsaver.domain.usecase
+package com.pichurchyk.budgetsaver.domain.usecase.preset
 
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 

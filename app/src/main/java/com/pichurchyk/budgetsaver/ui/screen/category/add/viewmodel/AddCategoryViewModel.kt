@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
-import com.pichurchyk.budgetsaver.domain.usecase.AddCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.AddCategoryUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.LoadEmojisUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
 import kotlinx.coroutines.channels.Channel

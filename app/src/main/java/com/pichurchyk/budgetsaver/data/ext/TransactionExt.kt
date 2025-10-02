@@ -3,6 +3,7 @@ package com.pichurchyk.budgetsaver.data.ext
 import com.pichurchyk.budgetsaver.data.ext.category.toDomain
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
@@ -47,7 +48,7 @@ fun TransactionCreation.toPayload(): TransactionPayload {
         if (this.type == TransactionType.EXPENSES) -this.value.toBigDecimal() else this.value.toBigDecimal()
 
     return TransactionPayload(
-        title = this.title,
+        title = this.title?.ifEmpty { null },
         value = Money.fromMajor(value, this.currency).amountMinor,
         currency = this.currency.currencyCode,
         notes = this.notes,
@@ -75,5 +76,17 @@ fun Transaction.toTransactionCreation(): TransactionCreation {
         type = type,
         mainCategory = mainCategory,
         subCategory = emptyList()
+    )
+}
+
+fun TransactionCreation.toPresetCreation(): TransactionPresetCreation {
+    return TransactionPresetCreation(
+        title = title,
+        notes = notes,
+        value = value,
+        type = type,
+        currency = currency,
+        mainCategory = mainCategory,
+        subCategory = emptyList(),
     )
 }

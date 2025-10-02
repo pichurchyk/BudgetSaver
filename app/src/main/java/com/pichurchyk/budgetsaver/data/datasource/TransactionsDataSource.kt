@@ -1,12 +1,13 @@
 package com.pichurchyk.budgetsaver.data.datasource
 
 import com.pichurchyk.budgetsaver.data.ext.category.toPayload
+import com.pichurchyk.budgetsaver.data.ext.toPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionPresetResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.delete
@@ -64,6 +65,13 @@ internal class TransactionsDataSource(
     suspend fun deletePreset(presetId: String) {
         httpClient.delete(Preset()) {
             parameter("id", "eq.$presetId")
+        }
+            .body<Unit>()
+    }
+
+    suspend fun addPreset(preset: TransactionPresetCreation) {
+        httpClient.post(Preset()) {
+            setBody(preset.toPayload())
         }
             .body<Unit>()
     }

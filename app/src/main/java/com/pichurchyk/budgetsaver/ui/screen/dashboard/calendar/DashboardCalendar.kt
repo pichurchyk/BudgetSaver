@@ -27,6 +27,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.ext.DateUtils
 import com.pichurchyk.budgetsaver.ui.ext.DateUtils.toTheEndOfDay
+import com.pichurchyk.budgetsaver.ui.ext.DateUtils.toTheStartOfDay
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import kotlinx.datetime.Instant
 
@@ -127,7 +128,7 @@ fun DashboardDateRangeCalendar(
     )
 
     LaunchedEffect(state.selectedStartDateMillis, state.selectedEndDateMillis) {
-        val startDate = state.selectedStartDateMillis?.let { Instant.fromEpochMilliseconds(it) }
+        val startDate = state.selectedStartDateMillis?.let { Instant.fromEpochMilliseconds(it) }?.toTheStartOfDay()
         val endDate = state.selectedEndDateMillis?.let { Instant.fromEpochMilliseconds(it) }?.toTheEndOfDay()
 
         onDatesSelected(startDate?.let { TransactionDate.createWithDefaultTimeZone(it) } to endDate?.let {

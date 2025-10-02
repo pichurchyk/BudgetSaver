@@ -85,4 +85,5 @@
     <string name="presets">Presets</string>
     <string name="you_have_no_presets">You have no presets</string>
     <string name="add_preset">Add preset</string>
+    <string name="save_as_preset">Save as preset</string>
 </resources>

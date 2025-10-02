@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
@@ -81,7 +85,7 @@ import java.util.Currency
 fun DashboardScreen(
     viewModel: DashboardViewModel = koinViewModel(),
     openEditTransactionScreen: (transactionId: String) -> Unit,
-    openAddTransactionScreen: () -> Unit
+    openAddTransactionScreen: (selectedCurrency: String) -> Unit
 ) {
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
@@ -99,16 +103,25 @@ fun DashboardScreen(
 private fun Content(
     viewState: DashboardViewState,
     callViewModel: (DashboardIntent) -> Unit,
-    onAddTransactionClick: () -> Unit,
+    onAddTransactionClick: (selectedCurrency: String) -> Unit,
     onEditTransactionClick: (transactionId: String) -> Unit
 ) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                callViewModel(DashboardIntent.Refresh)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     var showCalendar by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        callViewModel(DashboardIntent.Init)
-    }
 
     if (viewState.status == DashboardUiStatus.LoadingAll) {
         Box(
@@ -130,12 +143,9 @@ private fun Content(
         return
     }
 
-    // No more filtering logic - just use the data from viewState
     val filteredTransactions = viewState.filteredTransactions
     val selectedCategories = viewState.selectedCategories
     val selectedTransactionType = viewState.selectedTransactionType
-    val selectedCurrency = viewState.selectedCurrency
-    val datePeriod = viewState.datePeriod
     val totalIncomes = viewState.totalIncomes
     val totalExpenses = viewState.totalExpenses
 
@@ -348,7 +358,6 @@ private fun Content(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.BottomEnd
             ) {
-                // Show FAB when not in error or loading states
                 if (viewState.status !is DashboardUiStatus.Error &&
                     viewState.status != DashboardUiStatus.LoadingAll
                 ) {
@@ -362,7 +371,7 @@ private fun Content(
                             .padding(20.dp),
                         shape = RoundedCornerShape(12.dp),
                         containerColor = MaterialTheme.colorScheme.primary,
-                        onClick = onAddTransactionClick,
+                        onClick = { viewState.selectedCurrency?.currencyCode?.let { selectedCurrency -> onAddTransactionClick(selectedCurrency) } },
                         content = {
                             Icon(
                                 Icons.Rounded.Add,

@@ -24,4 +24,6 @@ sealed class AddTransactionIntent {
     data object ClearData: AddTransactionIntent()
 
     data object DismissNotification: AddTransactionIntent()
+
+    data class ToggleSavePreset(val checked: Boolean): AddTransactionIntent()
 }

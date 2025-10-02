@@ -1,7 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 
 sealed class ProfilePresetsUiStatus {
     data object Idle : ProfilePresetsUiStatus()

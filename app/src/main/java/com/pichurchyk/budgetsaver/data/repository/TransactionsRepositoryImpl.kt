@@ -8,7 +8,8 @@ import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -62,7 +63,8 @@ internal class TransactionsRepositoryImpl(
         }
     }
 
-    override suspend fun deletePreset(presetId: String) =  transactionsDataSource.deletePreset(presetId)
+    override suspend fun deletePreset(presetId: String) =
+        transactionsDataSource.deletePreset(presetId)
 
     override suspend fun addCategory(category: TransactionCategoryCreation) {
         val newCategory = transactionsDataSource.addCategory(category)
@@ -88,13 +90,16 @@ internal class TransactionsRepositoryImpl(
                 }
         }
 
+    override suspend fun addPreset(preset: TransactionPresetCreation) =
+        transactionsDataSource.addPreset(preset)
+
     override suspend fun addTransaction(transaction: TransactionCreation) {
         val newTransaction = transactionsDataSource.addTransaction(transaction.toPayload())
             .toDomain()
 
         val currencyCode = transaction.currency.currencyCode
         val cached = transactionsCache[currencyCode].orEmpty()
-        transactionsCache[currencyCode] = cached + newTransaction
+        transactionsCache[currencyCode] = listOf(newTransaction) + cached
     }
 
     override suspend fun editTransaction(transactionId: String, transaction: TransactionCreation) {

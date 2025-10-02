@@ -7,12 +7,13 @@ import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
-import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.GetPresetsUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.AddTransactionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
@@ -23,6 +24,7 @@ import kotlin.text.iterator
 class AddTransactionViewModel(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val currencyRepository: CurrencyRepository,
+    private val getPresetsUseCase: GetPresetsUseCase,
 ) : ViewModel() {
 
     private val _viewState: MutableStateFlow<AddTransactionViewState> = MutableStateFlow(
@@ -32,6 +34,34 @@ class AddTransactionViewModel(
 
     init {
         loadInitialCurrencies()
+        loadPresets()
+    }
+
+    private fun loadPresets() {
+        viewModelScope.launch {
+            getPresetsUseCase.invoke()
+                .onStart {
+                    _viewState.update { it.copy(presetsStatus = AddTransactionPresetsUiStatus.Loading) }
+                }
+                .catch { e ->
+                    _viewState.update {
+                        it.copy(
+                            presetsStatus = AddTransactionPresetsUiStatus.Error(
+                                error = e as DomainException,
+                                { loadPresets() }
+                            )
+                        )
+                    }
+                }
+                .collect { presets ->
+                    _viewState.update {
+                        it.copy(
+                            presetsStatus = AddTransactionPresetsUiStatus.Idle,
+                            presets = presets
+                        )
+                    }
+                }
+        }
     }
 
     fun handleIntent(intent: AddTransactionIntent) {
@@ -46,29 +76,31 @@ class AddTransactionViewModel(
             is AddTransactionIntent.ChangeCategory -> changeCategory(intent.value)
             is AddTransactionIntent.ClearData -> clearData()
             is AddTransactionIntent.DismissNotification -> dismissNotification()
+            is AddTransactionIntent.ToggleSavePreset -> toggleSavePreset(intent.checked)
         }
     }
 
-    private fun loadInitialCurrencies() {
-        currencyRepository.getAllCurrencies()
-            .onEach { currencies ->
-                _viewState.update { currentState ->
-                    val defaultTransactionCurrency = currentState.transaction.currency
+    private fun toggleSavePreset(checked: Boolean) {
+        _viewState.update { it.copy(saveAsPreset = checked) }
+    }
 
-                    currentState.copy(
-                        allCurrencies = currencies,
-                        transaction = currentState.transaction.copy(currency = defaultTransactionCurrency)
-                    )
-                }
+    private fun loadInitialCurrencies() {
+        currencyRepository.getAllCurrencies().onEach { currencies ->
+            _viewState.update { currentState ->
+                val defaultTransactionCurrency = currentState.transaction.currency
+
+                currentState.copy(
+                    allCurrencies = currencies,
+                    transaction = currentState.transaction.copy(currency = defaultTransactionCurrency)
+                )
             }
-            .catch { e ->
-                _viewState.update {
-                    it.copy(
-                        allCurrencies = null
-                    )
-                }
+        }.catch { e ->
+            _viewState.update {
+                it.copy(
+                    allCurrencies = null
+                )
             }
-            .launchIn(viewModelScope)
+        }.launchIn(viewModelScope)
     }
 
     private fun dismissNotification() {
@@ -108,8 +140,7 @@ class AddTransactionViewModel(
             val filteredValue = filterAmountInput(value)
             currentViewState.copy(
                 transaction = currentViewState.transaction.copy(value = filteredValue),
-                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_AMOUNT }
-            )
+                validationError = currentViewState.validationError.filterNot { it == AddTransactionValidationError.EMPTY_AMOUNT })
         }
     }
 
@@ -161,10 +192,15 @@ class AddTransactionViewModel(
     }
 
     private fun submit() {
-        _viewState.update { it.copy(status = AddTransactionUiStatus.Idle, validationError = emptyList()) }
+        _viewState.update {
+            it.copy(
+                status = AddTransactionUiStatus.Idle, validationError = emptyList()
+            )
+        }
 
         val currentData = _viewState.value
-        val validationErrors = performValidation(currentData.transaction, currentData.transaction.type)
+        val validationErrors =
+            performValidation(currentData.transaction, currentData.transaction.type)
 
         if (validationErrors.isNotEmpty()) {
             _viewState.update {
@@ -179,21 +215,20 @@ class AddTransactionViewModel(
 
         viewModelScope.launch {
             _viewState.value.transaction.let { transactionToSubmit ->
-                addTransactionUseCase.invoke(transactionToSubmit)
+                addTransactionUseCase.invoke(
+                    transactionToSubmit,
+                    viewState.value.saveAsPreset
+                )
                     .onStart {
                         _viewState.update { it.copy(status = AddTransactionUiStatus.Loading) }
-                    }
-                    .catch { e ->
+                    }.catch { e ->
                         _viewState.update {
                             it.copy(
                                 status = AddTransactionUiStatus.Error(
-                                    error = e as DomainException,
-                                    lastAction = { submit() }
-                                )
+                                    error = e as DomainException, lastAction = { submit() })
                             )
                         }
-                    }
-                    .collect {
+                    }.collect {
                         clearData()
 
                         _viewState.update { it.copy(status = AddTransactionUiStatus.Success) }
@@ -203,8 +238,7 @@ class AddTransactionViewModel(
     }
 
     private fun performValidation(
-        transaction: TransactionCreation,
-        type: TransactionType
+        transaction: TransactionCreation, type: TransactionType
     ): List<AddTransactionValidationError> {
         val errors = mutableListOf<AddTransactionValidationError>()
 

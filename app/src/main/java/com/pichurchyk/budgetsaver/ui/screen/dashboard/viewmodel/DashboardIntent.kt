@@ -7,7 +7,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import java.util.Currency
 
 sealed class DashboardIntent {
-    data object Init: DashboardIntent()
+    data object Refresh: DashboardIntent()
 
     data object LoadData: DashboardIntent()
 
