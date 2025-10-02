@@ -346,7 +346,7 @@ private fun Content(
                     TransactionValueInput(
                         modifier = Modifier
                             .weight(1f),
-                        value = if (transactionData.value.toDoubleOrNull() == 0.0 && transactionData.value.isNotEmpty()) "" else transactionData.value,
+                        value = transactionData.value.ifEmpty { "" },
                         error = viewState.validationError.contains(AddTransactionValidationError.EMPTY_AMOUNT),
                         transactionType = viewState.transaction.type
                     ) {
