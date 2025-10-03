@@ -18,7 +18,12 @@ data class ProfilePresetsViewState(
     val search: String = ""
 ) {
     val filteredPresets: List<TransactionPreset>
-        get() = presets.filter {
-            it.title?.lowercase()?.contains(search.lowercase()) == true
+        get() = presets.filter { preset ->
+            val title = preset.title
+            when {
+                title == null && search.isEmpty() -> true
+                title == null && search.isNotEmpty() -> false
+                else -> title?.lowercase()?.contains(search.lowercase()) == true
+            }
         }
 }
