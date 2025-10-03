@@ -48,6 +48,8 @@ import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCaseImpl
 import com.pichurchyk.budgetsaver.ui.MainViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
@@ -55,6 +57,7 @@ import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
+import com.pichurchyk.budgetsaver.ui.screen.preset.viewmodel.AddPresetViewModel
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileViewModel
 import com.pichurchyk.budgetsaver.ui.screen.themeselector.viewmodel.AppThemeSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionViewModel
@@ -89,11 +92,13 @@ val mainModule = module {
     viewModelOf(::MainViewModel)
     viewModelOf(::FavoriteCurrenciesSelectorViewModel)
     viewModelOf(::AddCategoryViewModel)
+    viewModelOf(::AddPresetViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
 
     single<GetPresetsUseCase> { GetPresetsUseCaseImpl(get()) }
     single<DeletePresetUseCase> { DeletePresetUseCaseImpl(get()) }
+    single<AddPresetUseCase> { AddPresetUseCaseImpl(get()) }
 
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
     single<DeleteCategoryUseCase> { DeleteCategoryUseCaseImpl(get()) }

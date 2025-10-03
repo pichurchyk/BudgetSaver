@@ -6,6 +6,7 @@ import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
 import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.model.user.User
@@ -91,6 +92,14 @@ object PreviewMocks {
         notes = "Notes",
         mainCategory = category,
         uuid = "0"
+    )
+
+    val transactionPresetCreation = TransactionPresetCreation(
+        title = "Groceries",
+        value = "1.33",
+        notes = "Notes",
+        mainCategory = category,
+        currency = Currency.getInstance("USD")
     )
 
 }

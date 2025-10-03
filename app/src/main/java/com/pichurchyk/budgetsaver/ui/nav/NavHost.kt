@@ -10,6 +10,7 @@ import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
 import com.pichurchyk.budgetsaver.ui.screen.category.add.AddCategoryScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
+import com.pichurchyk.budgetsaver.ui.screen.preset.AddPresetScreen
 import com.pichurchyk.budgetsaver.ui.screen.profile.ProfileScreen
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.EditTransactionScreen
 
@@ -43,7 +44,9 @@ fun NavHost(
                 openAddCategory = {
                     navController.navigate(Screen.AddCategory)
                 },
-                openAddPreset = {}
+                openAddPreset = {
+                    navController.navigate(Screen.AddPreset)
+                }
             )
         }
 
@@ -70,6 +73,14 @@ fun NavHost(
             EditTransactionScreen(
                 transactionId = args.transactionId,
                 closeScreen = { navController.popBackStack() },
+            )
+        }
+
+        composable<Screen.AddPreset> {
+            AddPresetScreen(
+                closeScreen = {
+                    navController.popBackStack()
+                }
             )
         }
     }

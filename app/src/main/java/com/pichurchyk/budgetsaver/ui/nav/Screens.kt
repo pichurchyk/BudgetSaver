@@ -17,6 +17,9 @@ sealed class Screen {
     data object AddCategory: Screen()
 
     @Serializable
+    data object AddPreset: Screen()
+
+    @Serializable
     data class AddTransaction(val selectedCurrency: String): Screen()
 
     @Serializable
@@ -31,6 +34,7 @@ sealed class Screen {
             AddTransaction("dummy"),
             EditTransaction("dummy"),
             AddCategory,
+            AddPreset
         )
     }
 }
