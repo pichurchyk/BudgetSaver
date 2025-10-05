@@ -9,6 +9,7 @@ import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
 import com.pichurchyk.budgetsaver.ui.screen.category.add.AddCategoryScreen
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.EditCategoryScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
 import com.pichurchyk.budgetsaver.ui.screen.preset.AddPresetScreen
 import com.pichurchyk.budgetsaver.ui.screen.profile.ProfileScreen
@@ -46,6 +47,9 @@ fun NavHost(
                 },
                 openAddPreset = {
                     navController.navigate(Screen.AddPreset)
+                },
+                openEditCategory = { categoryId ->
+                    navController.navigate(Screen.EditCategory(categoryId))
                 }
             )
         }
@@ -57,6 +61,16 @@ fun NavHost(
                 }
             )
         }
+
+        composable<Screen.EditCategory> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.EditCategory>()
+
+            EditCategoryScreen(
+                categoryId = args.categoryId,
+                closeScreen = { navController.popBackStack() },
+            )
+        }
+
 
         composable<Screen.AddTransaction> { backStackEntry ->
             val args = backStackEntry.toRoute<Screen.AddTransaction>()

@@ -17,6 +17,9 @@ sealed class Screen {
     data object AddCategory: Screen()
 
     @Serializable
+    data class EditCategory(val categoryId: String): Screen()
+
+    @Serializable
     data object AddPreset: Screen()
 
     @Serializable
@@ -34,6 +37,7 @@ sealed class Screen {
             AddTransaction("dummy"),
             EditTransaction("dummy"),
             AddCategory,
+            EditCategory("dummy"),
             AddPreset
         )
     }

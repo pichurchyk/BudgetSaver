@@ -1,4 +1,4 @@
-package com.pichurchyk.budgetsaver.ui.screen.category.add
+package com.pichurchyk.budgetsaver.ui.screen.category.edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -79,18 +79,22 @@ import com.pichurchyk.budgetsaver.ui.ext.fromHex
 import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.ext.random
 import com.pichurchyk.budgetsaver.ui.ext.toHex
-import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryIntent
-import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryNotification
-import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
-import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewState
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.viewmodel.EditCategoryIntent
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.viewmodel.EditCategoryNotification
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.viewmodel.EditCategoryViewModel
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.viewmodel.EditCategoryViewState
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
-fun AddCategoryScreen(
-    viewModel: AddCategoryViewModel = koinViewModel(),
+fun EditCategoryScreen(
+    categoryId: String,
+    viewModel: EditCategoryViewModel = koinViewModel(
+        parameters = { parametersOf(categoryId) }
+    ),
     closeScreen: () -> Unit
 ) {
     val viewState by viewModel.viewState.collectAsState()
@@ -101,16 +105,16 @@ fun AddCategoryScreen(
     LaunchedEffect(Unit) {
         viewModel.notificationEvent.collect { notificationState ->
             when (notificationState) {
-                is AddCategoryNotification.Success -> {
+                is EditCategoryNotification.Success -> {
                     NotificationController.sendEvent(
                         NotificationEvent(
-                            message = context.getString(R.string.category_created),
+                            message = context.getString(R.string.category_updated),
                             type = NotificationType.SUCCESS,
                         )
                     )
                 }
 
-                is AddCategoryNotification.Error -> {
+                is EditCategoryNotification.Error -> {
                     NotificationController.sendEvent(
                         NotificationEvent(
                             message = context.getString(notificationState.error.asErrorMessage()),
@@ -129,8 +133,7 @@ fun AddCategoryScreen(
     LaunchedEffect(viewState.model.color) {
         if (viewState.model.color.isEmpty()) {
             val color = Color.random().toHex()
-
-            viewModel.handleIntent(AddCategoryIntent.ChangeColor(color))
+            viewModel.handleIntent(EditCategoryIntent.ChangeColor(color))
         }
     }
 
@@ -162,9 +165,9 @@ private enum class BottomSheetState {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Content(
-    viewState: AddCategoryViewState,
+    viewState: EditCategoryViewState,
     closeScreen: () -> Unit,
-    callViewModel: (AddCategoryIntent) -> Unit
+    callViewModel: (EditCategoryIntent) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -197,7 +200,7 @@ private fun Content(
                     Text(
                         modifier = Modifier,
                         textAlign = TextAlign.Center,
-                        text = stringResource(R.string.add_category),
+                        text = stringResource(R.string.edit_category),
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.headlineSmall
                     )
@@ -249,12 +252,12 @@ private fun Content(
                                         modifier = Modifier,
                                         emojisList = viewState.availableEmojis,
                                         onSelect = { emoji ->
-                                            callViewModel(AddCategoryIntent.ChangeEmoji(emoji))
+                                            callViewModel(EditCategoryIntent.ChangeEmoji(emoji))
                                             hideSheet()
                                         },
                                         onSearchChanged = { searchValue ->
                                             callViewModel(
-                                                AddCategoryIntent.ChangeSearchEmojiValue(
+                                                EditCategoryIntent.ChangeSearchEmojiValue(
                                                     searchValue
                                                 )
                                             )
@@ -268,7 +271,7 @@ private fun Content(
                                         ColorPicker(
                                             initialColor = Color.fromHex(viewState.model.color),
                                             onColorChanged = {
-                                                callViewModel(AddCategoryIntent.ChangeColor(it.toHex()))
+                                                callViewModel(EditCategoryIntent.ChangeColor(it.toHex()))
                                             }
                                         )
                                     }
@@ -291,7 +294,7 @@ private fun Content(
                         value = viewState.model.title,
                         headline = stringResource(R.string.title),
                         onValueChanged = {
-                            callViewModel(AddCategoryIntent.ChangeTitle(it))
+                            callViewModel(EditCategoryIntent.ChangeTitle(it))
                         }
                     )
 
@@ -366,7 +369,7 @@ private fun Content(
                     .padding(horizontal = 16.dp),
                 value = stringResource(R.string.submit),
                 onClick = {
-                    callViewModel(AddCategoryIntent.Submit)
+                    callViewModel(EditCategoryIntent.Submit)
                 }
             )
         },
@@ -496,7 +499,7 @@ private fun CategoryPreview(
             TransactionCategoryChip(
                 modifier = Modifier,
                 category = TransactionCategory(
-                    "",
+                    transactionCategory.uuid,
                     title = transactionCategory.title.ifEmpty { stringResource(R.string.here_will_be_title) },
                     emoji = transactionCategory.emoji,
                     color = transactionCategory.color
@@ -522,7 +525,7 @@ private fun CategoryPreview(
 private fun Preview() {
     AppTheme {
         Content(
-            viewState = AddCategoryViewState(
+            viewState = EditCategoryViewState(
                 model = TransactionCategoryCreation(
                     title = "Title",
                     color = "F19E2A",

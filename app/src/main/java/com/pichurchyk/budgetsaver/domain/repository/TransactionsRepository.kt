@@ -20,7 +20,9 @@ internal interface TransactionsRepository {
 
     suspend fun addCategory(category: TransactionCategoryCreation)
 
-    suspend fun getCategories(): Flow<List<TransactionCategory>>
+    suspend fun editCategory(categoryId: String, category: TransactionCategoryCreation)
+
+    suspend fun getCategories(categoriesId: List<String>): Flow<List<TransactionCategory>>
 
     suspend fun getPresets(): Flow<List<TransactionPreset>>
 

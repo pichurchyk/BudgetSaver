@@ -2,12 +2,15 @@ package com.pichurchyk.budgetsaver.data.datasource
 
 import com.pichurchyk.budgetsaver.data.ext.category.toPayload
 import com.pichurchyk.budgetsaver.data.ext.toPayload
+import com.pichurchyk.budgetsaver.data.model.payload.TransactionCategoryPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
+import com.pichurchyk.budgetsaver.data.model.payload.TransactionPresetPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionPresetResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
-import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.delete
@@ -44,14 +47,21 @@ internal class TransactionsDataSource(
             .body<TransactionResponse>()
     }
 
-    fun getCategories(): Flow<List<MainCategoryResponse>> = flow {
-        httpClient
-            .get(Category()) {
-                parameter("order", "created.desc")
-            }
-            .body<List<MainCategoryResponse>>()
-            .also { emit(it) }
-    }
+    fun getCategories(categoriesId: List<String> = emptyList()): Flow<List<MainCategoryResponse>> =
+        flow {
+            val ids = categoriesId.joinToString(",")
+
+            httpClient
+                .get(Category()) {
+                    parameter("order", "created.desc")
+
+                    if (categoriesId.isNotEmpty()) {
+                        parameter("id", "in.($ids)")
+                    }
+                }
+                .body<List<MainCategoryResponse>>()
+                .also { emit(it) }
+        }
 
     fun getPresets(): Flow<List<TransactionPresetResponse>> = flow {
         httpClient
@@ -69,9 +79,9 @@ internal class TransactionsDataSource(
             .body<Unit>()
     }
 
-    suspend fun addPreset(preset: TransactionPresetCreation) {
+    suspend fun addPreset(preset: TransactionPresetPayload) {
         httpClient.post(Preset()) {
-            setBody(preset.toPayload())
+            setBody(preset)
         }
             .body<Unit>()
     }
@@ -83,9 +93,18 @@ internal class TransactionsDataSource(
             .body<Unit>()
     }
 
-    suspend fun addCategory(category: TransactionCategoryCreation) {
+    suspend fun addCategory(category: TransactionCategoryPayload) {
         httpClient.post(Category()) {
-            setBody(category.toPayload())
+            setBody(category)
+        }
+            .body<Unit>()
+    }
+
+    suspend fun editCategory(categoryId: String, category: TransactionCategoryPayload) {
+        httpClient.patch(Category()) {
+            parameter("id", "eq.$categoryId")
+
+            setBody(category)
         }
             .body<Unit>()
     }
@@ -96,7 +115,10 @@ internal class TransactionsDataSource(
         }.body<TransactionResponse>()
     }
 
-    suspend fun editTransaction(transactionId: String, transactionPayload: TransactionPayload): TransactionResponse {
+    suspend fun editTransaction(
+        transactionId: String,
+        transactionPayload: TransactionPayload
+    ): TransactionResponse {
         return httpClient.patch(EditTransaction()) {
             parameter("id", transactionId)
 

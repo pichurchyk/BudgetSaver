@@ -5,12 +5,11 @@ import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 
 interface GetTransactionsCategoriesUseCase {
-    suspend fun invoke(): Flow<List<TransactionCategory>>
+    suspend fun invoke(categoriesId: List<String> = emptyList()): Flow<List<TransactionCategory>>
 }
 
 internal class GetTransactionsCategoriesUseCaseImpl(
     private val repository: TransactionsRepository
 ) : GetTransactionsCategoriesUseCase {
-    override suspend fun invoke() = repository.getCategories()
-
+    override suspend fun invoke(categoriesId: List<String>) = repository.getCategories(categoriesId)
 }

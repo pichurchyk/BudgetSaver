@@ -12,6 +12,7 @@ fun Screen.getTitle(): String {
         Screen.Profile -> stringResource(R.string.profile)
         Screen.Dashboard -> stringResource(R.string.dashboard)
         Screen.AddCategory -> stringResource(R.string.add_category)
+        is Screen.EditCategory -> stringResource(R.string.edit_category)
         Screen.AddPreset -> stringResource(R.string.add_preset)
         is Screen.AddTransaction -> stringResource(R.string.add_transaction)
         is Screen.EditTransaction -> stringResource(R.string.edit_transaction)

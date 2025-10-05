@@ -37,6 +37,7 @@ import org.koin.androidx.compose.koinViewModel
 fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
     openAddCategory: () -> Unit,
+    openEditCategory: (categoryId: String) -> Unit,
     openAddPreset: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -62,7 +63,8 @@ fun ProfileScreen(
             callViewModel = { viewModel.handleIntent(it) },
             onAddCategoryClick = openAddCategory,
             presetsViewState = presetsViewState,
-            onAddPresetClick = openAddPreset
+            onAddPresetClick = openAddPreset,
+            onEditCategoryClick = openEditCategory
         )
     }
 }
@@ -75,6 +77,7 @@ private fun Content(
     presetsViewState: ProfilePresetsViewState,
     callViewModel: (ProfileIntent) -> Unit,
     onAddCategoryClick: () -> Unit,
+    onEditCategoryClick: (categoryId: String) -> Unit,
     onAddPresetClick: () -> Unit,
 ) {
     Column(
@@ -100,7 +103,7 @@ private fun Content(
             modifier = Modifier,
             viewState = categoriesViewState,
             onChipClicked = {
-
+                onEditCategoryClick(it.uuid)
             },
             onSearchValueChanged = {
                 callViewModel.invoke(ProfileIntent.ChangeSearchCategory(it))

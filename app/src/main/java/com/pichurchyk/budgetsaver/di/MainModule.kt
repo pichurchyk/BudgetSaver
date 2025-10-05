@@ -48,6 +48,8 @@ import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.category.EditCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.EditCategoryUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCaseImpl
 import com.pichurchyk.budgetsaver.ui.MainViewModel
@@ -55,6 +57,7 @@ import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorV
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.viewmodel.EditCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
 import com.pichurchyk.budgetsaver.ui.screen.preset.viewmodel.AddPresetViewModel
@@ -93,6 +96,7 @@ val mainModule = module {
     viewModelOf(::FavoriteCurrenciesSelectorViewModel)
     viewModelOf(::AddCategoryViewModel)
     viewModelOf(::AddPresetViewModel)
+    viewModelOf(::EditCategoryViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
 
@@ -103,6 +107,7 @@ val mainModule = module {
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
     single<DeleteCategoryUseCase> { DeleteCategoryUseCaseImpl(get()) }
     single<AddCategoryUseCase> { AddCategoryUseCaseImpl(get()) }
+    single<EditCategoryUseCase> { EditCategoryUseCaseImpl(get()) }
 
     single<AddTransactionUseCase> { AddTransactionUseCaseImpl(get()) }
     single<EditTransactionUseCase> { EditTransactionUseCaseImpl(get()) }

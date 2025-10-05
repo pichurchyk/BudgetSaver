@@ -7,7 +7,7 @@ data class TransactionCategory(
     val uuid: String,
     val title: String,
     val emoji: String,
-    val color: String? = null,
+    val color: String = "",
 ) {
     val asPrettyText: String
         get() = "$emoji   $title"

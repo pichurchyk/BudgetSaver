@@ -2,6 +2,7 @@ package com.pichurchyk.budgetsaver.data.repository
 
 import com.pichurchyk.budgetsaver.data.datasource.TransactionsDataSource
 import com.pichurchyk.budgetsaver.data.ext.category.toDomain
+import com.pichurchyk.budgetsaver.data.ext.category.toPayload
 import com.pichurchyk.budgetsaver.data.ext.toDomain
 import com.pichurchyk.budgetsaver.data.ext.toPayload
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
@@ -67,15 +68,19 @@ internal class TransactionsRepositoryImpl(
         transactionsDataSource.deletePreset(presetId)
 
     override suspend fun addCategory(category: TransactionCategoryCreation) {
-        val newCategory = transactionsDataSource.addCategory(category)
+        val newCategory = transactionsDataSource.addCategory(category.toPayload())
 
 //        categoriesCache.forEach { (key, categories) ->
 //            categoriesCache[key] = categories + newCategory.toDomain()
 //        }
     }
 
-    override suspend fun getCategories(): Flow<List<TransactionCategory>> =
-        transactionsDataSource.getCategories().map { categories ->
+    override suspend fun editCategory(categoryId: String, category: TransactionCategoryCreation) {
+        val updatedCategory = transactionsDataSource.editCategory(categoryId, category.toPayload())
+    }
+
+    override suspend fun getCategories(categoriesId: List<String>): Flow<List<TransactionCategory>> =
+        transactionsDataSource.getCategories(categoriesId).map { categories ->
             categories
                 .map { category ->
                     category.toDomain()
@@ -91,7 +96,7 @@ internal class TransactionsRepositoryImpl(
         }
 
     override suspend fun addPreset(preset: TransactionPresetCreation) =
-        transactionsDataSource.addPreset(preset)
+        transactionsDataSource.addPreset(preset.toPayload())
 
     override suspend fun addTransaction(transaction: TransactionCreation) {
         val newTransaction = transactionsDataSource.addTransaction(transaction.toPayload())
