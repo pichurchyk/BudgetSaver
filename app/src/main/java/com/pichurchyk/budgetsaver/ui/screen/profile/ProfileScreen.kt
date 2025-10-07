@@ -80,7 +80,7 @@ fun ProfileScreen(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (signOutViewState is SignOutViewState.Loading) {
+        if (signOutViewState is SignOutViewState.Loading || signOutViewState is SignOutViewState.SignedOut) {
             Loader(modifier = Modifier.size(40.dp))
         } else {
             Content(
