@@ -86,7 +86,7 @@ private fun PresetsGrid(
 ) {
     val itemCount = when (viewState.status) {
         is ProfilePresetsUiStatus.Idle, is ProfilePresetsUiStatus.Error -> viewState.filteredPresets.size
-        is ProfilePresetsUiStatus.Loading -> 30
+        is ProfilePresetsUiStatus.Loading -> 2
     }
 
     val rows = when {
@@ -164,7 +164,7 @@ private fun PresetsGrid(
                     }
 
                     is ProfilePresetsUiStatus.Loading -> {
-                        items(4) { index ->
+                        items(2) { index ->
                             Box {
                                 TransactionPresetChipPlaceHolder()
                             }
