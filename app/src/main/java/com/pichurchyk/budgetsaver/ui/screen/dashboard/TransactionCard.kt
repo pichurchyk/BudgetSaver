@@ -12,6 +12,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -57,6 +59,7 @@ import com.pichurchyk.budgetsaver.ui.ext.getColorBasedOnValue
 import com.pichurchyk.budgetsaver.ui.ext.getTransactionDefaultTitle
 import com.pichurchyk.budgetsaver.ui.ext.toMajorWithCurrency
 import com.pichurchyk.budgetsaver.ui.theme.AppTheme
+import com.pichurchyk.budgetsaver.ui.theme.disableGrey
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigInteger
@@ -65,6 +68,7 @@ import java.math.BigInteger
 fun TransactionCard(
     modifier: Modifier = Modifier,
     transaction: Transaction,
+    isDeleting: Boolean,
     onEditClick: (transactionId: String) -> Unit
 ) {
     var isExpanded by remember {
@@ -107,19 +111,23 @@ fun TransactionCard(
                     .togetherWith(fadeOut(animationSpec = tween(90)))
             }
         ) { isExpanded ->
-            if (isExpanded) {
-                ExpandedCard(
-                    transaction = transaction,
-                    titleTextSize = animatedTitleTextSize,
-                    valueTextSize = animatedValueTextSize,
-                    onEditClick = onEditClick
-                )
-            } else {
-                CollapsedCard(
-                    transaction = transaction,
-                    titleTextSize = animatedTitleTextSize,
-                    valueTextSize = animatedValueTextSize
-                )
+            Box(
+                modifier = Modifier.alpha(if (isDeleting) 0.5f else 1f)
+            ) {
+                if (isExpanded) {
+                    ExpandedCard(
+                        transaction = transaction,
+                        titleTextSize = animatedTitleTextSize,
+                        valueTextSize = animatedValueTextSize,
+                        onEditClick = onEditClick
+                    )
+                } else {
+                    CollapsedCard(
+                        transaction = transaction,
+                        titleTextSize = animatedTitleTextSize,
+                        valueTextSize = animatedValueTextSize
+                    )
+                }
             }
         }
     }
@@ -282,13 +290,14 @@ private fun DashedDivider(
 }
 
 @Composable
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 private fun Preview() {
     AppTheme {
         TransactionCard(
             modifier = Modifier,
             onEditClick = {},
-            transaction = PreviewMocks.transaction
+            transaction = PreviewMocks.transaction,
+            isDeleting = true
         )
     }
 }

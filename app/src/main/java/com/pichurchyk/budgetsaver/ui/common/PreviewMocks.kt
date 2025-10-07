@@ -3,12 +3,15 @@ package com.pichurchyk.budgetsaver.ui.common
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.Money
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionSubCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
 import com.pichurchyk.budgetsaver.domain.model.user.User
 import com.pichurchyk.budgetsaver.domain.model.user.UserPreferences
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import java.math.BigInteger
@@ -16,7 +19,7 @@ import java.util.Currency
 
 object PreviewMocks {
 
-    val category = TransactionCategory("Food", "🍔", "#FF7043")
+    val category = TransactionCategory("Food", "Food", "🍔", "#FF7043")
 
     val categories = listOf(
         TransactionCategory("Food", "🍔", "#FF7043"),
@@ -53,13 +56,6 @@ object PreviewMocks {
         )
     )
 
-    val transactionByCurrency = TransactionsByCurrency(
-        transactions = listOf(transaction),
-        currencyCode = "BYN",
-        selectedCategories = listOf(category),
-        selectedTransactionType = listOf(TransactionType.EXPENSES)
-    )
-
     val money = Money(
         amountMinor = BigInteger("132123123"),
          currency = "USD"
@@ -76,4 +72,34 @@ object PreviewMocks {
         email = "pichurchyk@gmail.com",
         preferences = userPreferences
     )
+
+    val transactionCreation = TransactionCreation(
+        title = "Title",
+        value = 10.toString(),
+        currency = Currency.getInstance("USD"),
+        notes = "Notes",
+        date = TransactionDate(
+            dateInstant = Clock.System.now(),
+            timeZone = TimeZone.currentSystemDefault()
+        ),
+        type = TransactionType.EXPENSES,
+        mainCategory = category
+    )
+
+    val transactionPreset = TransactionPreset(
+        title = "Groceries",
+        value = money,
+        notes = "Notes",
+        mainCategory = category,
+        uuid = "0"
+    )
+
+    val transactionPresetCreation = TransactionPresetCreation(
+        title = "Groceries",
+        value = "1.33",
+        notes = "Notes",
+        mainCategory = category,
+        currency = Currency.getInstance("USD")
+    )
+
 }

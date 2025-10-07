@@ -74,7 +74,7 @@ fun ExpenseIncomeFilter(
                         .border(1.dp, textColor.copy(0.6f), RoundedCornerShape(100))
                         .clip(RoundedCornerShape(100))
                         .clickable { onSelectAllClick() }
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 12.dp, vertical = 8   .dp),
                     text = stringResource(R.string.all),
                     style = MaterialTheme.typography.labelSmall,
                     color = textColor

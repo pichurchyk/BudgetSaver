@@ -1,30 +1,36 @@
 package com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
+import com.pichurchyk.budgetsaver.domain.model.transaction.Money
+import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionDate
+import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
+import java.math.BigInteger
+import java.util.Currency
 
-sealed class TransactionsUiStatus {
-    data object Idle : TransactionsUiStatus()
-    data object Loading : TransactionsUiStatus()
+sealed class DashboardUiStatus {
+    data object Idle: DashboardUiStatus()
+    data class IdleDeletingTransaction(val transaction: Transaction): DashboardUiStatus()
+    data object LoadingAll : DashboardUiStatus()
+    data object LoadingTransactions : DashboardUiStatus()
     data class Error(
         val error: DomainException,
         val lastAction: () -> Unit
-    ) : TransactionsUiStatus()
-}
-
-sealed class CurrenciesUiStatus {
-    data object Idle : CurrenciesUiStatus()
-    data object Loading : CurrenciesUiStatus()
-    data class Error(
-        val error: DomainException,
-        val lastAction: () -> Unit
-    ) : CurrenciesUiStatus()
+    ) : DashboardUiStatus()
 }
 
 data class DashboardViewState(
-    val transactionsStatus: TransactionsUiStatus = TransactionsUiStatus.Idle,
-    val currenciesStatus: CurrenciesUiStatus = CurrenciesUiStatus.Idle,
-    val availableCurrencies: List<String> = emptyList(),
-    val selectedCurrency: String? = null,
-    val transactions: List<TransactionsByCurrency>? = null
+    val status: DashboardUiStatus = DashboardUiStatus.Idle,
+    val availableCurrencies: List<Currency> = emptyList(),
+    val selectedCurrency: Currency? = null,
+
+    val filteredTransactions: List<Transaction> = emptyList(),
+    val totalIncomes: Money = Money(BigInteger.ZERO, ""),
+    val totalExpenses: Money = Money(BigInteger.ZERO, ""),
+
+    val allCategories: List<TransactionCategory?> = emptyList(),
+    val selectedCategories: List<TransactionCategory?> = emptyList(),
+    val selectedTransactionType: List<TransactionType> = TransactionType.entries,
+    val datePeriod: Pair<TransactionDate?, TransactionDate?> = null to null,
 )

@@ -17,8 +17,9 @@ internal class AuthRepositoryImpl(
         return authDataSource.signIn(googleIdToken)
     }
 
-    override suspend fun signOut(): Flow<Unit> {
-        return authDataSource.signOut()
+    override suspend fun signOut() {
+        authDataSource.signOut()
+        sessionManager.clearSession()
     }
 
     override suspend fun getUser(): User? {

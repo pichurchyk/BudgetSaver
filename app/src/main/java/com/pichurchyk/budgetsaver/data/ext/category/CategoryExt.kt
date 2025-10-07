@@ -18,3 +18,9 @@ fun TransactionCategoryCreation.toPayload() = TransactionCategoryPayload(
     color = this.color,
     emoji = this.emoji
 )
+
+fun TransactionCategory.toCreation() = TransactionCategoryCreation(
+    title = this.title,
+    color = this.color,
+    emoji = this.emoji
+)

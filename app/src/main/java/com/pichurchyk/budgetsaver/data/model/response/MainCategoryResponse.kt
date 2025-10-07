@@ -11,5 +11,5 @@ data class MainCategoryResponse(
 
     val emoji: String,
     val title: String,
-    val color: String? = null,
+    val color: String,
 )

@@ -5,5 +5,11 @@ sealed class ProfileIntent {
 
     data class DeleteCategory(val categoryId: String): ProfileIntent()
 
+    data class ChangeSearchPreset(val value: String): ProfileIntent()
+
+    data class DeletePreset(val presetId: String): ProfileIntent()
+
     data object InitLoad: ProfileIntent()
+
+    data object SignOut: ProfileIntent()
 }

@@ -41,13 +41,6 @@ fun ProfileCardLoader(
             Alignment.CenterHorizontally
         )
     ) {
-        Box(
-            modifier = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(100))
-                .shimmerBackground(),
-        )
-
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {

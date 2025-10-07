@@ -76,6 +76,7 @@ import com.pichurchyk.budgetsaver.ui.common.notification.NotificationType
 import com.pichurchyk.budgetsaver.ui.ext.asErrorMessage
 import com.pichurchyk.budgetsaver.ui.ext.doOnClick
 import com.pichurchyk.budgetsaver.ui.ext.fromHex
+import com.pichurchyk.budgetsaver.ui.ext.imePaddingWithoutNavBars
 import com.pichurchyk.budgetsaver.ui.ext.random
 import com.pichurchyk.budgetsaver.ui.ext.toHex
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryIntent
@@ -188,6 +189,7 @@ private fun Content(
     }
 
     Scaffold(
+        modifier = Modifier.imePaddingWithoutNavBars(),
         topBar = {
             CenterAlignedTopAppBar(
                 windowInsets = WindowInsets(top = 0.dp),
@@ -328,14 +330,14 @@ private fun Content(
 
                 Text(
                     modifier = Modifier.padding(top = 10.dp, start = 16.dp, end = 16.dp),
-                    text = stringResource(R.string.create_transaction_description),
+                    text = stringResource(R.string.create_category_description),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onBackground.copy(0.5f)
                 )
 
                 Text(
                     modifier = Modifier.padding(top = 10.dp, start = 16.dp, end = 16.dp),
-                    text = stringResource(R.string.create_transaction_tip),
+                    text = stringResource(R.string.create_category_tip),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -358,9 +360,8 @@ private fun Content(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        (WindowInsets.navigationBars)
-                            .only(WindowInsetsSides.Bottom)
-                            .asPaddingValues()
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding()
                     )
                     .padding(horizontal = 16.dp),
                 value = stringResource(R.string.submit),

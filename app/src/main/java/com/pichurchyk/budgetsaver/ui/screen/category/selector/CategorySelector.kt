@@ -1,24 +1,17 @@
 package com.pichurchyk.budgetsaver.ui.screen.category.selector
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,13 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
-import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
 import com.pichurchyk.budgetsaver.ui.common.Loader
+import com.pichurchyk.budgetsaver.ui.common.category.TransactionCategoryChip
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorIntent
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewState
@@ -83,102 +75,89 @@ fun CategorySelector(
                         viewModel.handleIntent(CategorySelectorIntent.ChangeSearchValue(it))
                     }
 
-                    LazyRow(
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .height(66.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) {
-                        if (isMultiSelect) {
-                            item {
-                                Box(modifier = Modifier.padding(end = 8.dp)) {
+                    val allItems = if (isMultiSelect) {
+                        state.filteredBySearchCategories.size + 1
+                    } else {
+                        state.filteredBySearchCategories.size
+                    }
+
+                    val itemCount = allItems
+                    val rows = when {
+                        itemCount == 0 -> 0
+                        itemCount <= 8 -> 1
+                        itemCount <= 16 -> 2
+                        itemCount <= 32 -> 3
+                        else -> 4
+                    }
+
+                    val chipHeight = 38.dp
+                    val spacing = 4.dp
+                    val gridHeight = (chipHeight * rows) + (spacing * (rows - 1))
+
+                    if (rows != 0) {
+                        LazyHorizontalStaggeredGrid(
+                            rows = StaggeredGridCells.Fixed(rows),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(gridHeight)
+                                .padding(top = 8.dp),
+                            horizontalItemSpacing = 4.dp,
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
+                            if (isMultiSelect) {
+                                item(key = "select_all") {
                                     val isAllSelected =
                                         state.selected.size == state.filteredBySearchCategories.size
                                     SelectAllChip(
-                                        modifier = Modifier.padding(top = 26.dp),
+                                        modifier = Modifier,
                                         isAllSelected = isAllSelected,
                                         onClick = {
                                             viewModel.handleIntent(CategorySelectorIntent.ToggleAllCategories)
-
                                             onValuesSelected.invoke(state.selected)
                                         }
                                     )
                                 }
                             }
-                        }
 
-                        if (state.selected.isNotEmpty()) {
-                            item(key = "selected_block") {
-                                Column(
-                                    modifier = Modifier
-                                        .padding(end = 8.dp)
-                                        .animateItem()
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.selected),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)
-                                    )
-
-                                    Box(
-                                        modifier = Modifier
-                                            .animateContentSize(animationSpec = tween(durationMillis = 300))
-                                            .background(
-                                                MaterialTheme.colorScheme.primary.copy(0.05f),
-                                                RoundedCornerShape(16.dp)
-                                            )
-                                            .border(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.primary.copy(0.4f),
-                                                RoundedCornerShape(16.dp)
-                                            )
-                                            .padding(8.dp)
-                                    ) {
-                                        FlowRow(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            state.selected.forEach { category ->
-                                                TransactionCategoryChip(
-                                                    modifier = Modifier,
-                                                    category = category,
-                                                    isSelected = true,
-                                                    onItemClick = {
-                                                        viewModel.handleIntent(
-                                                            CategorySelectorIntent.ToggleCategory(it)
-                                                        )
-
-                                                        onValuesSelected.invoke(listOf(it))
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        items(
-                            state.unselected,
-                            key = { it.title }
-                        ) { category ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(end = 8.dp)
-                                    .animateItem()
-                            ) {
+                            items(
+                                state.selected,
+                                key = { "selected_${it.uuid}" }
+                            ) { category ->
                                 TransactionCategoryChip(
-                                    modifier = Modifier.padding(top = 26.dp),
+                                    modifier = Modifier,
+                                    category = category,
+                                    isSelected = true,
+                                    onItemClick = {
+                                        viewModel.handleIntent(
+                                            CategorySelectorIntent.ToggleCategory(
+                                                it
+                                            )
+                                        )
+                                        onValuesSelected.invoke(
+                                            if (isMultiSelect) state.selected else listOf(it)
+                                        )
+                                    }
+                                )
+                            }
+
+                            items(
+                                state.unselected,
+                                key = { "unselected_${it.uuid}" }
+                            ) { category ->
+                                TransactionCategoryChip(
+                                    modifier = Modifier,
                                     category = category,
                                     isSelected = false,
                                     onItemClick = {
                                         viewModel.handleIntent(
-                                            CategorySelectorIntent.ToggleCategory(it)
+                                            CategorySelectorIntent.ToggleCategory(
+                                                it
+                                            )
                                         )
-
-                                        onValuesSelected.invoke(listOf(it))
+                                        onValuesSelected.invoke(
+                                            if (isMultiSelect) state.selected else listOf(it)
+                                        )
                                     }
                                 )
                             }

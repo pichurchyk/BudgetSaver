@@ -1,13 +1,12 @@
 package com.pichurchyk.budgetsaver.domain.repository
 
-import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionsByCurrency
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPresetCreation
 import kotlinx.coroutines.flow.Flow
-import java.util.Currency
 
 internal interface TransactionsRepository {
 
@@ -17,11 +16,15 @@ internal interface TransactionsRepository {
 
     suspend fun deleteCategory(categoryId: String)
 
+    suspend fun deletePreset(presetId: String)
+
     suspend fun addCategory(category: TransactionCategoryCreation)
 
-    suspend fun getRelativeTransaction(transactionId: String, direction: RelativeTransactionType): Transaction
+    suspend fun editCategory(categoryId: String, category: TransactionCategoryCreation)
 
-    suspend fun getCategories(): Flow<List<TransactionCategory>>
+    suspend fun getCategories(categoriesId: List<String>): Flow<List<TransactionCategory>>
+
+    suspend fun getPresets(): Flow<List<TransactionPreset>>
 
     suspend fun addTransaction(transaction: TransactionCreation)
 
@@ -29,8 +32,6 @@ internal interface TransactionsRepository {
 
     suspend fun deleteTransaction(transactionId: String)
 
-    suspend fun addFavoriteCurrency(currency: Currency)
-
-    suspend fun deleteFavoriteCurrency(currency: Currency)
+    suspend fun addPreset(preset: TransactionPresetCreation)
 
 }

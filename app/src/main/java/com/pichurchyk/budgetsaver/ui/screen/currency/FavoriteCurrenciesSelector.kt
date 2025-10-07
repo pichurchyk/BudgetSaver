@@ -1,7 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.currency
 
-import androidx.activity.result.launch
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,10 +30,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.ui.common.CommonInput
@@ -69,6 +69,10 @@ private fun Content(
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
 
+    val currenciesRowHeight =
+        if (viewState.selectedCurrencies.isNotEmpty()) 100.dp else Dp.Unspecified
+    val animatedHeight by animateDpAsState(targetValue = currenciesRowHeight, label = "heightAnim")
+
     Column(
         modifier = modifier
             .bringIntoViewRequester(bringIntoViewRequester),
@@ -93,14 +97,13 @@ private fun Content(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-                    .onFocusEvent { focusState ->
-                        if (focusState.isFocused) {
-                            coroutineScope.launch {
-                                bringIntoViewRequester.bringIntoView()
-                            }
+                .onFocusEvent { focusState ->
+                    if (focusState.isFocused) {
+                        coroutineScope.launch {
+                            bringIntoViewRequester.bringIntoView()
                         }
                     }
-            ,
+                },
             placeholder = stringResource(R.string.search),
             value = viewState.searchValue
         ) {
@@ -115,16 +118,17 @@ private fun Content(
                     viewState.filteredCurrencies
                 ) {
                     val selected = viewState.selectedCurrencies
-                    val unselected = viewState.filteredCurrencies.filterNot { selected.contains(it) }
+                    val unselected =
+                        viewState.filteredCurrencies.filterNot { selected.contains(it) }
                     selected to unselected
                 }
 
                 LazyRow(
                     modifier = Modifier
                         .padding(top = 4.dp)
-                        .height(100.dp),
+                        .height(80.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Top
                 ) {
                     if (selectedCurrencies.isNotEmpty()) {
                         item(key = "selected_block") {
@@ -189,8 +193,16 @@ private fun Content(
                                 .padding(end = 8.dp)
                                 .animateItem()
                         ) {
+                            val paddingTop =
+                                if (viewState.selectedCurrencies.isNotEmpty()) 26.dp else 0.dp
+                            val animatedPadding by animateDpAsState(
+                                targetValue = paddingTop,
+                                label = "heightAnim"
+                            )
+
                             CurrencyItem(
-                                modifier = Modifier.padding(top = 18.dp),
+                                modifier = Modifier
+                                    .padding(top = animatedPadding),
                                 isSelected = false, currency = currency, onClick = {
                                     callViewModel.invoke(
                                         FavoriteCurrenciesSelectorIntent.SelectCurrency(

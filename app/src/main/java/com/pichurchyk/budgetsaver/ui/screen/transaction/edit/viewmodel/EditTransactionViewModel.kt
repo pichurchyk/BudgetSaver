@@ -8,9 +8,9 @@ import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionType
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.DeleteTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.EditTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.LoadTransactionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch

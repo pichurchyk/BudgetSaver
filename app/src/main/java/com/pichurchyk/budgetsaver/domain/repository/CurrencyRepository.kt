@@ -5,4 +5,10 @@ import java.util.Currency
 
 interface CurrencyRepository {
     fun getAllCurrencies(): Flow<List<Currency>>
+
+    suspend fun updateCache()
+
+    suspend fun deleteFavoriteCurrency(currency: Currency): Flow<List<Currency>>
+
+    suspend fun addFavoriteCurrency(currency: Currency): Flow<List<Currency>>
 }

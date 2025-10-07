@@ -1,11 +1,16 @@
 package com.pichurchyk.budgetsaver.data.datasource
 
 import com.pichurchyk.budgetsaver.data.ext.category.toPayload
+import com.pichurchyk.budgetsaver.data.ext.toPayload
+import com.pichurchyk.budgetsaver.data.model.payload.TransactionCategoryPayload
 import com.pichurchyk.budgetsaver.data.model.payload.TransactionPayload
+import com.pichurchyk.budgetsaver.data.model.payload.TransactionPresetPayload
 import com.pichurchyk.budgetsaver.data.model.response.MainCategoryResponse
+import com.pichurchyk.budgetsaver.data.model.response.TransactionPresetResponse
 import com.pichurchyk.budgetsaver.data.model.response.TransactionResponse
+import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategoryCreation
-import com.pichurchyk.budgetsaver.domain.model.transaction.RelativeTransactionType
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.delete
@@ -19,7 +24,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import java.util.Currency
-import kotlin.collections.mapOf
 
 internal class TransactionsDataSource(
     private val httpClient: HttpClient,
@@ -43,53 +47,83 @@ internal class TransactionsDataSource(
             .body<TransactionResponse>()
     }
 
-    suspend fun getRelativeTransaction(
-        transactionId: String,
-        direction: RelativeTransactionType
-    ): TransactionResponse {
-        return httpClient
-            .get(GetTransaction()) {
-                parameter("id", transactionId)
-                parameter("direction", direction.name.lowercase())
-            }
-            .body<TransactionResponse>()
-    }
+    fun getCategories(categoriesId: List<String> = emptyList()): Flow<List<MainCategoryResponse>> =
+        flow {
+            val ids = categoriesId.joinToString(",")
 
-    fun getCategories(): Flow<List<MainCategoryResponse>> = flow {
+            httpClient
+                .get(Category()) {
+                    parameter("order", "created.desc")
+
+                    if (categoriesId.isNotEmpty()) {
+                        parameter("id", "in.($ids)")
+                    }
+                }
+                .body<List<MainCategoryResponse>>()
+                .also { emit(it) }
+        }
+
+    fun getPresets(): Flow<List<TransactionPresetResponse>> = flow {
         httpClient
-            .get(Category()) {
+            .get(GetPresets()) {
                 parameter("order", "created.desc")
             }
-            .body<List<MainCategoryResponse>>()
+            .body<List<TransactionPresetResponse>>()
             .also { emit(it) }
     }
 
+    suspend fun deletePreset(presetId: String) {
+        httpClient.delete(Preset()) {
+            parameter("id", "eq.$presetId")
+        }
+            .body<Unit>()
+    }
+
+    suspend fun addPreset(preset: TransactionPresetPayload) {
+        httpClient.post(Preset()) {
+            setBody(preset)
+        }
+            .body<Unit>()
+    }
+
     suspend fun deleteCategory(categoryId: String) {
-        httpClient.delete(DeleteTransaction()) {
+        httpClient.delete(DeleteTransactionCategory()) {
             parameter("categoryId", categoryId)
         }
             .body<Unit>()
     }
 
-    suspend fun addCategory(category: TransactionCategoryCreation) {
+    suspend fun addCategory(category: TransactionCategoryPayload) {
         httpClient.post(Category()) {
-            setBody(category.toPayload())
+            setBody(category)
         }
             .body<Unit>()
     }
 
-    suspend fun addTransaction(transactionPayload: TransactionPayload) {
-        httpClient.post(Transaction()) {
-            setBody(transactionPayload)
-        }.body<Unit>()
+    suspend fun editCategory(categoryId: String, category: TransactionCategoryPayload) {
+        httpClient.patch(Category()) {
+            parameter("id", "eq.$categoryId")
+
+            setBody(category)
+        }
+            .body<Unit>()
     }
 
-    suspend fun editTransaction(transactionId: String, transactionPayload: TransactionPayload) {
-        httpClient.patch(Transaction()) {
-            parameter("id", "eq.$transactionId")
+    suspend fun addTransaction(transactionPayload: TransactionPayload): TransactionResponse {
+        return httpClient.post(CreateTransaction()) {
+            setBody(transactionPayload)
+        }.body<TransactionResponse>()
+    }
+
+    suspend fun editTransaction(
+        transactionId: String,
+        transactionPayload: TransactionPayload
+    ): TransactionResponse {
+        return httpClient.patch(EditTransaction()) {
+            parameter("id", transactionId)
 
             setBody(transactionPayload)
-        }.body<Unit>()
+        }.body<TransactionResponse>()
     }
 
     suspend fun deleteTransaction(transactionId: String) {
@@ -125,15 +159,31 @@ private class GetTransaction()
 
 @Serializable
 @Resource("/functions/v1/delete-transaction-category")
-private class DeleteTransaction()
+private class DeleteTransactionCategory()
 
 @Serializable
 @Resource("/rest/v1/Category")
 private class Category()
 
 @Serializable
+@Resource("/functions/v1/get-presets")
+private class GetPresets()
+
+@Serializable
+@Resource("/rest/v1/Preset")
+private class Preset()
+
+@Serializable
 @Resource("/rest/v1/Transaction")
 private class Transaction()
+
+@Serializable
+@Resource("/functions/v1/create-transaction")
+private class CreateTransaction()
+
+@Serializable
+@Resource("/functions/v1/edit-transaction")
+private class EditTransaction()
 
 @Serializable
 @Resource("/functions/v1/add-favorite-currency")

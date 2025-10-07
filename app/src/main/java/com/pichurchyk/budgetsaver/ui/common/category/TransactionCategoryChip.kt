@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pichurchyk.budgetsaver.domain.model.category.TransactionCategory
 import com.pichurchyk.budgetsaver.ui.ext.fromHex
@@ -24,7 +25,7 @@ fun TransactionCategoryChip(
     modifier: Modifier,
     category: TransactionCategory,
     isSelected: Boolean,
-    onItemClick: (TransactionCategory) -> Unit,
+    onItemClick: (TransactionCategory) -> Unit = {},
     onItemLongClick: (TransactionCategory) -> Unit = {}
 ) {
     val categoryColor = Color.fromHex(category.color ?: MaterialTheme.colorScheme.primary.toHex())
@@ -43,6 +44,8 @@ fun TransactionCategoryChip(
             .padding(horizontal = 12.dp, vertical = 8.dp),
         text = category.asPrettyText,
         style = MaterialTheme.typography.labelMedium,
-        color = textColor
+        color = textColor,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
     )
 }

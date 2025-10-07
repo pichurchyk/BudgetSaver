@@ -9,7 +9,9 @@ import com.pichurchyk.budgetsaver.ui.ext.navigateSingleTopTo
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.AddTransactionScreen
 import com.pichurchyk.budgetsaver.ui.screen.auth.AuthScreen
 import com.pichurchyk.budgetsaver.ui.screen.category.add.AddCategoryScreen
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.EditCategoryScreen
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.DashboardScreen
+import com.pichurchyk.budgetsaver.ui.screen.preset.AddPresetScreen
 import com.pichurchyk.budgetsaver.ui.screen.profile.ProfileScreen
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.EditTransactionScreen
 
@@ -29,8 +31,8 @@ fun NavHost(
 
         composable<Screen.Dashboard> {
             DashboardScreen(
-                openAddTransactionScreen = {
-                    navController.navigate(Screen.AddTransaction)
+                openAddTransactionScreen = { selectedCurrency ->
+                    navController.navigate(Screen.AddTransaction(selectedCurrency = selectedCurrency))
                 },
                 openEditTransactionScreen = { transactionId ->
                     navController.navigate(Screen.EditTransaction(transactionId = transactionId))
@@ -42,6 +44,15 @@ fun NavHost(
             ProfileScreen(
                 openAddCategory = {
                     navController.navigate(Screen.AddCategory)
+                },
+                openAddPreset = {
+                    navController.navigate(Screen.AddPreset)
+                },
+                openEditCategory = { categoryId ->
+                    navController.navigate(Screen.EditCategory(categoryId))
+                },
+                openAuthScreen = {
+                    navController.navigateSingleTopTo(Screen.Auth)
                 }
             )
         }
@@ -54,8 +65,21 @@ fun NavHost(
             )
         }
 
-        composable<Screen.AddTransaction> {
+        composable<Screen.EditCategory> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.EditCategory>()
+
+            EditCategoryScreen(
+                categoryId = args.categoryId,
+                closeScreen = { navController.popBackStack() },
+            )
+        }
+
+
+        composable<Screen.AddTransaction> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.AddTransaction>()
+
             AddTransactionScreen(
+                selectedCurrency = args.selectedCurrency,
                 closeScreen = { navController.popBackStack() },
             )
         }
@@ -66,6 +90,14 @@ fun NavHost(
             EditTransactionScreen(
                 transactionId = args.transactionId,
                 closeScreen = { navController.popBackStack() },
+            )
+        }
+
+        composable<Screen.AddPreset> {
+            AddPresetScreen(
+                closeScreen = {
+                    navController.popBackStack()
+                }
             )
         }
     }

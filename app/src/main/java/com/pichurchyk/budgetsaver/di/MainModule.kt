@@ -16,41 +16,53 @@ import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
 import com.pichurchyk.budgetsaver.domain.repository.EmojiRepository
 import com.pichurchyk.budgetsaver.domain.repository.SystemRepository
 import com.pichurchyk.budgetsaver.domain.repository.TransactionsRepository
-import com.pichurchyk.budgetsaver.domain.usecase.AddCategoryUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.AddCategoryUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.AddFavoriteCurrencyUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.AddFavoriteCurrencyUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.AddTransactionUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteCategoryUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteCategoryUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteFavoriteCurrencyUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteFavoriteCurrencyUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteTransactionUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.EditTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.category.AddCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.AddCategoryUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.currency.AddFavoriteCurrencyUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.currency.AddFavoriteCurrencyUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.AddTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.AddTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.category.DeleteCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.DeleteCategoryUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.currency.DeleteFavoriteCurrencyUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.currency.DeleteFavoriteCurrencyUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.preset.DeletePresetUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.DeletePresetUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.DeleteTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.DeleteTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.EditTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.EditTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.preset.GetPresetsUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.GetPresetsUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsCategoriesUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.GetTransactionsUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.category.GetTransactionsCategoriesUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.GetTransactionsCategoriesUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.GetTransactionsUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.GetTransactionsUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.LoadEmojisUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.LoadEmojisUseCaseImpl
-import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.LoadTransactionUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.LoadTransactionUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.transaction.LoadTransactionUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.SignOutUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.SignOutUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.category.EditCategoryUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.category.EditCategoryUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCaseImpl
 import com.pichurchyk.budgetsaver.ui.MainViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.viewmodel.CategorySelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel.AddTransactionViewModel
 import com.pichurchyk.budgetsaver.ui.screen.auth.viewmodel.AuthViewModel
 import com.pichurchyk.budgetsaver.ui.screen.category.add.viewmodel.AddCategoryViewModel
+import com.pichurchyk.budgetsaver.ui.screen.category.edit.viewmodel.EditCategoryViewModel
 import com.pichurchyk.budgetsaver.ui.screen.currency.viewmodel.FavoriteCurrenciesSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.viewmodel.DashboardViewModel
+import com.pichurchyk.budgetsaver.ui.screen.preset.viewmodel.AddPresetViewModel
 import com.pichurchyk.budgetsaver.ui.screen.profile.viewmodel.ProfileViewModel
 import com.pichurchyk.budgetsaver.ui.screen.themeselector.viewmodel.AppThemeSelectorViewModel
 import com.pichurchyk.budgetsaver.ui.screen.transaction.edit.viewmodel.EditTransactionViewModel
@@ -66,9 +78,10 @@ val mainModule = module {
 
     single<GetSignedInUserUseCase> { GetSignedInUserUseCaseImpl(get()) }
     single<SignInUseCase> { SignInUseCaseImpl(get()) }
+    single<SignOutUseCase> { SignOutUseCaseImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<EmojiRepository> { EmojiRepositoryImpl(get()) }
-    single<CurrencyRepository> { CurrencyRepositoryImpl(get()) }
+    single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }
     single { AuthDataSource(get(), get(), get()) }
 
     single<AuthPreferencesActions> { AuthPreferences(get()) }
@@ -85,12 +98,19 @@ val mainModule = module {
     viewModelOf(::MainViewModel)
     viewModelOf(::FavoriteCurrenciesSelectorViewModel)
     viewModelOf(::AddCategoryViewModel)
+    viewModelOf(::AddPresetViewModel)
+    viewModelOf(::EditCategoryViewModel)
 
     single<GetTransactionsUseCase> { GetTransactionsUseCaseImpl(get()) }
+
+    single<GetPresetsUseCase> { GetPresetsUseCaseImpl(get()) }
+    single<DeletePresetUseCase> { DeletePresetUseCaseImpl(get()) }
+    single<AddPresetUseCase> { AddPresetUseCaseImpl(get()) }
 
     single<GetTransactionsCategoriesUseCase> { GetTransactionsCategoriesUseCaseImpl(get()) }
     single<DeleteCategoryUseCase> { DeleteCategoryUseCaseImpl(get()) }
     single<AddCategoryUseCase> { AddCategoryUseCaseImpl(get()) }
+    single<EditCategoryUseCase> { EditCategoryUseCaseImpl(get()) }
 
     single<AddTransactionUseCase> { AddTransactionUseCaseImpl(get()) }
     single<EditTransactionUseCase> { EditTransactionUseCaseImpl(get()) }

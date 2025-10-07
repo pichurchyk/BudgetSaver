@@ -71,20 +71,12 @@ internal class AuthDataSource(
         awaitClose()
     }
 
-    fun signOut(): Flow<Unit> = callbackFlow {
-        try {
-            supabaseClient.auth.signOut()
+    suspend fun signOut() {
+        supabaseClient.auth.signOut()
 
-            preferences.setAccessToken(null)
-            preferences.setRefreshToken(null)
-            preferences.setUserUid(null)
-
-            close()
-
-            awaitClose()
-        } catch (e: Exception) {
-            Log.e(TAG, e.message ?: "Error occurred")
-        }
+        preferences.setAccessToken(null)
+        preferences.setRefreshToken(null)
+        preferences.setUserUid(null)
     }
 
     companion object {

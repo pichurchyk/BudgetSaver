@@ -5,16 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.pichurchyk.budgetsaver.data.datasource.SessionManager
 import com.pichurchyk.budgetsaver.di.DomainException
 import com.pichurchyk.budgetsaver.domain.repository.CurrencyRepository
-import com.pichurchyk.budgetsaver.domain.usecase.AddFavoriteCurrencyUseCase
-import com.pichurchyk.budgetsaver.domain.usecase.DeleteFavoriteCurrencyUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.currency.AddFavoriteCurrencyUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.currency.DeleteFavoriteCurrencyUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Currency
@@ -38,18 +34,7 @@ class FavoriteCurrenciesSelectorViewModel(
     private fun initLoad() {
         viewModelScope.launch {
             try {
-                val allCurrencies = currencyRepository.getAllCurrencies().first()
-                val user = sessionManager.user.first()
-
-                val userFavoriteCurrencies = user?.preferences?.favoriteCurrencies ?: emptyList()
-
-                _viewState.update {
-                    it.copy(
-                        allCurrencies = allCurrencies,
-                        selectedCurrencies = userFavoriteCurrencies,
-                        status = FavoriteCurrenciesSelectorUiStatus.Idle
-                    )
-                }
+                updateCurrencies()
             } catch (e: DomainException) {
                 _viewState.update {
                     it.copy(
@@ -89,21 +74,18 @@ class FavoriteCurrenciesSelectorViewModel(
         viewModelScope.launch {
             addFavoriteCurrencyUseCase
                 .invoke(currency)
-                .onStart {
-                    _viewState.update { currentState ->
-                        val currentCurrencies = currentState.selectedCurrencies
-
-                        currentState.copy(selectedCurrencies = currentCurrencies + currency)
-                    }
-                }
                 .catch {
                     _viewState.update { currentState ->
                         currentState.copy(
-                            selectedCurrencies = currentState.selectedCurrencies.filter { it != currency }
-                        )
+                            status = FavoriteCurrenciesSelectorUiStatus.Error(
+                                error = it as DomainException,
+                                lastAction = { unselectCurrency(currency) }
+                            ))
                     }
                 }
-                .collect ()
+                .collect {
+                    updateCurrencies()
+                }
         }
     }
 
@@ -117,21 +99,35 @@ class FavoriteCurrenciesSelectorViewModel(
         viewModelScope.launch {
             deleteFavoriteCurrencyUseCase
                 .invoke(currency)
-                .onStart {
-                    _viewState.update { currentState ->
-                        val currentCurrencies = currentState.selectedCurrencies
-
-                        currentState.copy(selectedCurrencies = currentCurrencies.filter { it != currency })
-                    }
-                }
                 .catch {
                     _viewState.update { currentState ->
-                        val currentCurrencies = currentState.selectedCurrencies
-
-                        currentState.copy(selectedCurrencies = currentCurrencies + currency)
+                        currentState.copy(
+                            status = FavoriteCurrenciesSelectorUiStatus.Error(
+                            error = it as DomainException,
+                            lastAction = { unselectCurrency(currency) }
+                        ))
                     }
                 }
-                .collect()
+                .collect {
+                    updateCurrencies()
+                }
+        }
+    }
+
+    private fun updateCurrencies() {
+        viewModelScope.launch {
+            val allCurrencies = currencyRepository.getAllCurrencies().first()
+            val user = sessionManager.user.first()
+
+            val userFavoriteCurrencies = user?.preferences?.favoriteCurrencies ?: emptyList()
+
+            _viewState.update {
+                it.copy(
+                    allCurrencies = allCurrencies,
+                    selectedCurrencies = userFavoriteCurrencies,
+                    status = FavoriteCurrenciesSelectorUiStatus.Idle
+                )
+            }
         }
     }
 }

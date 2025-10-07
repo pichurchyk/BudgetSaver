@@ -1,6 +1,7 @@
 package com.pichurchyk.budgetsaver.ui.screen.transaction.add.viewmodel
 
 import com.pichurchyk.budgetsaver.di.DomainException
+import com.pichurchyk.budgetsaver.domain.model.preset.TransactionPreset
 import com.pichurchyk.budgetsaver.domain.model.transaction.TransactionCreation
 import java.util.Currency
 
@@ -11,7 +12,12 @@ data class AddTransactionViewState(
 
     val validationError: List<AddTransactionValidationError> = emptyList<AddTransactionValidationError>(),
 
-    val status: AddTransactionUiStatus = AddTransactionUiStatus.Idle
+    val status: AddTransactionUiStatus = AddTransactionUiStatus.Idle,
+
+    val presetsStatus: AddTransactionPresetsUiStatus = AddTransactionPresetsUiStatus.Loading,
+    val presets: List<TransactionPreset>? = null,
+
+    val saveAsPreset: Boolean = false
 ) {
     val filteredCurrencies: List<Currency>
         get() =
@@ -37,4 +43,16 @@ sealed interface AddTransactionUiStatus {
         val error: DomainException,
         val lastAction: () -> Unit
     ) : AddTransactionUiStatus
+}
+
+sealed interface AddTransactionPresetsUiStatus {
+
+    object Idle : AddTransactionPresetsUiStatus
+
+    object Loading : AddTransactionPresetsUiStatus
+
+    data class Error(
+        val error: DomainException,
+        val lastAction: () -> Unit
+    ) : AddTransactionPresetsUiStatus
 }

@@ -50,12 +50,6 @@ fun ProfileCard(
                         Alignment.CenterHorizontally
                     )
                 ) {
-//                    Icon(
-//                        modifier = Modifier.size(46.dp),
-//                        imageVector = Icons.Default.AccountCircle,
-//                        contentDescription = "Avatar"
-//                    )
-
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
