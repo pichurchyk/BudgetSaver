@@ -10,4 +10,6 @@ sealed class ProfileIntent {
     data class DeletePreset(val presetId: String): ProfileIntent()
 
     data object InitLoad: ProfileIntent()
+
+    data object SignOut: ProfileIntent()
 }

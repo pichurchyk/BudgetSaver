@@ -48,6 +48,8 @@ import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SearchEmojiUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.SignInUseCaseImpl
+import com.pichurchyk.budgetsaver.domain.usecase.SignOutUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.SignOutUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.category.EditCategoryUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.category.EditCategoryUseCaseImpl
 import com.pichurchyk.budgetsaver.domain.usecase.preset.AddPresetUseCase
@@ -76,6 +78,7 @@ val mainModule = module {
 
     single<GetSignedInUserUseCase> { GetSignedInUserUseCaseImpl(get()) }
     single<SignInUseCase> { SignInUseCaseImpl(get()) }
+    single<SignOutUseCase> { SignOutUseCaseImpl(get()) }
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<EmojiRepository> { EmojiRepositoryImpl(get()) }
     single<CurrencyRepository> { CurrencyRepositoryImpl(get(), get()) }

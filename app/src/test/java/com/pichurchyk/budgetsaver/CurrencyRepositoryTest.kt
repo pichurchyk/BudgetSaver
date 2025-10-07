@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 import java.util.Currency
 
 @DisplayName("CurrencyRepository Tests")
-class CurrencyRepositoryImplTest {
+class CurrencyRepositoryTest {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var repository: CurrencyRepositoryImpl
@@ -37,8 +37,9 @@ class CurrencyRepositoryImplTest {
 
     @BeforeEach
     fun setUp() {
-        sessionManager = mockk(relaxed = true) // Use relaxed mock for simplicity
-        repository = CurrencyRepositoryImpl(sessionManager)
+        sessionManager = mockk(relaxed = true)
+        sessionManager = mockk(relaxed = true)
+        repository = CurrencyRepositoryImpl(sessionManager, transactionsDataSource = mockk())
 
         mockkStatic(Currency::class)
         every { Currency.getAvailableCurrencies() } returns mockCurrencies.toSet()

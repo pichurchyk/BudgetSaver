@@ -88,4 +88,5 @@
     <string name="save_as_preset">Save as preset</string>
     <string name="edit_category">Edit category</string>
     <string name="category_updated">Category updated</string>
+    <string name="sign_out">Sign out</string>
 </resources>

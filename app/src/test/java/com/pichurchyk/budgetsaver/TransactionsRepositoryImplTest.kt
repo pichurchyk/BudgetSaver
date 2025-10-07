@@ -180,7 +180,6 @@ class TransactionsRepositoryImplTest {
 
         @Test
         fun `should update transaction in cache even if currency changed`() = runTest {
-            // arrange: repository must know about the original transaction
             val originalTransactionResponse = mockTransactionResponse
             coEvery { dataSource.getTransactions(any()) } returns flowOf(
                 listOf(
@@ -188,7 +187,6 @@ class TransactionsRepositoryImplTest {
                 )
             )
 
-            // call repo to load data (so it fills the cache naturally)
             repository.getTransactions(originalTransactionResponse.currency).first()
 
             val updatedTransactionCreation =
@@ -198,18 +196,14 @@ class TransactionsRepositoryImplTest {
                 dataSource.editTransaction("tx1", any())
             } returns updatedTransactionCreation.toResponse(originalTransactionResponse.uuid)
 
-            // act
             repository.editTransaction("tx1", updatedTransactionCreation)
 
-            // assert: inspect the repo's cache via reflection or, even better, a repo getter
             val cacheField = repository::class.java.getDeclaredField("transactionsCache")
                 .apply { isAccessible = true }
             val updatedCache = cacheField.get(repository) as MutableMap<String, List<Transaction>>
 
-            // old currency no longer has it
             assertTrue(updatedCache[originalTransactionResponse.currency]?.none { it.uuid == "tx1" } == true)
 
-            // new currency has it
             assertTrue(updatedCache[updatedTransactionCreation.currency.currencyCode]?.any { it.uuid == "tx1" } == true)
         }
     }
@@ -237,7 +231,7 @@ class TransactionsRepositoryImplTest {
         fun `should map categories from datasource`() = runTest {
             coEvery { dataSource.getCategories() } returns flowOf(listOf(mockCategoryResponse))
 
-            repository.getCategories().test {
+            repository.getCategories(emptyList()).test {
                 val result = awaitItem()
                 assertEquals(mockCategoryResponse.uuid, result.first().uuid)
                 cancelAndIgnoreRemainingEvents()

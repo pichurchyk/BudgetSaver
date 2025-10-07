@@ -68,15 +68,11 @@ internal class TransactionsRepositoryImpl(
         transactionsDataSource.deletePreset(presetId)
 
     override suspend fun addCategory(category: TransactionCategoryCreation) {
-        val newCategory = transactionsDataSource.addCategory(category.toPayload())
-
-//        categoriesCache.forEach { (key, categories) ->
-//            categoriesCache[key] = categories + newCategory.toDomain()
-//        }
+        transactionsDataSource.addCategory(category.toPayload())
     }
 
     override suspend fun editCategory(categoryId: String, category: TransactionCategoryCreation) {
-        val updatedCategory = transactionsDataSource.editCategory(categoryId, category.toPayload())
+        transactionsDataSource.editCategory(categoryId, category.toPayload())
     }
 
     override suspend fun getCategories(categoriesId: List<String>): Flow<List<TransactionCategory>> =

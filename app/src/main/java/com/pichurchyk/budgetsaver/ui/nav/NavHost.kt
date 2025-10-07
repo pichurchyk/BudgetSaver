@@ -50,6 +50,9 @@ fun NavHost(
                 },
                 openEditCategory = { categoryId ->
                     navController.navigate(Screen.EditCategory(categoryId))
+                },
+                openAuthScreen = {
+                    navController.navigateSingleTopTo(Screen.Auth)
                 }
             )
         }

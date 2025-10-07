@@ -8,7 +8,7 @@ internal interface AuthRepository {
 
     suspend fun signIn(googleIdToken: String): Flow<SignInResult>
 
-    suspend fun signOut(): Flow<Unit>
+    suspend fun signOut()
 
     suspend fun getUser(): User?
 }

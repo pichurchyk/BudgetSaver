@@ -7,6 +7,7 @@ import com.pichurchyk.budgetsaver.domain.usecase.category.DeleteCategoryUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.preset.DeletePresetUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.preset.GetPresetsUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.GetSignedInUserUseCase
+import com.pichurchyk.budgetsaver.domain.usecase.SignOutUseCase
 import com.pichurchyk.budgetsaver.domain.usecase.category.GetTransactionsCategoriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.sign
 
 class ProfileViewModel(
     private val getSignedInUserUseCase: GetSignedInUserUseCase,
@@ -21,6 +23,7 @@ class ProfileViewModel(
     private val getPresetsUseCase: GetPresetsUseCase,
     private val deleteCategoryUseCase: DeleteCategoryUseCase,
     private val deletePresetUseCase: DeletePresetUseCase,
+    private val signOutUseCase: SignOutUseCase
 ) : ViewModel() {
 
     private val _userViewState: MutableStateFlow<ProfileUserViewState> = MutableStateFlow(
@@ -39,6 +42,11 @@ class ProfileViewModel(
             ProfilePresetsViewState()
         )
     val presetsViewState = _presetsViewState.asStateFlow()
+
+    private val _signOutViewState: MutableStateFlow<SignOutViewState> =
+        MutableStateFlow(SignOutViewState.Idle)
+
+    val signOutViewState = _signOutViewState.asStateFlow()
 
     private fun initLoad() {
         loadUserData()
@@ -151,6 +159,33 @@ class ProfileViewModel(
             is ProfileIntent.DeletePreset -> {
                 deletePreset(intent.presetId)
             }
+
+            is ProfileIntent.SignOut -> {
+                signOut()
+            }
+        }
+    }
+
+    private fun signOut() {
+        viewModelScope.launch {
+            signOutUseCase.invoke()
+                .onStart {
+                    _signOutViewState.update {
+                        SignOutViewState.Loading
+                    }
+                }
+                .catch { error ->
+                    _signOutViewState.update {
+                        SignOutViewState.Error(error as DomainException) {
+                            signOut()
+                        }
+                    }
+                }
+                .collect {
+                    _signOutViewState.update {
+                        SignOutViewState.SignedOut
+                    }
+                }
         }
     }
 
