@@ -17,7 +17,6 @@
             android:name="com.pichurchyk.budgetsaver.ui.MainActivity"
             android:windowSoftInputMode="adjustNothing"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.BudgetSaver">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
