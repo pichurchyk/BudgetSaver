@@ -62,8 +62,8 @@ import com.pichurchyk.budgetsaver.R
 import com.pichurchyk.budgetsaver.domain.model.transaction.Transaction
 import com.pichurchyk.budgetsaver.ui.common.ErrorBlock
 import com.pichurchyk.budgetsaver.ui.common.Loader
-import com.pichurchyk.budgetsaver.ui.common.PreviewMocks
 import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItem
+import com.pichurchyk.budgetsaver.ui.common.currency.CurrencyItemPlaceholder
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.calendar.DashboardCalendarButton
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.calendar.DashboardDateRangeCalendar
 import com.pichurchyk.budgetsaver.ui.screen.dashboard.filter.CategoriesFilter
@@ -123,16 +123,6 @@ private fun Content(
 
     var showCalendar by remember { mutableStateOf(false) }
 
-    if (viewState.status == DashboardUiStatus.LoadingAll) {
-        Box(
-            Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Loader(Modifier.align(Alignment.Center))
-        }
-        return
-    }
-
     if (viewState.status is DashboardUiStatus.Error) {
         ErrorBlock(
             modifier = Modifier.fillMaxSize(),
@@ -176,14 +166,19 @@ private fun Content(
             }
 
             Column {
-                if (viewState.availableCurrencies.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier
-                            .height(60.dp)
-                            .background(MaterialTheme.colorScheme.background),
-                        verticalAlignment = Alignment.CenterVertically,
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) {
+                LazyRow(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .background(MaterialTheme.colorScheme.background),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    if (viewState.status is DashboardUiStatus.LoadingCurrencies) {
+                        items(10) { currency ->
+                            CurrencyItemPlaceholder()
+                        }
+                    } else {
                         items(viewState.availableCurrencies, key = { it }) { currency ->
                             val selected = viewState.selectedCurrency == currency
                             CurrencyItem(
@@ -211,7 +206,6 @@ private fun Content(
                     }
 
                     is DashboardUiStatus.Idle, is DashboardUiStatus.IdleDeletingTransaction -> {
-                        // Check if we have any transactions at all (based on categories)
                         if (viewState.allCategories.isNotEmpty()) {
                             LazyColumn(
                                 modifier = Modifier
@@ -347,9 +341,7 @@ private fun Content(
                         }
                     }
 
-                    else -> {
-                        // Handle other states if needed
-                    }
+                    else -> {}
                 }
             }
         },
@@ -359,7 +351,7 @@ private fun Content(
                 contentAlignment = Alignment.BottomEnd
             ) {
                 if (viewState.status !is DashboardUiStatus.Error &&
-                    viewState.status != DashboardUiStatus.LoadingAll
+                    viewState.status != DashboardUiStatus.LoadingCurrencies
                 ) {
                     FloatingActionButton(
                         modifier = Modifier
@@ -371,7 +363,13 @@ private fun Content(
                             .padding(20.dp),
                         shape = RoundedCornerShape(12.dp),
                         containerColor = MaterialTheme.colorScheme.primary,
-                        onClick = { viewState.selectedCurrency?.currencyCode?.let { selectedCurrency -> onAddTransactionClick(selectedCurrency) } },
+                        onClick = {
+                            viewState.selectedCurrency?.currencyCode?.let { selectedCurrency ->
+                                onAddTransactionClick(
+                                    selectedCurrency
+                                )
+                            }
+                        },
                         content = {
                             Icon(
                                 Icons.Rounded.Add,

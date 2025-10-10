@@ -65,3 +65,7 @@ obj/
 *.hprof
 
 **/google-services.json
+
+# === KeyStore ===
+app/*.keystore
+app/*.jks

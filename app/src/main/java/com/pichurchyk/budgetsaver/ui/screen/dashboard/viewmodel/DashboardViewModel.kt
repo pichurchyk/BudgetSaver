@@ -14,6 +14,7 @@ import com.pichurchyk.budgetsaver.domain.usecase.transaction.GetTransactionsUseC
 import com.pichurchyk.budgetsaver.ui.ext.DateUtils.asEndOfTheDay
 import com.pichurchyk.budgetsaver.ui.ext.DateUtils.asStartOfTheDay
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
@@ -34,10 +35,12 @@ class DashboardViewModel(
 
     private var allTransactions: List<Transaction> = emptyList()
 
+    private var firstCallMade: Boolean = false
+
     private val _state: MutableStateFlow<DashboardViewState> =
         MutableStateFlow(
             DashboardViewState(
-                status = DashboardUiStatus.LoadingAll,
+                status = DashboardUiStatus.Idle,
             )
         )
 
@@ -63,7 +66,7 @@ class DashboardViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = DashboardViewState(status = DashboardUiStatus.LoadingAll)
+            initialValue = DashboardViewState(status = DashboardUiStatus.Idle)
         )
 
     init {
@@ -148,7 +151,7 @@ class DashboardViewModel(
         viewModelScope.launch {
             currencyRepository.getAllCurrencies()
                 .onStart {
-                    _state.update { it.copy(status = DashboardUiStatus.LoadingAll) }
+                    _state.update { it.copy(status = DashboardUiStatus.LoadingCurrencies) }
                 }
                 .catch { error ->
                     _state.update {
@@ -198,7 +201,10 @@ class DashboardViewModel(
 
     private fun selectCurrency(currency: Currency) {
         _state.update { it.copy(selectedCurrency = currency) }
-        loadData()
+
+        if (firstCallMade) {
+            loadData()
+        }
     }
 
     private fun toggleAllTypesFilter() {
@@ -240,9 +246,12 @@ class DashboardViewModel(
         }
     }
 
+    private var loadJob: Job? = null
+
     private fun loadData() {
         _state.value.selectedCurrency?.let { selectedCurrency ->
-            viewModelScope.launch {
+            loadJob?.cancel()
+            loadJob = viewModelScope.launch {
                 getTransactionsUseCase.invoke(selectedCurrency.currencyCode)
                     .onStart {
                         _state.update { it.copy(status = DashboardUiStatus.LoadingTransactions) }
@@ -257,15 +266,16 @@ class DashboardViewModel(
                         }
                     }
                     .collect { data ->
+                        firstCallMade = true
                         allTransactions = data
 
                         val categories = data.map { it.mainCategory }.distinct()
-
                         val oldestTransactionDate =
-                            data.minByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date?.asStartOfTheDay()
-
+                            data.minByOrNull { it.date.dateInstant.toEpochMilliseconds() }
+                                ?.date?.asStartOfTheDay()
                         val newestTransactionDate =
-                            data.maxByOrNull { it.date.dateInstant.toEpochMilliseconds() }?.date?.asEndOfTheDay()
+                            data.maxByOrNull { it.date.dateInstant.toEpochMilliseconds() }
+                                ?.date?.asEndOfTheDay()
 
                         _state.update {
                             it.copy(
@@ -280,4 +290,5 @@ class DashboardViewModel(
             }
         }
     }
+
 }

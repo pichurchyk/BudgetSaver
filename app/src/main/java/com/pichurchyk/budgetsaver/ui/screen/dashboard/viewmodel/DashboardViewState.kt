@@ -12,7 +12,7 @@ import java.util.Currency
 sealed class DashboardUiStatus {
     data object Idle: DashboardUiStatus()
     data class IdleDeletingTransaction(val transaction: Transaction): DashboardUiStatus()
-    data object LoadingAll : DashboardUiStatus()
+    data object LoadingCurrencies : DashboardUiStatus()
     data object LoadingTransactions : DashboardUiStatus()
     data class Error(
         val error: DomainException,
