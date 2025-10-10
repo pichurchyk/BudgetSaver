@@ -48,8 +48,6 @@ android {
         }
 
         release {
-            isDebuggable = true
-
             signingConfig = signingConfigs.getByName("release")
 
             buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
